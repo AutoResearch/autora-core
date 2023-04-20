@@ -26,3 +26,7 @@ documentation = "https://autoresearch.github.io/autora/"
 
 [tool.isort]
 profile = "black"
+
+[build-system]
+requires = ["pdm-backend"]
+build-backend = "pdm.backend"

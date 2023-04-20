@@ -7,7 +7,7 @@ on:
     branches: [ "main" ]
 
 jobs:
-  build-poetry:
+  build-pypi:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -15,5 +15,5 @@ jobs:
         with:
           python-version: 3.8
           cache: 'pip'
-      - run: pip install .
+      - run: pip install ".[dev]"
       - run: python -m build .

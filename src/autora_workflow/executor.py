@@ -15,8 +15,8 @@ import numpy as np
 import pandas as pd
 from sklearn.base import BaseEstimator
 
-from autora.controller.protocol import SupportsControllerState
-from autora.controller.state import resolve_state_params
+from .protocol import SupportsControllerState
+from .state import resolve_state_params
 from autora.experimentalist.pipeline import Pipeline
 
 _logger = logging.getLogger(__name__)
@@ -80,6 +80,7 @@ def theorist_wrapper(
     params_ = resolve_state_params(params, state)
     metadata = state.metadata
     observations = state.observations
+    assert len(observations) >= 1, f"{observations=} needs at least one entry for model fitting"
 
     if isinstance(observations[-1], pd.DataFrame):
         all_observations = pd.concat(observations)
@@ -141,7 +142,7 @@ def no_op(state, params):
     An Executor which has no effect on the state.
 
     Examples:
-         >>> from autora.controller.state import Snapshot
+         >>> from autora_workflow.state import Snapshot
          >>> s = Snapshot()
          >>> s_returned = no_op(s, {})
          >>> assert s_returned is s

@@ -3,7 +3,7 @@ Functions which look at state and output the next function name to execute.
 """
 import random
 
-from autora.controller.protocol import ResultKind, SupportsControllerStateHistory
+from .protocol import ResultKind, SupportsControllerStateHistory
 
 
 def full_cycle_planner(_):
@@ -22,11 +22,11 @@ def last_result_kind_planner(state: SupportsControllerStateHistory):
     """
     Chooses the operation based on the last result, e.g. new theory -> run experimentalist.
 
-    Interpretation: The "traditional" AutoRA Controller – a systematic research assistant.
+    Interpretation: The "traditional" autora_workflow – a systematic research assistant.
 
     Examples:
         We initialize a new list to run our planner on:
-        >>> from autora.controller.state import History
+        >>> from autora_workflow.state import History
         >>> state_ = History()
 
         Based on the results available in the state, we can get the next kind of executor we need.

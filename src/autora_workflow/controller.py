@@ -7,13 +7,14 @@ from typing import Callable, Dict, Optional
 
 from sklearn.base import BaseEstimator
 
-from autora.controller.base import BaseController
-from autora.controller.executor import make_online_executor_collection
-from autora.controller.planner import last_result_kind_planner
-from autora.controller.serializer import HistorySerializer
-from autora.controller.state import History
 from autora.experimentalist.pipeline import Pipeline
 from autora.variable import VariableCollection
+
+from .base import BaseController
+from .executor import make_online_executor_collection
+from .planner import last_result_kind_planner
+from .serializer import HistorySerializer
+from .state import History
 
 _logger = logging.getLogger(__name__)
 

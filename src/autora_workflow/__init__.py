@@ -282,7 +282,7 @@ Examples:
     In this example, we use the `Controller` which allows much more control over execution
     order. It considers the last available result and picks the matching next step. This means
     that seeding is relatively simple.
-    >>> from autora.controller import Controller
+    >>> from autora_workflow import Controller
     >>> def monitor(state):
     ...     print(f"MONITOR: Generated new {state.history[-1].kind}")
     >>> cycle_with_last_result_planner = Controller(
@@ -332,7 +332,7 @@ Examples:
 
     This might be useful in cases when different experimentalists or theorists are needed at
     different times in the cycle, e.g. for initial seeding.
-    >>> from autora.controller.planner import random_operation_planner
+    >>> from autora_workflow.planner import random_operation_planner
     >>> def monitor(state):
     ...     print(f"MONITOR: Generated new {state.history[-1].kind}")
     >>> controller_with_random_planner = Controller(
@@ -359,13 +359,13 @@ Examples:
     >>> def step(controller_):
     ...     try:
     ...         _ = next(controller_)
-    ...     except ValueError as e:
+    ...     except Exception as e:
     ...         print(f"FAILED: with {e=}")
 
     The first step, the theorist is selected as the random Executor, and it fails because it
     depends on there being observations to theorize against:
     >>> step(controller_with_random_planner) # i = 0
-    FAILED: with e=ValueError('need at least one array to concatenate')
+    FAILED: with e=AssertionError('observations=[] needs at least one entry for model fitting')
 
     The second step, a new condition is generated.
     >>> step(controller_with_random_planner) # i = 1
@@ -377,7 +377,7 @@ Examples:
 
     On the fourth step, we generate another error when trying to run the theorist:
     >>> step(controller_with_random_planner) # i = 3
-    FAILED: with e=ValueError('need at least one array to concatenate')
+    FAILED: with e=AssertionError('observations=[] needs at least one entry for model fitting')
 
     On the fifth step, we generate a first real observation, so that the next time we try to run
     a theorist we are successful:
@@ -420,8 +420,8 @@ Examples:
 
     We now define a planner which chooses a different experimentalist when supplied with no data
     versus some data.
-    >>> from autora.controller.protocol import ResultKind
-    >>> from autora.controller.planner import last_result_kind_planner
+    >>> from autora_workflow.protocol import ResultKind
+    >>> from autora_workflow.planner import last_result_kind_planner
     >>> def seeding_planner(state):
     ...     # We're going to reuse the "last_available_result" planner, and modify its output.
     ...     next_function = last_result_kind_planner(state)
@@ -435,7 +435,7 @@ Examples:
 
     Now we can see what would happen with a particular state. If there are no results,
     then we get the seed experimentalist:
-    >>> from autora.controller.state import History
+    >>> from autora_workflow.state import History
     >>> seeding_planner(History())
     'seed_experimentalist'
 
@@ -497,7 +497,7 @@ Examples:
 
     Now we can define the executor component. We'll use a factory method to generate the
     collection:
-    >>> from autora.controller.executor import make_online_executor_collection
+    >>> from autora_workflow.executor import make_online_executor_collection
     >>> executor_collection = make_online_executor_collection([
     ...     ("seed_experimentalist", "experimentalist", experimentalist_which_needs_no_data),
     ...     ("main_experimentalist", "experimentalist", experimentalist_which_needs_a_theory),
@@ -509,8 +509,8 @@ Examples:
     >>> params = {"main_experimentalist": {"sampler": {"models": "%theories%"}}}
 
     We now instantiate the controller:
-    >>> from autora.controller.base import BaseController
-    >>> from autora.controller.state import History
+    >>> from autora_workflow.base import BaseController
+    >>> from autora_workflow.state import History
     >>> c = BaseController(
     ...         state=History(metadata=metadata_2, params=params),
     ...         planner=seeding_planner,

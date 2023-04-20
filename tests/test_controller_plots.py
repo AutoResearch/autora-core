@@ -5,8 +5,8 @@ import pytest
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import r2_score
 
-from autora.controller import Cycle
-from autora.controller.plotting import (
+from autora_workflow import Cycle
+from autora_workflow.plotting import (
     _check_replace_default_kw,
     cycle_default_score,
     cycle_specified_score,

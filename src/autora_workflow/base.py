@@ -4,7 +4,7 @@ from __future__ import annotations
 import logging
 from typing import Callable, Generic, Mapping, Optional
 
-from autora.controller.protocol import State
+from .protocol import State
 
 _logger = logging.getLogger(__name__)
 

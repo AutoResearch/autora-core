@@ -6,10 +6,10 @@ from typing import Callable, Dict, Optional
 
 from sklearn.base import BaseEstimator
 
-from autora.controller.base import BaseController
-from autora.controller.executor import make_default_online_executor_collection
-from autora.controller.planner import full_cycle_planner
-from autora.controller.state import Snapshot
+from .base import BaseController
+from .executor import make_default_online_executor_collection
+from .planner import full_cycle_planner
+from .state import Snapshot
 from autora.experimentalist.pipeline import Pipeline
 from autora.variable import VariableCollection
 
@@ -100,7 +100,7 @@ class Cycle(BaseController):
         ```
 
         Examples:
-            >>> from autora.controller.cycle import Cycle
+            >>> from autora_workflow.cycle import Cycle
             >>> p = {"some": "params"}
             >>> c = Cycle(metadata=None, theorist=None, experimentalist=None,
             ...                 experiment_runner=None, params=p)
@@ -123,7 +123,7 @@ class Cycle(BaseController):
         Generates new theories.
 
         Examples:
-            >>> from autora.controller.cycle import Cycle
+            >>> from autora_workflow.cycle import Cycle
             >>> from sklearn.linear_model import LinearRegression, PoissonRegressor
             >>> c = Cycle(metadata=None, theorist=LinearRegression(), experimentalist=None,
             ...                 experiment_runner=None)
@@ -148,7 +148,7 @@ class Cycle(BaseController):
         Generates new experimental conditions.
 
         Examples:
-            >>> from autora.controller.cycle import Cycle
+            >>> from autora_workflow.cycle import Cycle
             >>> from autora.experimentalist.pipeline import Pipeline
             >>> c = Cycle(metadata=None, theorist=None, experiment_runner=None,
             ...                 experimentalist=Pipeline([("pool", [11,12,13])]))
@@ -173,7 +173,7 @@ class Cycle(BaseController):
         Generates new observations.
 
         Examples:
-            >>> from autora.controller.cycle import Cycle
+            >>> from autora_workflow.cycle import Cycle
             >>> def plus_one(x): return x + 1
             >>> c = Cycle(metadata=None, theorist=None, experimentalist=None,
             ...                 experiment_runner=plus_one)

@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/autora.iml" filepath="$PROJECT_DIR$/.idea/autora.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/autora-workflow.iml" filepath="$PROJECT_DIR$/.idea/autora-workflow.iml" />
     </modules>
   </component>
 </project>

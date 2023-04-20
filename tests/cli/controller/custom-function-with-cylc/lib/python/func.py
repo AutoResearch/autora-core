@@ -2,9 +2,9 @@ import numpy as np
 import pandas as pd
 
 
-def plus_1(df: pd.DataFrame):
+def plus_3(df: pd.DataFrame):
     x = df[["x"]]
-    y = x + 1
+    y = x + 3
     df["y"] = y
     return df
 

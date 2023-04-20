@@ -1,6 +1,6 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="pytest in tests" type="tests" factoryName="py.test" nameIsGenerated="true">
-    <module name="autora" />
+    <module name="autora-workflow" />
     <option name="INTERPRETER_OPTIONS" value="" />
     <option name="PARENT_ENVS" value="true" />
     <option name="SDK_HOME" value="" />

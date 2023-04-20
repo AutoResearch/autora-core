@@ -23,7 +23,7 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
         cache: "pip"
-    - run: pip install .
+    - run: pip install -e ".[dev]"
     - run: pytest tests/
     - run: pytest --doctest-modules src/
 

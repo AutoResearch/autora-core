@@ -15,17 +15,13 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-
     - uses: actions/setup-python@v4
       with:
         python-version: 3.8
         cache: "pip"
-
-    - run: pip install .
-
+    - run: pip install -e ".[dev]"
     - uses: actions/cache@v3
       with:
         path: ~/.cache/pre-commit
         key: pre-commit-3|${{ env.pythonLocation }}|${{ runner.os }}|${{ hashFiles('.pre-commit-config.yaml') }}
-
     - run: pre-commit run --all-files --show-diff-on-failure --color=always

@@ -6,12 +6,13 @@ from typing import Callable, Dict, Optional
 
 from sklearn.base import BaseEstimator
 
+from autora.experimentalist.pipeline import Pipeline
+from autora.variable import VariableCollection
+
 from .base import BaseController
 from .executor import make_default_online_executor_collection
 from .planner import full_cycle_planner
 from .state import Snapshot
-from autora.experimentalist.pipeline import Pipeline
-from autora.variable import VariableCollection
 
 _logger = logging.getLogger(__name__)
 

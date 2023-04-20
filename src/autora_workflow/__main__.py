@@ -38,6 +38,7 @@ def main(
 
     return
 
+
 def _configure_logger(debug, verbose):
     if debug:
         logging.basicConfig(level=logging.DEBUG)
@@ -45,6 +46,7 @@ def _configure_logger(debug, verbose):
     if verbose:
         logging.basicConfig(level=logging.INFO)
         _logger.info("using INFO logging level")
+
 
 def _load_manager(path: pathlib.Path) -> Controller:
     _logger.debug(f"_load_manager: loading from {path=} (currently in {os.getcwd()})")

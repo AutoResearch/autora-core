@@ -7,8 +7,9 @@ from typing import Dict, Mapping
 
 import numpy as np
 
-from ..protocol import SupportsControllerState
 from autora.utils.dictionary import LazyDict
+
+from ..protocol import SupportsControllerState
 
 _logger = logging.getLogger(__name__)
 

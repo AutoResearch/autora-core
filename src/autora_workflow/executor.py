@@ -15,9 +15,10 @@ import numpy as np
 import pandas as pd
 from sklearn.base import BaseEstimator
 
+from autora.experimentalist.pipeline import Pipeline
+
 from .protocol import SupportsControllerState
 from .state import resolve_state_params
-from autora.experimentalist.pipeline import Pipeline
 
 _logger = logging.getLogger(__name__)
 
@@ -80,7 +81,9 @@ def theorist_wrapper(
     params_ = resolve_state_params(params, state)
     metadata = state.metadata
     observations = state.observations
-    assert len(observations) >= 1, f"{observations=} needs at least one entry for model fitting"
+    assert (
+        len(observations) >= 1
+    ), f"{observations=} needs at least one entry for model fitting"
 
     if isinstance(observations[-1], pd.DataFrame):
         all_observations = pd.concat(observations)

@@ -2,7 +2,7 @@ import pickle
 import tempfile
 from abc import abstractmethod
 from pathlib import Path
-from typing import Generic, Mapping, NamedTuple, Union, Type
+from typing import Generic, Mapping, NamedTuple, Type, Union
 
 import numpy as np
 
@@ -136,7 +136,7 @@ class HistorySerializer(StateSerializer[History]):
             with open(Path(path, filename), mode) as f:
                 serializer.dump(container, f)
 
-    def load(self, cls:Type[History] = History) -> History:
+    def load(self, cls: Type[History] = History) -> History:
         """
 
         Examples:

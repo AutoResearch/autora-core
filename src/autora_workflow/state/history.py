@@ -7,13 +7,10 @@ from typing import Any, Dict, Iterable, List, Optional, Sequence, Set, Union
 from numpy.typing import ArrayLike
 from sklearn.base import BaseEstimator
 
-from ..protocol import (
-    ResultKind,
-    SupportsControllerStateHistory,
-    SupportsDataKind,
-)
-from .snapshot import Snapshot
 from autora.variable import VariableCollection
+
+from ..protocol import ResultKind, SupportsControllerStateHistory, SupportsDataKind
+from .snapshot import Snapshot
 
 
 class History(SupportsControllerStateHistory):

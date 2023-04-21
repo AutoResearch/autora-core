@@ -6,18 +6,10 @@ theme:
   name: material
 
 watch:
-  - src/
+  - src/autora/
 
 plugins:
-  - mkdocs-jupyter:
-      include_source: true
-      execute: true
-      ignore_h1_titles: True
+  - search
 
 nav:
 - Introduction: 'index.md'
-- Basic Usage: 'basic-usage.ipynb'
-- 'passing-static-parameters.ipynb'
-- "accessing-state-dependent-properties.ipynb"
-- "using-alternative-planners-and-executors.ipynb"
-

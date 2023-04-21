@@ -6,7 +6,7 @@ theme:
   name: material
 
 watch:
-  - src/autora/
+  - src/
 
 plugins:
   - search

@@ -1,18 +1,12 @@
-# yaml-language-server: $schema=https://squidfunk.github.io/mkdocs-material/schema.json
-
 site_name: AutoRA Workflow
 
 theme:
   name: material
 
-watch:
-  - src/
-
 plugins:
-  - search
   - mkdocs-jupyter:
       include_source: true
-      execute: true
+      execute: false
       ignore_h1_titles: True
 
 nav:

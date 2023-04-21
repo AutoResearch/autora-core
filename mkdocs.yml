@@ -11,9 +11,9 @@ watch:
 plugins:
   - search
   - mkdocs-jupyter:
-    include_source: true
-    execute: true
-    ignore_h1_titles: True
+      include_source: true
+      execute: true
+      ignore_h1_titles: True
 
 nav:
 - Introduction: 'index.md'

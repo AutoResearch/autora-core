@@ -2,28 +2,24 @@
 name = "autora-workflow"
 version = "0.0.0"
 description = "Workflow tools for the Autonomous Research Assistant (AutoRA) package."
-authors = [
-    {name="John Gerrard Holland", email="john_holland1@brown.edu"}
-]
-license = { file = "LICENSE.md"}
+authors = [{ name = "John Gerrard Holland", email = "john_holland1@brown.edu" }]
+license = { file = "LICENSE.md" }
 requires-python = " >=3.8.10,<3.11"
 readme = "README.md"
-dependencies = [
-    "autora-core",
+dependencies = ["autora-core",
     "typer",
     "rich",
     "shellingham",
-    "pyyaml"
-]
+    "pyyaml"]
 
-[project.optional-dependencies]
-dev = [
-    "pytest>=7.2.0",
-    "pre-commit>=2.20",
+[tool.pdm.dev-dependencies]
+commit = ["pre-commit>=2.20",
     "build",
-    "jupyter",
+]
+test = ["pytest>=7.2.0",
 ]
 docs = ["mkdocs-material",
+    "jupyter",
     "mkdocs-jupyter",
     "mkdocs-multirepo-plugin"]
 

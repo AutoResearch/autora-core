@@ -6,11 +6,11 @@ from sklearn.linear_model import LinearRegression
 from sklearn.metrics import r2_score
 
 from autora.experimentalist.pipeline import Pipeline
-from autora.experimentalist.pooler.general_pool import grid_pool
-from autora.experimentalist.sampler import random_sampler
+from autora.experimentalist.pooler.grid import grid_pool
+from autora.experimentalist.sampler.random_sampler import random_sampler
 from autora.variable import Variable, VariableCollection
-from autora_workflow import Cycle
-from autora_workflow.plotting import (
+from autora.workflow import Cycle
+from autora.workflow.plotting import (
     _check_replace_default_kw,
     cycle_default_score,
     cycle_specified_score,

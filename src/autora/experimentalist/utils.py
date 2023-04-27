@@ -25,12 +25,11 @@ def sequence_to_array(iterable):
         array([['0', 'a'], ['1', 'b'], ['2', 'c'], ['3', 'd'], ['4', 'e']],  dtype='<U21')
 
         Single strings are broken into characters:
-        >>> sequence_to_array("abcde",array_type="numpy.array")  # doctest: +NORMALIZE_WHITESPACE
+        >>> sequence_to_array("abcde")  # doctest: +NORMALIZE_WHITESPACE
         array([['a'], ['b'], ['c'], ['d'], ['e']], dtype='<U1')
 
         Multiple strings are treated as individual entries:
-        >>> sequence_to_array(["abc", "de"],array_type="numpy.array"
-        ...     )  # doctest: +NORMALIZE_WHITESPACE
+        >>> sequence_to_array(["abc", "de"])  # doctest: +NORMALIZE_WHITESPACE
         array([['abc'], ['de']], dtype='<U3')
 
     """

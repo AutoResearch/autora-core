@@ -5,7 +5,7 @@ import pytest
 
 from autora.experimentalist.pipeline import make_pipeline
 from autora.experimentalist.pooler.grid import grid_pool
-from autora.experimentalist.sampler.random_ import random_sampler
+from autora.experimentalist.sampler.random_sampler import random_sampler
 from autora.variable import DV, IV, ValueType, VariableCollection
 
 

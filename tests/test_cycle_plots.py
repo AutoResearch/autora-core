@@ -16,7 +16,7 @@ from autora.cycle import (
 from autora.cycle.plot_utils import _check_replace_default_kw
 from autora.experimentalist.pipeline import Pipeline
 from autora.experimentalist.pooler.grid import grid_pool
-from autora.experimentalist.sampler.random_ import random_sampler
+from autora.experimentalist.sampler.random_sampler import random_sampler
 from autora.variable import Variable, VariableCollection
 
 

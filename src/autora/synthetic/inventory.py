@@ -8,7 +8,9 @@ Examples:
     >>> from functools import partial
     >>> import matplotlib.pyplot as plt
     >>> import numpy as np
-    >>> from autora.synthetic import register, retrieve, describe, SyntheticExperimentCollection
+    >>> from autora.synthetic.inventory import (
+    ...     register, retrieve, describe, SyntheticExperimentCollection
+    ... )
     >>> from autora.variable import IV, DV, VariableCollection
 
     Then we can define the function. We define all the arguments we want and add them to a

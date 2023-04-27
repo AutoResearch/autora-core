@@ -71,7 +71,7 @@ class HistorySerializer(StateSerializer[History]):
             First, we need to initialize a FilesystemCycleDataCollection. This is usually handled
             by the cycle itself. We start with a data collection as it would be at the very start of
             an experiment, with just a VariableCollection.
-            >>> from autora_workflow.state.history import History
+            >>> from autora.workflow.state.history import History
             >>> c = History()
             >>> c  #doctest: +NORMALIZE_WHITESPACE
             History([])
@@ -132,7 +132,8 @@ class HistorySerializer(StateSerializer[History]):
             ]
 
             assert isinstance(serializer, SupportsLoadDump)
-            filename = f"{str(i).rjust(8, '0')}-{container.kind}.{extension}"
+            assert container.kind is not None
+            filename = f"{str(i).rjust(8, '0')}-{container.kind.value}.{extension}"
             with open(Path(path, filename), mode) as f:
                 serializer.dump(container, f)
 
@@ -145,7 +146,7 @@ class HistorySerializer(StateSerializer[History]):
             >>> from sklearn.linear_model import LinearRegression
             >>> from autora.variable import VariableCollection
             >>> import numpy as np
-            >>> from autora_workflow.state.history import History
+            >>> from autora.workflow.state.history import History
             >>> import tempfile
             >>> x = np.linspace(-2, 2, 10).reshape(-1, 1) * np.pi
             >>> y = 3. * x + 0.1 * np.sin(x - 0.1) - 2.
@@ -161,7 +162,7 @@ class HistorySerializer(StateSerializer[History]):
 
             We can now compare the dumped object "c" with the reloaded object "e". The data arrays
             should be equal, and the theories should
-            >>> from autora_workflow.protocol import ResultKind
+            >>> from autora.workflow.protocol import ResultKind
             >>> for e_i, c_i in zip(e.history, c.history):
             ...     assert isinstance(e_i.data, type(c_i.data)) # Types match
             ...     if e_i.kind in (ResultKind.CONDITION, ResultKind.OBSERVATION):

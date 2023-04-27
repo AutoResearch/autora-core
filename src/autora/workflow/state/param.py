@@ -18,7 +18,7 @@ def _get_state_dependent_properties(state: SupportsControllerState):
     """
     Examples:
         Even with an empty data object, we can initialize the dictionary,
-        >>> from autora_workflow.state import Snapshot
+        >>> from autora.workflow.state import Snapshot
         >>> state_dependent_properties = _get_state_dependent_properties(Snapshot())
 
         ... but it will raise an exception if a value isn't yet available when we try to use it
@@ -106,7 +106,7 @@ def resolve_state_params(params: Dict, state: SupportsControllerState) -> Dict:
     Returns the `params` attribute of the input, with `cycle properties` resolved.
 
     Examples:
-        >>> from autora_workflow.state import History
+        >>> from autora.workflow.state import History
         >>> params = {"experimentalist": {"source": "%theories[-1]%"}}
         >>> s = History(theories=["the first theory", "the second theory"])
         >>> resolve_state_params(params, s)

@@ -282,9 +282,9 @@ Examples:
     In this example, we use the `Controller` which allows much more control over execution
     order. It considers the last available result and picks the matching next step. This means
     that seeding is relatively simple.
-    >>> from autora_workflow import Controller
+    >>> from autora.workflow import Controller
     >>> def monitor(state):
-    ...     print(f"MONITOR: Generated new {state.history[-1].kind}")
+    ...     print(f"MONITOR: Generated new {state.history[-1].kind.value}")
     >>> cycle_with_last_result_planner = Controller(
     ...     monitor=monitor,
     ...     metadata=metadata_0,
@@ -332,9 +332,9 @@ Examples:
 
     This might be useful in cases when different experimentalists or theorists are needed at
     different times in the cycle, e.g. for initial seeding.
-    >>> from autora_workflow.planner import random_operation_planner
+    >>> from autora.workflow.planner import random_operation_planner
     >>> def monitor(state):
-    ...     print(f"MONITOR: Generated new {state.history[-1].kind}")
+    ...     print(f"MONITOR: Generated new {state.history[-1].kind.value}")
     >>> controller_with_random_planner = Controller(
     ...     planner=random_operation_planner,
     ...     monitor=monitor,
@@ -420,8 +420,8 @@ Examples:
 
     We now define a planner which chooses a different experimentalist when supplied with no data
     versus some data.
-    >>> from autora_workflow.protocol import ResultKind
-    >>> from autora_workflow.planner import last_result_kind_planner
+    >>> from autora.workflow.protocol import ResultKind
+    >>> from autora.workflow.planner import last_result_kind_planner
     >>> def seeding_planner(state):
     ...     # We're going to reuse the "last_available_result" planner, and modify its output.
     ...     next_function = last_result_kind_planner(state)
@@ -435,7 +435,7 @@ Examples:
 
     Now we can see what would happen with a particular state. If there are no results,
     then we get the seed experimentalist:
-    >>> from autora_workflow.state import History
+    >>> from autora.workflow.state import History
     >>> seeding_planner(History())
     'seed_experimentalist'
 
@@ -458,7 +458,7 @@ Examples:
 
     Now we need to define an executor collection to handle the actual execution steps.
     >>> from autora.experimentalist.pipeline import make_pipeline, Pipeline
-    >>> from autora.experimentalist.sampler.random import random_sampler
+    >>> from autora.experimentalist.sampler.random_sampler import random_sampler
     >>> from functools import partial
 
     Wen can run the seed pipeline with no data:
@@ -497,7 +497,7 @@ Examples:
 
     Now we can define the executor component. We'll use a factory method to generate the
     collection:
-    >>> from autora_workflow.executor import make_online_executor_collection
+    >>> from autora.workflow.executor import make_online_executor_collection
     >>> executor_collection = make_online_executor_collection([
     ...     ("seed_experimentalist", "experimentalist", experimentalist_which_needs_no_data),
     ...     ("main_experimentalist", "experimentalist", experimentalist_which_needs_a_theory),
@@ -509,8 +509,8 @@ Examples:
     >>> params = {"main_experimentalist": {"sampler": {"models": "%theories%"}}}
 
     We now instantiate the controller:
-    >>> from autora_workflow.base import BaseController
-    >>> from autora_workflow.state import History
+    >>> from autora.workflow.base import BaseController
+    >>> from autora.workflow.state import History
     >>> c = BaseController(
     ...         state=History(metadata=metadata_2, params=params),
     ...         planner=seeding_planner,

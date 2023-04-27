@@ -145,7 +145,7 @@ def no_op(state, params):
     An Executor which has no effect on the state.
 
     Examples:
-         >>> from autora_workflow.state import Snapshot
+         >>> from autora.workflow.state import Snapshot
          >>> s = Snapshot()
          >>> s_returned = no_op(s, {})
          >>> assert s_returned is s

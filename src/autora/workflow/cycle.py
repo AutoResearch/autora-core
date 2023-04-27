@@ -101,7 +101,7 @@ class Cycle(BaseController):
         ```
 
         Examples:
-            >>> from autora_workflow.cycle import Cycle
+            >>> from autora.workflow.cycle import Cycle
             >>> p = {"some": "params"}
             >>> c = Cycle(metadata=None, theorist=None, experimentalist=None,
             ...                 experiment_runner=None, params=p)
@@ -124,7 +124,7 @@ class Cycle(BaseController):
         Generates new theories.
 
         Examples:
-            >>> from autora_workflow.cycle import Cycle
+            >>> from autora.workflow.cycle import Cycle
             >>> from sklearn.linear_model import LinearRegression, PoissonRegressor
             >>> c = Cycle(metadata=None, theorist=LinearRegression(), experimentalist=None,
             ...                 experiment_runner=None)
@@ -149,7 +149,7 @@ class Cycle(BaseController):
         Generates new experimental conditions.
 
         Examples:
-            >>> from autora_workflow.cycle import Cycle
+            >>> from autora.workflow.cycle import Cycle
             >>> from autora.experimentalist.pipeline import Pipeline
             >>> c = Cycle(metadata=None, theorist=None, experiment_runner=None,
             ...                 experimentalist=Pipeline([("pool", [11,12,13])]))
@@ -174,7 +174,7 @@ class Cycle(BaseController):
         Generates new observations.
 
         Examples:
-            >>> from autora_workflow.cycle import Cycle
+            >>> from autora.workflow.cycle import Cycle
             >>> def plus_one(x): return x + 1
             >>> c = Cycle(metadata=None, theorist=None, experimentalist=None,
             ...                 experiment_runner=plus_one)

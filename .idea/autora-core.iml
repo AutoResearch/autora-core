@@ -28,6 +28,8 @@
     <option name="namespacePackageFolders">
       <list>
         <option value="$MODULE_DIR$/src/autora" />
+        <option value="$MODULE_DIR$/src/autora/synthetic" />
+        <option value="$MODULE_DIR$/src/autora/experimentalist" />
       </list>
     </option>
   </component>

@@ -43,6 +43,7 @@ docs = [
     "mkdocs-gen-files",
     "mkdocs-literate-nav",
     "mkdocs-section-index",
+    "mkdocs-multirepo-plugin",
     "mkdocstrings-python",
     "mkdocs-jupyter",
     "pymdown-extensions",

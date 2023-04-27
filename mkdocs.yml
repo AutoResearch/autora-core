@@ -1,13 +1,7 @@
+# yaml-language-server: $schema=https://squidfunk.github.io/mkdocs-material/schema.json
+INHERIT: mkdocs/base.yml  # use the shared AutoRA configuration by default
+
 site_name: AutoRA Workflow
-
-theme:
-  name: material
-
-plugins:
-  - mkdocs-jupyter:
-      include_source: true
-      execute: false
-      ignore_h1_titles: True
 
 nav:
 - Introduction: 'index.md'
@@ -15,3 +9,4 @@ nav:
 - 'passing-static-parameters.ipynb'
 - "accessing-state-dependent-properties.ipynb"
 - "using-alternative-planners-and-executors.ipynb"
+- Code Reference: reference/

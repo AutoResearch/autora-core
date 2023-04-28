@@ -20,7 +20,7 @@ def full_cycle_planner(_):
 
 def last_result_kind_planner(state: SupportsControllerStateHistory):
     """
-    Chooses the operation based on the last result, e.g. new theory -> run experimentalist.
+    Chooses the operation based on the last result, e.g. new model -> run experimentalist.
 
     Interpretation: The "traditional" autora.workflow – a systematic research assistant.
 
@@ -44,15 +44,15 @@ def last_result_kind_planner(state: SupportsControllerStateHistory):
         >>> last_result_kind_planner(state_)
         'theorist'
 
-        ... or if we last produced a theory, then we could now run the experimentalist:
-        >>> state_ = state_.update(theories=["some theory"])
+        ... or if we last produced a model, then we could now run the experimentalist:
+        >>> state_ = state_.update(models=["some model"])
         >>> last_result_kind_planner(state_)
         'experimentalist'
 
     """
 
     filtered_history = state.filter_by(
-        kind={ResultKind.CONDITION, ResultKind.OBSERVATION, ResultKind.THEORY}
+        kind={ResultKind.CONDITION, ResultKind.OBSERVATION, ResultKind.MODEL}
     ).history
 
     try:
@@ -62,7 +62,7 @@ def last_result_kind_planner(state: SupportsControllerStateHistory):
 
     executor_name = {
         None: "experimentalist",
-        ResultKind.THEORY: "experimentalist",
+        ResultKind.MODEL: "experimentalist",
         ResultKind.CONDITION: "experiment_runner",
         ResultKind.OBSERVATION: "theorist",
     }[last_result_kind]

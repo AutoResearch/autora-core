@@ -45,7 +45,7 @@ class ResultKind(str, Enum):
 
     CONDITION = "CONDITION"
     OBSERVATION = "OBSERVATION"
-    THEORY = "THEORY"
+    MODEL = "MODEL"
     PARAMS = "PARAMS"
     VARIABLES = "VARIABLES"
 
@@ -68,7 +68,7 @@ class SupportsControllerStateFields(Protocol):
     params: Dict
     conditions: Sequence[ArrayLike]
     observations: Sequence[ArrayLike]
-    theories: Sequence[BaseEstimator]
+    models: Sequence[BaseEstimator]
 
     def update(self: State, **kwargs) -> State:
         ...
@@ -97,7 +97,7 @@ class SupportsControllerStateProperties(Protocol):
         ...
 
     @property
-    def theories(self) -> Sequence[BaseEstimator]:
+    def models(self) -> Sequence[BaseEstimator]:
         ...
 
 

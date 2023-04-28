@@ -25,11 +25,11 @@ class Controller(BaseController[History]):
     Once initialized, the `controller` can be started by calling `next(controller)` or using the
         `controller.run` method. Each iteration runs the next logical step based on the last
         result:
-    – if the last result doesn't exist or is a theory, run the experimentalist and add an
+    – if the last result doesn't exist or is a model, run the experimentalist and add an
         experimental condition as a new result,
     - if the last result is an experimental condition, run the experiment runner and add an
        observation as a new result,
-    - if the last result is an observation, run the theorist and add a theory as a new result.
+    - if the last result is an observation, run the theorist and add a model as a new result.
 
     """
 
@@ -66,7 +66,7 @@ class Controller(BaseController[History]):
             variables=variables,
             conditions=[],
             observations=[],
-            theories=[],
+            models=[],
             params=params,
         )
 

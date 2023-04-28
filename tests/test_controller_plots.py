@@ -215,7 +215,7 @@ def test_2d_plot(state_lr):
         ),
     )
 
-    # Test theory line is being plotted
+    # Test model line is being plotted
     for axes in fig.axes[:-2]:
         assert len(axes.lines[0].get_xdata()) == steps
         assert len(axes.lines[0].get_ydata()) == steps

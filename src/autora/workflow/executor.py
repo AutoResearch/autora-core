@@ -112,7 +112,7 @@ def theorist_wrapper(
             f"new_theorist has no __dict__ attribute, so no results are shown"
         )
 
-    new_state = state.update(theories=[new_theorist])
+    new_state = state.update(models=[new_theorist])
     return new_state
 
 

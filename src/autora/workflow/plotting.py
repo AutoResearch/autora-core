@@ -131,11 +131,11 @@ def _generate_mesh_grid(state: SupportsControllerState, steps: int = 50) -> np.n
     return np.meshgrid(*l_space)
 
 
-def _theory_predict(
+def _model_predict(
     state: SupportsControllerState, conditions: Sequence, predict_proba: bool = False
 ) -> list:
     """
-    Gets theory predictions over conditions space and saves results of each cycle to a list.
+    Gets model predictions over conditions space and saves results of each cycle to a list.
     Args:
         state: AER Cycle object that has been run
         conditions: Condition space. Should be an array of grouped conditions.
@@ -145,11 +145,11 @@ def _theory_predict(
 
     """
     l_predictions = []
-    for i, theory in enumerate(state.theories):
+    for i, model in enumerate(state.models):
         if not predict_proba:
-            l_predictions.append(theory.predict(conditions))
+            l_predictions.append(model.predict(conditions))
         else:
-            l_predictions.append(theory.predict_proba(conditions))
+            l_predictions.append(model.predict_proba(conditions))
 
     return l_predictions
 
@@ -192,13 +192,13 @@ def plot_results_panel_2d(
     subplot_kw: dict = {},
     scatter_previous_kw: dict = {},
     scatter_current_kw: dict = {},
-    plot_theory_kw: dict = {},
+    plot_model_kw: dict = {},
 ) -> plt.figure:
     """
     Generates a multi-panel figure with 2D plots showing results of one AER cycle.
 
     Observed data is plotted as a scatter plot with the current cycle colored differently than
-    observed data from previous cycles. The current cycle's theory is plotted as a line over the
+    observed data from previous cycles. The current cycle's model is plotted as a line over the
     range of the observed data.
 
     Args:
@@ -207,7 +207,7 @@ def plot_results_panel_2d(
                     object. Default will select the first.
         dv_name: Single dependent variable name. Name should match the names instantiated in the
                     cycle object. Default will select the first DV.
-        steps: Number of steps to define the condition space to plot the theory.
+        steps: Number of steps to define the condition space to plot the model.
         wrap: Number of panels to appear in a row. Example: 9 panels with wrap=3 results in a
                 3x3 grid.
         query: Query which cycles to plot with either a List of indexes or a slice. The slice must
@@ -217,8 +217,8 @@ def plot_results_panel_2d(
                     plots the data points from previous cycles.
         scatter_current_kw: Dictionary of keywords to pass to matplotlib 'scatter' function that
                     plots the data points from the current cycle.
-        plot_theory_kw: Dictionary of keywords to pass to matplotlib 'plot' function that plots the
-                    theory line.
+        plot_model_kw: Dictionary of keywords to pass to matplotlib 'plot' function that plots the
+                    model line.
 
     Returns: matplotlib figure
 
@@ -244,7 +244,7 @@ def plot_results_panel_2d(
         "alpha": 0.6,
         "label": "New Data",
     }
-    line_kw_defaults = {"label": "Theory"}
+    line_kw_defaults = {"label": "Model"}
     # Combine default and user supplied keywords
     d_kw = {}
     for d1, d2, key in zip(
@@ -254,8 +254,8 @@ def plot_results_panel_2d(
             scatter_current_defaults,
             line_kw_defaults,
         ],
-        [subplot_kw, scatter_previous_kw, scatter_current_kw, plot_theory_kw],
-        ["subplot_kw", "scatter_previous_kw", "scatter_current_kw", "plot_theory_kw"],
+        [subplot_kw, scatter_previous_kw, scatter_current_kw, plot_model_kw],
+        ["subplot_kw", "scatter_previous_kw", "scatter_current_kw", "plot_model_kw"],
     ):
         assert isinstance(d1, dict)
         assert isinstance(d2, dict)
@@ -280,11 +280,11 @@ def plot_results_panel_2d(
     # Generate IV space
     condition_space = _generate_condition_space(state, steps=steps)
 
-    # Get theory predictions over space
-    l_predictions = _theory_predict(state, condition_space)
+    # Get model predictions over space
+    l_predictions = _model_predict(state, condition_space)
 
     # Cycle Indexing
-    cycle_idx = list(range(len(state.theories)))
+    cycle_idx = list(range(len(state.models)))
     if query:
         if isinstance(query, list):
             cycle_idx = [cycle_idx[s] for s in query]
@@ -322,9 +322,9 @@ def plot_results_panel_2d(
             ax.scatter(x_vals, dv_previous, **d_kw["scatter_previous_kw"])
             ax.scatter(x_vals, dv_current, **d_kw["scatter_current_kw"])
 
-            # ---Plot Theory---
+            # ---Plot Model---
             conditions = condition_space[:, iv[0]]
-            ax.plot(conditions, l_predictions[i_cycle], **d_kw["plot_theory_kw"])
+            ax.plot(conditions, l_predictions[i_cycle], **d_kw["plot_model_kw"])
 
             # Label Panels
             ax.text(
@@ -340,7 +340,7 @@ def plot_results_panel_2d(
 
     # Legend
     fig.legend(
-        ["Previous Data", "New Data", "Theory"],
+        ["Previous Data", "New Data", "Model"],
         ncols=3,
         bbox_to_anchor=(0.5, 0),
         loc="lower center",
@@ -365,7 +365,7 @@ def plot_results_panel_3d(
     Generates a multi-panel figure with 3D plots showing results of one AER cycle.
 
     Observed data is plotted as a scatter plot with the current cycle colored differently than
-    observed data from previous cycles. The current cycle's theory is plotted as a line over the
+    observed data from previous cycles. The current cycle's model is plotted as a line over the
     range of the observed data.
 
     Args:
@@ -375,7 +375,7 @@ def plot_results_panel_3d(
                     instantiated in the cycle object. Default will select up to the first two.
         dv_name: Single DV name. Name should match the names instantiated in the cycle object.
                     Default will select the first DV
-        steps: Number of steps to define the condition space to plot the theory.
+        steps: Number of steps to define the condition space to plot the model.
         wrap: Number of panels to appear in a row. Example: 9 panels with wrap=3 results in a
                 3x3 grid.
         view: Tuple of elevation angle and azimuth to change the viewing angle of the plot.
@@ -385,12 +385,12 @@ def plot_results_panel_3d(
         scatter_current_kw: Dictionary of keywords to pass to matplotlib 'scatter' function that
                     plots the data points from the current cycle.
         surface_kw: Dictionary of keywords to pass to matplotlib 'plot_surface' function that plots
-                    the theory plane.
+                    the model plane.
 
     Returns: matplotlib figure
 
     """
-    n_cycles = len(state.theories)
+    n_cycles = len(state.models)
 
     # ---Figure and plot params---
     # Set defaults, check and add user supplied keywords
@@ -400,7 +400,7 @@ def plot_results_panel_3d(
     }
     scatter_previous_defaults = {"color": "black", "s": 2, "label": "Previous Data"}
     scatter_current_defaults = {"color": "tab:orange", "s": 2, "label": "New Data"}
-    surface_kw_defaults = {"alpha": 0.5, "label": "Theory"}
+    surface_kw_defaults = {"alpha": 0.5, "label": "Model"}
     # Combine default and user supplied keywords
     d_kw = {}
     for d1, d2, key in zip(
@@ -436,8 +436,8 @@ def plot_results_panel_3d(
     # Generate IV Mesh Grid
     x1, x2 = _generate_mesh_grid(state, steps=steps)
 
-    # Get theory predictions over space
-    l_predictions = _theory_predict(state, np.column_stack((x1.ravel(), x2.ravel())))
+    # Get model predictions over space
+    l_predictions = _model_predict(state, np.column_stack((x1.ravel(), x2.ravel())))
 
     # Subplot configurations
     if n_cycles < wrap:
@@ -464,7 +464,7 @@ def plot_results_panel_3d(
             ax.scatter(*l_x, dv_previous, **d_kw["scatter_previous_kw"])
             ax.scatter(*l_x, dv_current, **d_kw["scatter_current_kw"])
 
-            # ---Plot Theory---
+            # ---Plot Model---
             ax.plot_surface(
                 x1, x2, l_predictions[i].reshape(x1.shape), **d_kw["surface_kw"]
             )
@@ -515,7 +515,7 @@ def cycle_default_score(
     Returns:
         List of scores by cycle
     """
-    l_scores = [s.score(x_vals, y_true) for s in state.theories]
+    l_scores = [s.score(x_vals, y_true) for s in state.models]
     return l_scores
 
 
@@ -540,9 +540,9 @@ def cycle_specified_score(
     """
     # Get predictions
     if "y_pred" in inspect.signature(scorer).parameters.keys():
-        l_y_pred = _theory_predict(state, x_vals, predict_proba=False)
+        l_y_pred = _model_predict(state, x_vals, predict_proba=False)
     elif "y_score" in inspect.signature(scorer).parameters.keys():
-        l_y_pred = _theory_predict(state, x_vals, predict_proba=True)
+        l_y_pred = _model_predict(state, x_vals, predict_proba=True)
 
     # Score each cycle
     l_scores = []
@@ -566,7 +566,7 @@ def plot_cycle_score(
     plot_kw: dict = {},
 ) -> plt.Figure:
     """
-    Plots scoring metrics of cycle's theories given test data.
+    Plots scoring metrics of cycle's models given test data.
     Args:
         state: AER Cycle object that has been run
         X: Test dataset independent values
@@ -592,7 +592,7 @@ def plot_cycle_score(
 
     # Plotting
     fig, ax = plt.subplots(figsize=figsize)
-    ax.plot(np.arange(len(state.theories)), l_scores, **plot_kw)
+    ax.plot(np.arange(len(state.models)), l_scores, **plot_kw)
 
     # Adjusting axis limits
     if ylim:

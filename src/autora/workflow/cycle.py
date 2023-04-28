@@ -55,7 +55,7 @@ class Cycle(BaseController):
             variables=variables,
             conditions=[],
             observations=[],
-            theories=[],
+            models=[],
             params={"full_cycle": params},
         )
         planner = full_cycle_planner
@@ -120,7 +120,7 @@ class Cycle(BaseController):
     @property
     def theorist(self):
         """
-        Generates new theories.
+        Generates new models.
 
         Examples:
             >>> from autora.workflow.cycle import Cycle

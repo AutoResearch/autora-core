@@ -4,7 +4,7 @@ Functions and classes for running the complete AER cycle.
 
 # Basic Usage
 
-Aim: Use the Controller to recover a simple ground truth theory from noisy data.
+Aim: Use the Controller to recover a simple ground truth model from noisy data.
 
 Examples:
 
@@ -36,12 +36,12 @@ Examples:
     >>> example_synthetic_experiment_runner(np.array([1]))
     array([2.04339546])
 
-    The theorist "tries" to work out the best theory.
+    The theorist "tries" to work out the best model.
     We use a trivial scikit-learn regressor.
     >>> from sklearn.linear_model import LinearRegression
     >>> example_theorist = LinearRegression()
 
-    We initialize the Controller with the variables describing the domain of the theory,
+    We initialize the Controller with the variables describing the domain of the model,
     the theorist, experimentalist and experiment runner,
     as well as a monitor which will let us know which cycle we're currently on.
     >>> cycle = Cycle(
@@ -49,16 +49,16 @@ Examples:
     ...     theorist=example_theorist,
     ...     experimentalist=example_experimentalist,
     ...     experiment_runner=example_synthetic_experiment_runner,
-    ...     monitor=lambda state: print(f"Generated {len(state.theories)} theories"),
+    ...     monitor=lambda state: print(f"Generated {len(state.models)} models"),
     ... )
     >>> cycle # doctest: +ELLIPSIS
     <...Cycle object at 0x...>
 
     We can run the cycle by calling the run method:
     >>> cycle.run(num_cycles=3)  # doctest: +ELLIPSIS
-    Generated 1 theories
-    Generated 2 theories
-    Generated 3 theories
+    Generated 1 models
+    Generated 2 models
+    Generated 3 models
     <...Cycle object at 0x...>
 
     We can now interrogate the results. The first set of conditions which went into the
@@ -85,61 +85,61 @@ Examples:
     array([[ 0.        ,  1.08559827],
            [10.        , 11.08179553]])
 
-    The best fit theory after the first cycle is:
-    >>> cycle.data.theories[0]
+    The best fit model after the first cycle is:
+    >>> cycle.data.models[0]
     LinearRegression()
 
     >>> def report_linear_fit(m: LinearRegression,  precision=4):
     ...     s = f"y = {np.round(m.coef_[0].item(), precision)} x " \\
     ...     f"+ {np.round(m.intercept_.item(), 4)}"
     ...     return s
-    >>> report_linear_fit(cycle.data.theories[0])
+    >>> report_linear_fit(cycle.data.models[0])
     'y = 1.0089 x + 0.9589'
 
-    The best fit theory after all the cycles, including all the data, is:
-    >>> report_linear_fit(cycle.data.theories[-1])
+    The best fit model after all the cycles, including all the data, is:
+    >>> report_linear_fit(cycle.data.models[-1])
     'y = 0.9989 x + 1.0292'
 
-    This is close to the ground truth theory of x -> (x + 1)
+    This is close to the ground truth model of x -> (x + 1)
 
     We can also run the cycle with more control over the execution flow:
     >>> next(cycle) # doctest: +ELLIPSIS
-    Generated 4 theories
+    Generated 4 models
     <...Cycle object at 0x...>
 
     >>> next(cycle) # doctest: +ELLIPSIS
-    Generated 5 theories
+    Generated 5 models
     <...Cycle object at 0x...>
 
     >>> next(cycle) # doctest: +ELLIPSIS
-    Generated 6 theories
+    Generated 6 models
     <...Cycle object at 0x...>
 
     We can continue to run the cycle as long as we like,
-    with a simple arbitrary stopping condition like the number of theories generated:
+    with a simple arbitrary stopping condition like the number of models generated:
     >>> from itertools import takewhile
-    >>> _ = list(takewhile(lambda c: len(c.data.theories) < 9, cycle))
-    Generated 7 theories
-    Generated 8 theories
-    Generated 9 theories
+    >>> _ = list(takewhile(lambda c: len(c.data.models) < 9, cycle))
+    Generated 7 models
+    Generated 8 models
+    Generated 9 models
 
     ... or the precision (here we keep iterating while the difference between the gradients
     of the second-last and last cycle is larger than 1x10^-3).
     >>> _ = list(
     ...         takewhile(
-    ...             lambda c: np.abs(c.data.theories[-1].coef_.item() -
-    ...                            c.data.theories[-2].coef_.item()) > 1e-3,
+    ...             lambda c: np.abs(c.data.models[-1].coef_.item() -
+    ...                            c.data.models[-2].coef_.item()) > 1e-3,
     ...             cycle
     ...         )
     ...     )
-    Generated 10 theories
-    Generated 11 theories
+    Generated 10 models
+    Generated 11 models
 
     ... or continue to run as long as we like:
     >>> _ = cycle.run(num_cycles=100) # doctest: +ELLIPSIS
-    Generated 12 theories
+    Generated 12 models
     ...
-    Generated 111 theories
+    Generated 111 models
 
 # Passing Static Parameters
 
@@ -177,7 +177,7 @@ Examples:
 
 Some experimentalists, experiment runners and theorists require access to the values
 created during the cycle execution, e.g. experimentalists which require access
-to the current best theory or the observed data. These data update each cycle, and
+to the current best model or the observed data. These data update each cycle, and
 so cannot easily be set using simple `params`.
 
 For this case, it is possible to use "state-dependent properties" in the `params`
@@ -190,8 +190,8 @@ their respective current values:
 concatenated into a single array
 - `"%observations.dvs%"`: all the observed dependent variables,
 concatenated into a single array
-- `"%theories[-1]%"`: the last fitted theorist
-- `"%theories%"`: all the fitted theorists
+- `"%models[-1]%"`: the last fitted theorist
+- `"%models%"`: all the fitted theorists
 
 Examples:
 
@@ -294,13 +294,13 @@ Examples:
     ... )
 
     When we run this cycle starting with no data, we generate an experimental condition first:
-    >>> _ = list(takewhile(lambda c: len(c.state.theories) < 2, cycle_with_last_result_planner))
+    >>> _ = list(takewhile(lambda c: len(c.state.models) < 2, cycle_with_last_result_planner))
     MONITOR: Generated new CONDITION
     MONITOR: Generated new OBSERVATION
-    MONITOR: Generated new THEORY
+    MONITOR: Generated new MODEL
     MONITOR: Generated new CONDITION
     MONITOR: Generated new OBSERVATION
-    MONITOR: Generated new THEORY
+    MONITOR: Generated new MODEL
 
     However, if we seed the same cycle with observations, then its first Executor will be the
     theorist:
@@ -315,7 +315,7 @@ Examples:
     >>> controller_with_seed_observation.seed(observations=[seed_observation])
 
     >>> _ = next(controller_with_seed_observation)
-    MONITOR: Generated new THEORY
+    MONITOR: Generated new MODEL
 
 ## Arbitrary Execution Order (Toy Example)
 
@@ -385,11 +385,11 @@ Examples:
     MONITOR: Generated new OBSERVATION
 
     By the ninth iteration, there are observations which the theorist can use, and it succeeds.
-    >>> _ = list(takewhile(lambda c: len(c.state.theories) < 1, controller_with_random_planner))
+    >>> _ = list(takewhile(lambda c: len(c.state.models) < 1, controller_with_random_planner))
     MONITOR: Generated new CONDITION
     MONITOR: Generated new CONDITION
     MONITOR: Generated new CONDITION
-    MONITOR: Generated new THEORY
+    MONITOR: Generated new MODEL
 
 ## Arbitrary Executors and Planners
 
@@ -398,8 +398,8 @@ In some cases, we need to go beyond adding different orders of planning the thre
 different Executors for different states.
 
 For instance, there might be a situation where at the start, the main "active" experimentalist
-can't be run as it needs one or more theories as input.
-Once there are at least two theories, then the active experimentalist _can_ be run.
+can't be run as it needs one or more models as input.
+Once there are at least two models, then the active experimentalist _can_ be run.
 One method to handle this is to run a "seed" experimentalist until the main experimentalist can
 be used.
 
@@ -407,7 +407,7 @@ In these cases, we need full control over (and have full responsibility for) the
 executors.
 
 Examples:
-    The theory we'll try to discover is:
+    The model we'll try to discover is:
     >>> def ground_truth(x, m=3.5, c=1):
     ...     return m * x + c
     >>> rng = np.random.default_rng(seed=180)
@@ -426,7 +426,7 @@ Examples:
     ...     # We're going to reuse the "last_available_result" planner, and modify its output.
     ...     next_function = last_result_kind_planner(state)
     ...     if next_function == "experimentalist":
-    ...         if len(state.theories) >= 2:
+    ...         if len(state.models) >= 2:
     ...             return "main_experimentalist"
     ...         else:
     ...             return "seed_experimentalist"
@@ -439,13 +439,13 @@ Examples:
     >>> seeding_planner(History())
     'seed_experimentalist'
 
-    ... and we also get the seed experimentalist if the last result was a theory and there are less
-    than two theories:
-    >>> seeding_planner(History(theories=['a single theory']))
+    ... and we also get the seed experimentalist if the last result was a model and there are less
+    than two models:
+    >>> seeding_planner(History(models=['a single model']))
     'seed_experimentalist'
 
-    ... whereas if we have at least two theories to work on, we get the main experimentalist:
-    >>> seeding_planner(History(theories=['a theory', 'another theory']))
+    ... whereas if we have at least two models to work on, we get the main experimentalist:
+    >>> seeding_planner(History(models=['a model', 'another model']))
     'main_experimentalist'
 
     If we had a condition last, we choose the experiment runner next:
@@ -473,10 +473,10 @@ Examples:
 
     ... whereas we need some model for this sampler:
     >>> from autora.experimentalist.sampler.model_disagreement import model_disagreement_sampler
-    >>> experimentalist_which_needs_a_theory = Pipeline([
+    >>> experimentalist_which_needs_a_model = Pipeline([
     ...     ('pool', np.linspace(*variables_2.independent_variables[0].value_range, 1_000)),
     ...     ('sampler', partial(model_disagreement_sampler, num_samples=5)),])
-    >>> experimentalist_which_needs_a_theory()
+    >>> experimentalist_which_needs_a_model()
     Traceback (most recent call last):
     ...
     TypeError: model_disagreement_sampler() missing 1 required positional argument: 'models'
@@ -500,13 +500,13 @@ Examples:
     >>> from autora.workflow.executor import make_online_executor_collection
     >>> executor_collection = make_online_executor_collection([
     ...     ("seed_experimentalist", "experimentalist", experimentalist_which_needs_no_data),
-    ...     ("main_experimentalist", "experimentalist", experimentalist_which_needs_a_theory),
+    ...     ("main_experimentalist", "experimentalist", experimentalist_which_needs_a_model),
     ...     ("theorist", "theorist", LinearRegression()),
     ...     ("experiment_runner", "experiment_runner", experiment_runner),
     ... ])
 
     We need some special parameters to handle the main experimentalist, so we specify those:
-    >>> params = {"main_experimentalist": {"sampler": {"models": "%theories%"}}}
+    >>> params = {"main_experimentalist": {"sampler": {"models": "%models%"}}}
 
     We now instantiate the controller:
     >>> from autora.workflow.base import BaseController
@@ -538,13 +538,13 @@ Examples:
                         6.17617618, -3.49349349, -8.998999  ,  4.93493493,  2.25225225]),
            kind=ResultKind.CONDITION)
 
-    Once we have two theories:
-    >>> _ = list(takewhile(lambda c: len(c.state.theories) < 2, c))
-    >>> c.state.theories
+    Once we have two models:
+    >>> _ = list(takewhile(lambda c: len(c.state.models) < 2, c))
+    >>> c.state.models
     [LinearRegression(), LinearRegression()]
 
     ... when we run the next step, we'll get the main experimentalist, which samples five points
-    from the extreme parts of the problem domain where the disagreement between the two theories
+    from the extreme parts of the problem domain where the disagreement between the two models
     is the greatest:
     >>> next(c).state.history[-1]  # doctest: +NORMALIZE_WHITESPACE
     Result(data=array([-10.       ,  -9.97997998,  -9.95995996,  -9.93993994,  -9.91991992]),

@@ -50,7 +50,7 @@ class HistorySerializer(StateSerializer[History]):
             ResultKind.PARAMS: _DumpSpec("yaml", YAMLSerializer, "w+"),
             ResultKind.CONDITION: _DumpSpec("yaml", YAMLSerializer, "w+"),
             ResultKind.OBSERVATION: _DumpSpec("yaml", YAMLSerializer, "w+"),
-            ResultKind.THEORY: _DumpSpec("pickle", pickle, "w+b"),
+            ResultKind.MODEL: _DumpSpec("pickle", pickle, "w+b"),
         }
 
         self._extension_loader_mapping: Mapping[str, _LoadSpec] = {
@@ -112,14 +112,14 @@ class HistorySerializer(StateSerializer[History]):
             >>> dump_and_list(c)
             ['00000000-VARIABLES.yaml', '00000001-CONDITION.yaml', '00000002-OBSERVATION.yaml']
 
-            We can also include a theory in the dump.
-            The theory is saved as a pickle file by default.
+            We can also include a model in the dump.
+            The model is saved as a pickle file by default.
             >>> from sklearn.linear_model import LinearRegression
             >>> estimator = LinearRegression().fit(x, y)
-            >>> c = c.update(theories=[estimator])
+            >>> c = c.update(models=[estimator])
             >>> dump_and_list(c)  # doctest: +NORMALIZE_WHITESPACE
             ['00000000-VARIABLES.yaml', '00000001-CONDITION.yaml', '00000002-OBSERVATION.yaml',
-             '00000003-THEORY.pickle']
+             '00000003-MODEL.pickle']
 
 
         """
@@ -152,7 +152,7 @@ class HistorySerializer(StateSerializer[History]):
             >>> y = 3. * x + 0.1 * np.sin(x - 0.1) - 2.
             >>> estimator = LinearRegression().fit(x, y)
             >>> c = History(variables=VariableCollection(), conditions=[x],
-            ...     observations=[np.column_stack([x, y])], theories=[estimator])
+            ...     observations=[np.column_stack([x, y])], models=[estimator])
 
             Now we can serialize the data using _dumper, and reload the data using _loader:
             >>> with tempfile.TemporaryDirectory() as d:
@@ -161,13 +161,13 @@ class HistorySerializer(StateSerializer[History]):
             ...     e = s.load()
 
             We can now compare the dumped object "c" with the reloaded object "e". The data arrays
-            should be equal, and the theories should
+            should be equal, and the models should
             >>> from autora.workflow.protocol import ResultKind
             >>> for e_i, c_i in zip(e.history, c.history):
             ...     assert isinstance(e_i.data, type(c_i.data)) # Types match
             ...     if e_i.kind in (ResultKind.CONDITION, ResultKind.OBSERVATION):
             ...         np.testing.assert_array_equal(e_i.data, c_i.data) # two numpy arrays
-            ...     if e_i.kind == ResultKind.THEORY:
+            ...     if e_i.kind == ResultKind.MODEL:
             ...         np.testing.assert_array_equal(e_i.data.coef_, c_i.data.coef_) # 2 estimators
 
 

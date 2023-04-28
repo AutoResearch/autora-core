@@ -13,9 +13,8 @@ from typing import Callable, Dict, Iterable, Literal, Optional, Tuple, Union
 
 import numpy as np
 import pandas as pd
-from sklearn.base import BaseEstimator
-
 from autora.experimentalist.pipeline import Pipeline
+from sklearn.base import BaseEstimator
 
 from .protocol import SupportsControllerState
 from .state import resolve_state_params
@@ -79,7 +78,7 @@ def theorist_wrapper(
 ) -> SupportsControllerState:
     """Interface for running the theorist estimator given some State."""
     params_ = resolve_state_params(params, state)
-    metadata = state.metadata
+    variables = state.variables
     observations = state.observations
     assert (
         len(observations) >= 1
@@ -87,12 +86,12 @@ def theorist_wrapper(
 
     if isinstance(observations[-1], pd.DataFrame):
         all_observations = pd.concat(observations)
-        iv_names = [iv.name for iv in metadata.independent_variables]
-        dv_names = [dv.name for dv in metadata.dependent_variables]
+        iv_names = [iv.name for iv in variables.independent_variables]
+        dv_names = [dv.name for dv in variables.dependent_variables]
         x, y = all_observations[iv_names], all_observations[dv_names]
     elif isinstance(observations[-1], np.ndarray):
         all_observations = np.row_stack(observations)
-        n_xs = len(metadata.independent_variables)
+        n_xs = len(variables.independent_variables)
         x, y = all_observations[:, :n_xs], all_observations[:, n_xs:]
         if y.shape[1] == 1:
             y = y.ravel()

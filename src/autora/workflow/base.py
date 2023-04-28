@@ -60,7 +60,6 @@ class BaseController(Generic[State]):
         return self
 
     def __next__(self):
-
         # Plan
         next_function_name = self.planner(self.state)
 

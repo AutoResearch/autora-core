@@ -46,7 +46,7 @@ class HistorySerializer(StateSerializer[History]):
             Union[None, ResultKind], _DumpSpec
         ] = {
             None: _DumpSpec("yaml", YAMLSerializer, "w+"),
-            ResultKind.METADATA: _DumpSpec("yaml", YAMLSerializer, "w+"),
+            ResultKind.VARIABLES: _DumpSpec("yaml", YAMLSerializer, "w+"),
             ResultKind.PARAMS: _DumpSpec("yaml", YAMLSerializer, "w+"),
             ResultKind.CONDITION: _DumpSpec("yaml", YAMLSerializer, "w+"),
             ResultKind.OBSERVATION: _DumpSpec("yaml", YAMLSerializer, "w+"),
@@ -91,12 +91,12 @@ class HistorySerializer(StateSerializer[History]):
 
             Each immutable part gets its own file.
             >>> from autora.variable import VariableCollection
-            >>> c = c.update(metadata=[VariableCollection()])
+            >>> c = c.update(variables=[VariableCollection()])
             >>> dump_and_list(c)
-            ['00000000-METADATA.yaml']
+            ['00000000-VARIABLES.yaml']
 
             The next step is to plan the first observations by defining experimental conditions.
-            Thes are appended as a Result with the correct metadata.
+            Thes are appended as a Result with the correct variables.
             >>> import numpy as np
             >>> x = np.linspace(-2, 2, 10).reshape(-1, 1) * np.pi
             >>> c = c.update(conditions=[x])
@@ -104,13 +104,13 @@ class HistorySerializer(StateSerializer[History]):
             If we dump and list again, we see that the new data are  included as a new file in
             the same directory.
             >>> dump_and_list(c)
-            ['00000000-METADATA.yaml', '00000001-CONDITION.yaml']
+            ['00000000-VARIABLES.yaml', '00000001-CONDITION.yaml']
 
             Then, once we've gathered real data, we dump these too:
             >>> y = 3. * x + 0.1 * np.sin(x - 0.1) - 2.
             >>> c = c.update(observations=[np.column_stack([x, y])])
             >>> dump_and_list(c)
-            ['00000000-METADATA.yaml', '00000001-CONDITION.yaml', '00000002-OBSERVATION.yaml']
+            ['00000000-VARIABLES.yaml', '00000001-CONDITION.yaml', '00000002-OBSERVATION.yaml']
 
             We can also include a theory in the dump.
             The theory is saved as a pickle file by default.
@@ -118,7 +118,7 @@ class HistorySerializer(StateSerializer[History]):
             >>> estimator = LinearRegression().fit(x, y)
             >>> c = c.update(theories=[estimator])
             >>> dump_and_list(c)  # doctest: +NORMALIZE_WHITESPACE
-            ['00000000-METADATA.yaml', '00000001-CONDITION.yaml', '00000002-OBSERVATION.yaml',
+            ['00000000-VARIABLES.yaml', '00000001-CONDITION.yaml', '00000002-OBSERVATION.yaml',
              '00000003-THEORY.pickle']
 
 
@@ -151,7 +151,7 @@ class HistorySerializer(StateSerializer[History]):
             >>> x = np.linspace(-2, 2, 10).reshape(-1, 1) * np.pi
             >>> y = 3. * x + 0.1 * np.sin(x - 0.1) - 2.
             >>> estimator = LinearRegression().fit(x, y)
-            >>> c = History(metadata=VariableCollection(), conditions=[x],
+            >>> c = History(variables=VariableCollection(), conditions=[x],
             ...     observations=[np.column_stack([x, y])], theories=[estimator])
 
             Now we can serialize the data using _dumper, and reload the data using _loader:

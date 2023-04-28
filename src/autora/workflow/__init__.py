@@ -14,7 +14,7 @@ Examples:
     The space of allowed x values is the integers between 0 and 10 inclusive,
     and we record the allowed output values as well.
     >>> from autora.variable import VariableCollection, Variable
-    >>> metadata_0 = VariableCollection(
+    >>> variables_0 = VariableCollection(
     ...    independent_variables=[Variable(name="x1", allowed_values=range(11))],
     ...    dependent_variables=[Variable(name="y", value_range=(-20, 20))],
     ...    )
@@ -23,7 +23,7 @@ Examples:
     Since the space of values is so restricted, we can just sample them all each time.
     >>> from autora.experimentalist.pipeline import make_pipeline
     >>> example_experimentalist = make_pipeline(
-    ...     [metadata_0.independent_variables[0].allowed_values])
+    ...     [variables_0.independent_variables[0].allowed_values])
 
     When we run a synthetic experiment, we get a reproducible noisy result:
     >>> import numpy as np
@@ -41,11 +41,11 @@ Examples:
     >>> from sklearn.linear_model import LinearRegression
     >>> example_theorist = LinearRegression()
 
-    We initialize the Controller with the metadata describing the domain of the theory,
+    We initialize the Controller with the variables describing the domain of the theory,
     the theorist, experimentalist and experiment runner,
     as well as a monitor which will let us know which cycle we're currently on.
     >>> cycle = Cycle(
-    ...     metadata=metadata_0,
+    ...     variables=variables_0,
     ...     theorist=example_theorist,
     ...     experimentalist=example_experimentalist,
     ...     experiment_runner=example_synthetic_experiment_runner,
@@ -155,7 +155,7 @@ Examples:
 
     The cycle can handle that using the `params` keyword:
     >>> cycle_with_parameters = Cycle(
-    ...     metadata=metadata_0,
+    ...     variables=variables_0,
     ...     theorist=example_theorist,
     ...     experimentalist=example_experimentalist_with_parameters,
     ...     experiment_runner=example_synthetic_experiment_runner,
@@ -199,7 +199,7 @@ Examples:
     experimentalist which excludes those conditions which have
     already been seen.
 
-    >>> metadata_1 = VariableCollection(
+    >>> variables_1 = VariableCollection(
     ...    independent_variables=[Variable(name="x1", allowed_values=range(10))],
     ...    dependent_variables=[Variable(name="y")],
     ...    )
@@ -211,13 +211,13 @@ Examples:
     ...     remaining_conditions = list(set(conditions) - set(excluded_conditions.flatten()))
     ...     return remaining_conditions
     >>> unobserved_data_experimentalist = make_pipeline([
-    ...     metadata_1.independent_variables[0].allowed_values,
+    ...     variables_1.independent_variables[0].allowed_values,
     ...     exclude_conditions,
     ...     custom_random_sampler
     ...     ]
     ... )
     >>> cycle_with_state_dep_properties = Cycle(
-    ...     metadata=metadata_1,
+    ...     variables=variables_1,
     ...     theorist=example_theorist,
     ...     experimentalist=unobserved_data_experimentalist,
     ...     experiment_runner=example_synthetic_experiment_runner,
@@ -287,7 +287,7 @@ Examples:
     ...     print(f"MONITOR: Generated new {state.history[-1].kind.value}")
     >>> cycle_with_last_result_planner = Controller(
     ...     monitor=monitor,
-    ...     metadata=metadata_0,
+    ...     variables=variables_0,
     ...     theorist=example_theorist,
     ...     experimentalist=example_experimentalist,
     ...     experiment_runner=example_synthetic_experiment_runner,
@@ -306,7 +306,7 @@ Examples:
     theorist:
     >>> controller_with_seed_observation = Controller(
     ...     monitor=monitor,
-    ...     metadata=metadata_0,
+    ...     variables=variables_0,
     ...     theorist=example_theorist,
     ...     experimentalist=example_experimentalist,
     ...     experiment_runner=example_synthetic_experiment_runner,
@@ -338,7 +338,7 @@ Examples:
     >>> controller_with_random_planner = Controller(
     ...     planner=random_operation_planner,
     ...     monitor=monitor,
-    ...     metadata=metadata_0,
+    ...     variables=variables_0,
     ...     theorist=example_theorist,
     ...     experimentalist=example_experimentalist,
     ...     experiment_runner=example_synthetic_experiment_runner,
@@ -413,7 +413,7 @@ Examples:
     >>> rng = np.random.default_rng(seed=180)
     >>> def experiment_runner(x):
     ...     return ground_truth(x) + rng.normal(0, 0.1)
-    >>> metadata_2 = VariableCollection(
+    >>> variables_2 = VariableCollection(
     ...    independent_variables=[Variable(name="x1", value_range=(-10, 10))],
     ...    dependent_variables=[Variable(name="y", value_range=(-100, 100))],
     ...    )
@@ -463,7 +463,7 @@ Examples:
 
     Wen can run the seed pipeline with no data:
     >>> experimentalist_which_needs_no_data = make_pipeline([
-    ...     np.linspace(*metadata_2.independent_variables[0].value_range, 1_000),
+    ...     np.linspace(*variables_2.independent_variables[0].value_range, 1_000),
     ...     partial(random_sampler, n=10)]
     ... )
     >>> np.array(experimentalist_which_needs_no_data())
@@ -474,7 +474,7 @@ Examples:
     ... whereas we need some model for this sampler:
     >>> from autora.experimentalist.sampler.model_disagreement import model_disagreement_sampler
     >>> experimentalist_which_needs_a_theory = Pipeline([
-    ...     ('pool', np.linspace(*metadata_2.independent_variables[0].value_range, 1_000)),
+    ...     ('pool', np.linspace(*variables_2.independent_variables[0].value_range, 1_000)),
     ...     ('sampler', partial(model_disagreement_sampler, num_samples=5)),])
     >>> experimentalist_which_needs_a_theory()
     Traceback (most recent call last):
@@ -488,7 +488,7 @@ Examples:
     >>> t = LinearRegression()
 
     Let's test the theorist for the ideal case – lots of data:
-    >>> X = np.linspace(*metadata_2.independent_variables[0].value_range, 1_000).reshape(-1, 1)
+    >>> X = np.linspace(*variables_2.independent_variables[0].value_range, 1_000).reshape(-1, 1)
     >>> tfitted = t.fit(X, experiment_runner(X))
     >>> f"m = {tfitted.coef_[0][0]:.2f}, c = {tfitted.intercept_[0]:.2f}"
     'm = 3.50, c = 1.04'
@@ -512,7 +512,7 @@ Examples:
     >>> from autora.workflow.base import BaseController
     >>> from autora.workflow.state import History
     >>> c = BaseController(
-    ...         state=History(metadata=metadata_2, params=params),
+    ...         state=History(variables=variables_2, params=params),
     ...         planner=seeding_planner,
     ...         executor_collection=executor_collection
     ... )

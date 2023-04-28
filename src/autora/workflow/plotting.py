@@ -31,12 +31,13 @@ def _get_variable_index(
 
     """
     l_iv = [
-        (i, s.name, s.units) for i, s in enumerate(state.metadata.independent_variables)
+        (i, s.name, s.units)
+        for i, s in enumerate(state.variables.independent_variables)
     ]
     n_iv = len(l_iv)
     l_dv = [
         (i + n_iv, s.name, s.units)
-        for i, s in enumerate(state.metadata.dependent_variables)
+        for i, s in enumerate(state.variables.dependent_variables)
     ]
     return l_iv, l_dv
 
@@ -72,7 +73,7 @@ def _min_max_observations(state: SupportsControllerState) -> List[Tuple[float, f
 
     """
     l_return = []
-    iv_index = range(len(state.metadata.independent_variables))
+    iv_index = range(len(state.variables.independent_variables))
     l_observations = state.observations
     # Get min and max of observation data
     # Min and max by cycle - All IVs
@@ -260,7 +261,7 @@ def plot_results_panel_2d(
         assert isinstance(d2, dict)
         d_kw[key] = _check_replace_default_kw(d1, d2)
 
-    # ---Extract IVs and DV metadata and indexes---
+    # ---Extract IVs and DV variables and indexes---
     ivs, dvs = _get_variable_index(state)
     if iv_name:
         iv = [s for s in ivs if s[1] == iv_name][0]
@@ -416,7 +417,7 @@ def plot_results_panel_3d(
         assert isinstance(d2, dict)
         d_kw[key] = _check_replace_default_kw(d1, d2)
 
-    # ---Extract IVs and DV metadata and indexes---
+    # ---Extract IVs and DV variables and indexes---
     ivs, dvs = _get_variable_index(state)
     if iv_names:
         iv = [s for s in ivs if s[1] == iv_names]
@@ -449,7 +450,6 @@ def plot_results_panel_3d(
     # Loop by panel
     for i, ax in enumerate(axs.flat):
         if i + 1 <= n_cycles:
-
             # ---Plot observed data---
             # Independent variable values
             l_x = [df_observed.loc[:, s[0]] for s in iv]

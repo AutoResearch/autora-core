@@ -4,10 +4,9 @@ from __future__ import annotations
 import logging
 from typing import Callable, Dict, Optional
 
-from sklearn.base import BaseEstimator
-
 from autora.experimentalist.pipeline import Pipeline
 from autora.variable import VariableCollection
+from sklearn.base import BaseEstimator
 
 from .base import BaseController
 from .executor import make_default_online_executor_collection
@@ -29,7 +28,7 @@ class Cycle(BaseController):
 
     def __init__(
         self,
-        metadata: VariableCollection,
+        variables: VariableCollection,
         theorist: Optional[BaseEstimator] = None,
         experimentalist: Optional[Pipeline] = None,
         experiment_runner: Optional[Callable] = None,
@@ -38,7 +37,7 @@ class Cycle(BaseController):
     ):
         """
         Args:
-            metadata: a description of the dependent and independent variables
+            variables: a description of the dependent and independent variables
             theorist: a scikit-learn-compatible estimator
             experimentalist: an autora.experimentalist.Pipeline
             experiment_runner: a function to map independent variables onto observed dependent
@@ -53,7 +52,7 @@ class Cycle(BaseController):
         if params is None:
             params = {}
         state = Snapshot(
-            metadata=metadata,
+            variables=variables,
             conditions=[],
             observations=[],
             theories=[],
@@ -103,7 +102,7 @@ class Cycle(BaseController):
         Examples:
             >>> from autora.workflow.cycle import Cycle
             >>> p = {"some": "params"}
-            >>> c = Cycle(metadata=None, theorist=None, experimentalist=None,
+            >>> c = Cycle(variables=None, theorist=None, experimentalist=None,
             ...                 experiment_runner=None, params=p)
             >>> c.params
             {'some': 'params'}
@@ -126,7 +125,7 @@ class Cycle(BaseController):
         Examples:
             >>> from autora.workflow.cycle import Cycle
             >>> from sklearn.linear_model import LinearRegression, PoissonRegressor
-            >>> c = Cycle(metadata=None, theorist=LinearRegression(), experimentalist=None,
+            >>> c = Cycle(variables=None, theorist=LinearRegression(), experimentalist=None,
             ...                 experiment_runner=None)
             >>> c.theorist
             LinearRegression()
@@ -151,7 +150,7 @@ class Cycle(BaseController):
         Examples:
             >>> from autora.workflow.cycle import Cycle
             >>> from autora.experimentalist.pipeline import Pipeline
-            >>> c = Cycle(metadata=None, theorist=None, experiment_runner=None,
+            >>> c = Cycle(variables=None, theorist=None, experiment_runner=None,
             ...                 experimentalist=Pipeline([("pool", [11,12,13])]))
             >>> c.experimentalist
             Pipeline(steps=[('pool', [11, 12, 13])], params={})
@@ -176,7 +175,7 @@ class Cycle(BaseController):
         Examples:
             >>> from autora.workflow.cycle import Cycle
             >>> def plus_one(x): return x + 1
-            >>> c = Cycle(metadata=None, theorist=None, experimentalist=None,
+            >>> c = Cycle(variables=None, theorist=None, experimentalist=None,
             ...                 experiment_runner=plus_one)
             >>> c.experiment_runner  # doctest: +ELLIPSIS
             <function plus_one at 0x...>

@@ -12,10 +12,9 @@ from typing import (
     runtime_checkable,
 )
 
+from autora.variable import VariableCollection
 from numpy.typing import ArrayLike
 from sklearn.base import BaseEstimator
-
-from autora.variable import VariableCollection
 
 State = TypeVar("State")
 
@@ -28,19 +27,19 @@ class ResultKind(str, Enum):
         >>> ResultKind.CONDITION is ResultKind.CONDITION
         True
 
-        >>> ResultKind.CONDITION is ResultKind.METADATA
+        >>> ResultKind.CONDITION is ResultKind.VARIABLES
         False
 
         >>> ResultKind.CONDITION == "CONDITION"
         True
 
-        >>> ResultKind.CONDITION == "METADATA"
+        >>> ResultKind.CONDITION == "VARIABLES"
         False
 
         >>> ResultKind.CONDITION in {ResultKind.CONDITION, ResultKind.PARAMS}
         True
 
-        >>> ResultKind.METADATA in {ResultKind.CONDITION, ResultKind.PARAMS}
+        >>> ResultKind.VARIABLES in {ResultKind.CONDITION, ResultKind.PARAMS}
         False
     """
 
@@ -48,7 +47,7 @@ class ResultKind(str, Enum):
     OBSERVATION = "OBSERVATION"
     THEORY = "THEORY"
     PARAMS = "PARAMS"
-    METADATA = "METADATA"
+    VARIABLES = "VARIABLES"
 
     def __repr__(self):
         cls_name = self.__class__.__name__
@@ -65,7 +64,7 @@ class SupportsDataKind(Protocol):
 class SupportsControllerStateFields(Protocol):
     """Support representing snapshots of a controller state as mutable fields."""
 
-    metadata: VariableCollection
+    variables: VariableCollection
     params: Dict
     conditions: Sequence[ArrayLike]
     observations: Sequence[ArrayLike]
@@ -82,7 +81,7 @@ class SupportsControllerStateProperties(Protocol):
         ...
 
     @property
-    def metadata(self) -> VariableCollection:
+    def variables(self) -> VariableCollection:
         ...
 
     @property

@@ -5,10 +5,9 @@ import logging
 import pathlib
 from typing import Callable, Dict, Optional
 
-from sklearn.base import BaseEstimator
-
 from autora.experimentalist.pipeline import Pipeline
 from autora.variable import VariableCollection
+from sklearn.base import BaseEstimator
 
 from .base import BaseController
 from .executor import make_online_executor_collection
@@ -36,7 +35,7 @@ class Controller(BaseController[History]):
 
     def __init__(
         self,
-        metadata: Optional[VariableCollection] = None,
+        variables: Optional[VariableCollection] = None,
         theorist: Optional[BaseEstimator] = None,
         experimentalist: Optional[Pipeline] = None,
         experiment_runner: Optional[Callable] = None,
@@ -46,7 +45,7 @@ class Controller(BaseController[History]):
     ):
         """
         Args:
-            metadata: a description of the dependent and independent variables
+            variables: a description of the dependent and independent variables
             theorist: a scikit-learn-compatible estimator
             experimentalist: an autora.experimentalist.Pipeline
             experiment_runner: a function to map independent variables onto observed dependent
@@ -64,7 +63,7 @@ class Controller(BaseController[History]):
         if params is None:
             params = {}
         state = History(
-            metadata=metadata,
+            variables=variables,
             conditions=[],
             observations=[],
             theories=[],

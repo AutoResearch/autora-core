@@ -2,13 +2,13 @@ import random
 
 import numpy as np
 import pytest
-from sklearn.linear_model import LinearRegression
-from sklearn.metrics import r2_score
-
 from autora.experimentalist.pipeline import Pipeline
 from autora.experimentalist.pooler.grid import grid_pool
 from autora.experimentalist.sampler.random_sampler import random_sampler
 from autora.variable import Variable, VariableCollection
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import r2_score
+
 from autora.workflow import Cycle
 from autora.workflow.plotting import (
     _check_replace_default_kw,
@@ -33,7 +33,7 @@ def state_lr(ground_truth_1x):
     random.seed(1)
 
     # Variable Metadata
-    study_metadata = VariableCollection(
+    study_variables = VariableCollection(
         independent_variables=[
             Variable(name="x1", allowed_values=np.linspace(0, 1, 100))
         ],
@@ -51,7 +51,7 @@ def state_lr(ground_truth_1x):
             ("transform", lambda x: [s[0] for s in x]),
         ],
         params={
-            "pool": {"ivs": study_metadata.independent_variables},
+            "pool": {"ivs": study_variables.independent_variables},
             "sampler": {"n": 5},
         },
     )
@@ -69,7 +69,7 @@ def state_lr(ground_truth_1x):
 
     # Initialize Cycle
     cycle = Cycle(
-        metadata=study_metadata,
+        variables=study_variables,
         theorist=lm,
         experimentalist=example_experimentalist,
         experiment_runner=example_synthetic_experiment_runner,
@@ -97,7 +97,7 @@ def cycle_multi_lr(ground_truth_2x):
     #     return X[:, 0] + (0.5 * X[:, 1]) + 1.0
 
     # Variable Metadata
-    study_metadata = VariableCollection(
+    study_variables = VariableCollection(
         independent_variables=[
             Variable(name="x1", allowed_values=np.linspace(0, 1, 10)),
             Variable(name="x2", allowed_values=np.linspace(0, 1, 10)),
@@ -116,7 +116,7 @@ def cycle_multi_lr(ground_truth_2x):
             ("transform", lambda x: np.array(x)),
         ],
         params={
-            "pool": {"ivs": study_metadata.independent_variables},
+            "pool": {"ivs": study_variables.independent_variables},
             "sampler": {"n": 10},
         },
     )
@@ -134,7 +134,7 @@ def cycle_multi_lr(ground_truth_2x):
 
     # Initialize Cycle
     cycle = Cycle(
-        metadata=study_metadata,
+        variables=study_variables,
         theorist=lm,
         experimentalist=example_experimentalist,
         experiment_runner=example_synthetic_experiment_runner,
@@ -262,7 +262,7 @@ def test_score_functions(state_lr, ground_truth_1x):
     """
     Tests the scoring functions cycle_default_score and cycle_specified_score.
     """
-    X_test = state_lr.metadata.independent_variables[0].allowed_values.reshape(-1, 1)
+    X_test = state_lr.variables.independent_variables[0].allowed_values.reshape(-1, 1)
     y_test = ground_truth_1x(X_test)
 
     scores_default = cycle_default_score(state_lr, X_test, y_test)
@@ -292,7 +292,7 @@ def test_cycle_score_plot(state_lr, ground_truth_1x):
     """
     Tests plotting functionality of test_cycle_score_plot with a 2D linear regression.
     """
-    X_test = state_lr.metadata.independent_variables[0].allowed_values.reshape(-1, 1)
+    X_test = state_lr.variables.independent_variables[0].allowed_values.reshape(-1, 1)
     y_test = ground_truth_1x(X_test)
     fig = plot_cycle_score(state_lr, X_test, y_test)
 
@@ -326,7 +326,7 @@ def test_cycle_score_plot_multi_lr(cycle_multi_lr, ground_truth_2x):
     """
     cycle_multi_lr.run(6)  # Run additional 6 times, total of 12 cycles
     X_test = np.array(
-        list(grid_pool(cycle_multi_lr.state.metadata.independent_variables))
+        list(grid_pool(cycle_multi_lr.state.variables.independent_variables))
     )
     y_test = ground_truth_2x(X_test)
     fig = plot_cycle_score(cycle_multi_lr.state, X_test, y_test)

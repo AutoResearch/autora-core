@@ -6,7 +6,6 @@ import logging
 from typing import Dict, Mapping
 
 import numpy as np
-
 from autora.utils.dictionary import LazyDict
 
 from ..protocol import SupportsControllerState
@@ -34,8 +33,8 @@ def _get_state_dependent_properties(state: SupportsControllerState):
 
     """
 
-    n_ivs = len(state.metadata.independent_variables)
-    n_dvs = len(state.metadata.dependent_variables)
+    n_ivs = len(state.variables.independent_variables)
+    n_dvs = len(state.variables.dependent_variables)
     state_dependent_property_dict = LazyDict(
         {
             "%observations.ivs[-1]%": lambda: np.array(state.observations[-1])[

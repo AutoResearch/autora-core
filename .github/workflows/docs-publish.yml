@@ -18,6 +18,6 @@ jobs:
           cache: 'pip'
 
       - name: Install dependencies
-        run: pip install ".[docs]"
+        run: pip install ".[dev]"
 
       - run: mkdocs gh-deploy --force

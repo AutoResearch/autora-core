@@ -380,7 +380,7 @@ class History(SupportsControllerStateHistory):
         Examples:
             >>> h = History(theories=['t1', 't2'], conditions=['c1', 'c2'],
             ...     observations=['o1', 'o2'], params={'a': 'param'},
-             ...    variables=VariableCollection(),
+            ...    variables=VariableCollection(),
             ...     history=[Result("from history", ResultKind.VARIABLES)])
 
             >>> h.filter_by(kind={"THEORY"})   # doctest: +NORMALIZE_WHITESPACE

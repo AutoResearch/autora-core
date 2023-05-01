@@ -23,7 +23,7 @@ dev = [
 ]
 
 [project.urls]
-homepage = "https://www.empiricalresearch.ai/"
+homepage = "http://www.empiricalresearch.ai/"
 repository = "https://github.com/AutoResearch/autora-workflow"
 documentation = "https://hollandjg.github.io/autora-workflow/"
 

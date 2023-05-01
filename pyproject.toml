@@ -60,7 +60,7 @@ module = ["matplotlib.*", "sklearn.*", "pandas.*", "numpy.*"]
 ignore_missing_imports=true
 
 [project.urls]
-homepage = "https://www.empiricalresearch.ai"
+homepage = "http://www.empiricalresearch.ai"
 repository = "https://github.com/AutoResearch/autora-theorist-template"
 documentation = "https://autoresearch.github.io/autora/"
 

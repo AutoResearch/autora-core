@@ -21,7 +21,7 @@ The `default-controller.yml` file looks like this:
 {% include-markdown "default-controller.yml" comments=false %}
 ```
 
-The same controller state can be loaded in a separate session as follows:
+The same Controller state can be loaded in a separate session as follows:
 
 ```python
 import yaml
@@ -32,10 +32,23 @@ with open("default-controller.yml", "r") as file:
 
 ## Executors
 
-A controller for real use always includes at least one (and usually more than one) executor. 
+A Controller for real use always includes at least one (and usually more than one) Executor. 
 These can likewise be saved.
 
-In this example, the controller includes an experimentalist, an experiment runner and a theorist.
+In this example, the Controller includes an experimentalist, an experiment runner and a theorist.
+
+We simulate a simple `experiment_runner` using a separate python file `lib.py`:
+
+```python
+{% include-markdown "lib.py" comments=false %}
+```
+
+!!! success
+    pyyaml saves functions by their name and where they are defined. 
+    By storing the function in a separate file and making it available on the project path, pyyaml can load the 
+    Controller with the function later.
+
+Now we can define the Controller and save it to file.
 
 ```python
 import autora.workflow
@@ -44,8 +57,10 @@ import yaml
 from autora.experimentalist.pipeline import make_pipeline
 from autora.experimentalist.sampler.random_sampler import random_sampler
 
+from lib import experiment_runner  # import the function from the "lib" file
+
 controller = autora.workflow.Controller(
-    experiment_runner=lambda x: x + 1,
+    experiment_runner=experiment_runner,
     experimentalist=make_pipeline([range(1000), random_sampler]),
     theorist=LinearRegression(),
     params={"experimentalist": {"random_sampler": {"n": 10}}}
@@ -54,13 +69,32 @@ with open("simple-controller.yml", "w") as file:
     yaml.dump(controller, file)
 ```
 
-## Saving functions defined in the current session
+`simple-controller.yml` looks like this:
+```yaml
+{% include-markdown "simple-controller.yml" comments=false %}
+```
 
-Functions defined in the current interactive session and `lambda` functions, will not be correctly saved by 
-`yaml.dump`. For example:
+Later, we can reload the same Controller, 
 
 ```python
 import yaml
+
+with open("default-controller.yml", "r") as file:
+    controller = yaml.load(file, Loader=yaml.Loader)
+```
+
+## Saving functions defined in the current session
+
+Functions defined in the current interactive session like lambda functions, will not be correctly saved by 
+`yaml.dump`. 
+
+If you need to use lambda functions or other functions defined interactively in a Controller, use an 
+alternative serializer like [`dill`](https://github.com/uqfoundation/dill).
+
+For example:
+
+```python
+import dill
 import autora.workflow
 
 def plus_one(x):
@@ -69,30 +103,22 @@ def plus_one(x):
 controller = autora.workflow.Controller(
     experiment_runner=plus_one,
 )
-with open("local-function-controller.yml", "w") as file:
-    yaml.dump(controller, file)
+with open("local-function-controller.dill", "wb") as file:
+    dill.dump(controller, file)
 ```
 
-The output file looks like this:
-```yaml
-{% include-markdown "local-function-controller.yml" comments=false %}
-```
+The `local-function-controller.dill` file is a binary file.
 
-If you need these, use an alternative serializer like [`dill`](https://github.com/uqfoundation/dill).
-
-
-The `simple-controller.dill` file is not human-readable.
-
-The configuration can be loaded as follows:
+The configuration can be re-loaded as follows:
 ```python
 import dill
 
-with open("simple-controller.dill", "rb") as file:
+with open("local-function-controller.dill", "rb") as file:
     controller = dill.load(file)
 ```
 
-
-
 ## Parameters
+
+
 
 ## History

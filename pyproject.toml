@@ -19,7 +19,11 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = [
-    "autora-core[dev]"
+    "autora-core[dev]",
+    "autora-workflow[docs]"
+]
+docs = [
+    "mkdocs-include-markdown-plugin"
 ]
 
 [project.urls]

@@ -1,0 +1,16 @@
+!!python/object:autora.workflow.controller.Controller
+executor_collection: !!python/object:autora.workflow.executor.ChainedFunctionMapping
+  data:
+    experiment_runner:
+    - !!python/name:autora.workflow.executor.from_experiment_runner ''
+    - null
+    experimentalist:
+    - !!python/name:autora.workflow.executor.from_experimentalist ''
+    - null
+    theorist:
+    - !!python/name:autora.workflow.executor.from_theorist ''
+    - null
+monitor: null
+planner: !!python/name:autora.workflow.planner.last_result_kind_planner ''
+state: !!python/object:autora.workflow.state.history.History
+  data: []

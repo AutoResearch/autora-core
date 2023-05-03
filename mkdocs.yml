@@ -13,7 +13,7 @@ nav:
     - 'interactive/passing-static-parameters.ipynb'
     - "interactive/accessing-state-dependent-properties.ipynb"
     - "interactive/using-alternative-planners-and-executors.ipynb"
-- Command line:
-    - "cli/using-workflow-with-cylc.md"
+    - "interactive/saving-and-loading/index.md"
+# - Command line:
 # TODO: - Use workflows in batch computing environments
 - Code Reference: reference/

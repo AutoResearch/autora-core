@@ -10,7 +10,12 @@ from autora.variable import VariableCollection
 from sklearn.base import BaseEstimator
 
 from .base import BaseController
-from .executor import make_online_executor_collection
+from .executor import (
+    ChainedFunctionMapping,
+    from_experiment_runner,
+    from_experimentalist,
+    from_theorist,
+)
 from .planner import last_result_kind_planner
 from .serializer import HistorySerializer
 from .state import History
@@ -68,24 +73,10 @@ class Controller(BaseController[History]):
             models=[],
         )
 
-        executor_collection = make_online_executor_collection(
-            [
-                (
-                    "experimentalist",
-                    "experimentalist",
-                    experimentalist,
-                ),
-                (
-                    "experiment_runner",
-                    "experiment_runner",
-                    experiment_runner,
-                ),
-                (
-                    "theorist",
-                    "theorist",
-                    theorist,
-                ),
-            ]
+        executor_collection = ChainedFunctionMapping(
+            experimentalist=[from_experimentalist, experimentalist],
+            experiment_runner=[from_experiment_runner, experiment_runner],
+            theorist=[from_theorist, theorist],
         )
 
         super().__init__(

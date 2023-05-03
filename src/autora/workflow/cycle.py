@@ -9,7 +9,7 @@ from autora.variable import VariableCollection
 from sklearn.base import BaseEstimator
 
 from .base import BaseController
-from .executor import make_default_online_executor_collection
+from .executor import full_cycle_wrapper
 from .planner import full_cycle_planner
 from .state import Snapshot
 
@@ -64,10 +64,10 @@ class Cycle(BaseController):
         self._experiment_runner_callable = experiment_runner
         self._theorist_estimator = theorist
 
-        executor_collection = make_default_online_executor_collection(
-            experimentalist_pipeline=self._experimentalist_pipeline,
-            experiment_runner_callable=self._experiment_runner_callable,
-            theorist_estimator=self._theorist_estimator,
+        executor_collection = _executor_collection_factory(
+            experimentalist=self._experimentalist_pipeline,
+            experiment_runner=self._experiment_runner_callable,
+            theorist=self._theorist_estimator,
         )
 
         super().__init__(
@@ -198,9 +198,19 @@ class Cycle(BaseController):
         self.executor_collection = self._updated_executor_collection()
 
     def _updated_executor_collection(self):
-        executor_collection = make_default_online_executor_collection(
-            experimentalist_pipeline=self._experimentalist_pipeline,
-            experiment_runner_callable=self._experiment_runner_callable,
-            theorist_estimator=self._theorist_estimator,
+        return _executor_collection_factory(
+            experimentalist=self._experimentalist_pipeline,
+            experiment_runner=self._experiment_runner_callable,
+            theorist=self._theorist_estimator,
         )
-        return executor_collection
+
+
+def _executor_collection_factory(experimentalist, experiment_runner, theorist):
+    executor_collection = {
+        "full_cycle": full_cycle_wrapper(
+            experimentalist_pipeline=experimentalist,
+            experiment_runner_callable=experiment_runner,
+            theorist_estimator=theorist,
+        )
+    }
+    return executor_collection

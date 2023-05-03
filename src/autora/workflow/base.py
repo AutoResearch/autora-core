@@ -43,8 +43,8 @@ class BaseController(Generic[State]):
             state: a fully instantiated controller state object compatible with the planner,
                 executor_collection and monitor
             planner: a function which maps from the state to the next ExecutorName
-            executor_collection: a mapping from the ExecutorName to a callable which can operate
-                on the state and return an updated state
+            executor_collection: a mapping from the ExecutorName to an experiment_runner
+                which can operate on the state and return an updated state
             monitor: a function which takes the state object as input
         """
 

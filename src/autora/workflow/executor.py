@@ -56,7 +56,7 @@ class ChainedFunctionMapping(collections.UserDict):
         return f
 
 
-def from_experimentalist(pipeline: Pipeline) -> Executor:
+def from_experimentalist_pipeline(pipeline: Pipeline) -> Executor:
     """Interface for running the experimentalist pipeline."""
 
     def _executor_experimentalist(state: SupportsControllerState, params: Dict):
@@ -90,13 +90,13 @@ def from_experimentalist(pipeline: Pipeline) -> Executor:
     return _executor_experimentalist
 
 
-def from_experiment_runner(experiment_runner: Callable) -> Executor:
+def from_experiment_runner_callable(callable: Callable) -> Executor:
     """Interface for running the experiment runner callable."""
 
     def _executor_experiment_runner(state: SupportsControllerState, params: Dict):
         params_ = resolve_state_params(params, state)
         x = state.conditions[-1]
-        output = experiment_runner(x, **params_)
+        output = callable(x, **params_)
 
         if isinstance(x, pd.DataFrame):
             new_observations = output
@@ -111,7 +111,7 @@ def from_experiment_runner(experiment_runner: Callable) -> Executor:
     return _executor_experiment_runner
 
 
-def from_theorist(estimator: BaseEstimator) -> Executor:
+def from_theorist_estimator(estimator: BaseEstimator) -> Executor:
     """Interface for running the theorist estimator given some State."""
 
     def _executor_theorist(state: SupportsControllerState, params: Dict):
@@ -167,17 +167,23 @@ def full_cycle_wrapper(
         state: SupportsControllerState, params: Dict
     ):  # TODO fix type
         experimentalist_params = params.get("experimentalist", {})
-        experimentalist_result = from_experimentalist(experimentalist_pipeline)(
-            state, experimentalist_params
+
+        experimentalist_executor = from_experimentalist_pipeline(
+            experimentalist_pipeline
         )
+        experimentalist_result = experimentalist_executor(state, experimentalist_params)
+
         experiment_runner_params = params.get("experiment_runner", {})
-        experiment_runner_result = from_experiment_runner(experiment_runner_callable)(
+        experiment_runner_executor = from_experiment_runner_callable(
+            experiment_runner_callable
+        )
+        experiment_runner_result = experiment_runner_executor(
             experimentalist_result, experiment_runner_params
         )
+
         theorist_params = params.get("theorist", {})
-        theorist_result = from_theorist(theorist_estimator)(
-            experiment_runner_result, theorist_params
-        )
+        theorist_executor = from_theorist_estimator(theorist_estimator)
+        theorist_result = theorist_executor(experiment_runner_result, theorist_params)
         return theorist_result
 
     return _executor_full_cycle

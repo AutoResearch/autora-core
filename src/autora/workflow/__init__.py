@@ -497,13 +497,15 @@ Examples:
 
     Now we can define the executor component. We'll use a factory method to generate the
     collection:
-    >>> from autora.workflow.executor import (ChainedFunctionMapping, from_experimentalist,
-    ...     from_experiment_runner, from_theorist)
+    >>> from autora.workflow.executor import (ChainedFunctionMapping, from_experimentalist_pipeline,
+    ...     from_experiment_runner_callable, from_theorist_estimator)
     >>> executor_collection = ChainedFunctionMapping(
-    ...     seed_experimentalist=[from_experimentalist, experimentalist_which_needs_no_data],
-    ...     main_experimentalist=[from_experimentalist, experimentalist_which_needs_a_model],
-    ...     experiment_runner=[from_experiment_runner, experiment_runner],
-    ...     theorist=[from_theorist, LinearRegression()],
+    ...     seed_experimentalist=
+    ...         [from_experimentalist_pipeline, experimentalist_which_needs_no_data],
+    ...     main_experimentalist=
+    ...         [from_experimentalist_pipeline, experimentalist_which_needs_a_model],
+    ...     experiment_runner=[from_experiment_runner_callable, experiment_runner],
+    ...     theorist=[from_theorist_estimator, LinearRegression()],
     ... )
 
     We need some special parameters to handle the main experimentalist, so we specify those:

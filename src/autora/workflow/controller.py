@@ -12,9 +12,9 @@ from sklearn.base import BaseEstimator
 from .base import BaseController
 from .executor import (
     ChainedFunctionMapping,
-    from_experiment_runner,
-    from_experimentalist,
-    from_theorist,
+    from_experiment_runner_callable,
+    from_experimentalist_pipeline,
+    from_theorist_estimator,
 )
 from .planner import last_result_kind_planner
 from .serializer import HistorySerializer
@@ -74,9 +74,9 @@ class Controller(BaseController[History]):
         )
 
         executor_collection = ChainedFunctionMapping(
-            experimentalist=[from_experimentalist, experimentalist],
-            experiment_runner=[from_experiment_runner, experiment_runner],
-            theorist=[from_theorist, theorist],
+            experimentalist=[from_experimentalist_pipeline, experimentalist],
+            experiment_runner=[from_experiment_runner_callable, experiment_runner],
+            theorist=[from_theorist_estimator, theorist],
         )
 
         super().__init__(

@@ -79,7 +79,7 @@ Later, we can reload the same Controller,
 ```python
 import yaml
 
-with open("default-controller.yml", "r") as file:
+with open("simple-controller.yml", "r") as file:
     controller = yaml.load(file, Loader=yaml.Loader)
 ```
 

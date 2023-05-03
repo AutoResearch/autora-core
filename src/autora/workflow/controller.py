@@ -60,14 +60,12 @@ class Controller(BaseController[History]):
                 is to map from the last result in the state's history to the next logical step.
         """
 
-        if params is None:
-            params = {}
         state = History(
             variables=variables,
+            params=params,
             conditions=[],
             observations=[],
             models=[],
-            params=params,
         )
 
         self._experimentalist_pipeline = experimentalist

@@ -1,4 +1,4 @@
-# Example of running the controller CLI under cylc
+# Running the controller CLI under cylc
 
 Requires a conda environment called `autora-cylc` with the following dependencies:
 - `autora` 3.0.0a0+

@@ -5,9 +5,12 @@ site_name: AutoRA Workflow
 
 nav:
 - Introduction: 'index.md'
-- 'basic-usage.ipynb'
-- 'passing-static-parameters.ipynb'
-- "accessing-state-dependent-properties.ipynb"
-- "using-alternative-planners-and-executors.ipynb"
+- Interactive:
+    - 'interactive/basic-usage.ipynb'
+    - 'interactive/passing-static-parameters.ipynb'
+    - "interactive/accessing-state-dependent-properties.ipynb"
+    - "interactive/using-alternative-planners-and-executors.ipynb"
+- Command line:
+    - "cli/using-workflow-with-cylc.md"
 # TODO: - Use workflows in batch computing environments
 - Code Reference: reference/

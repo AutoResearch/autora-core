@@ -1,0 +1,12 @@
+!!python/object:autora.workflow.controller.Controller
+_experiment_runner_callable: null
+_experimentalist_pipeline: null
+_theorist_estimator: null
+executor_collection:
+  experiment_runner: &id001 !!python/name:autora.workflow.executor.no_op ''
+  experimentalist: *id001
+  theorist: *id001
+monitor: null
+planner: !!python/name:autora.workflow.planner.last_result_kind_planner ''
+state: !!python/object:autora.workflow.state.history.History
+  _history: []

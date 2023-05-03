@@ -76,14 +76,14 @@ class History(SupportsControllerStateHistory):
                                     Result(data='m1', kind=ResultKind.MODEL),
                                     Result(data='m2', kind=ResultKind.MODEL)])
         """
-        self._history: List
+        self.data: List
 
         if history is not None:
-            self._history = list(history)
+            self.data = list(history)
         else:
-            self._history = []
+            self.data = []
 
-        self._history += _init_result_list(
+        self.data += _init_result_list(
             variables=variables,
             params=params,
             conditions=conditions,
@@ -219,7 +219,7 @@ class History(SupportsControllerStateHistory):
             observations=observations,
             models=models,
         )
-        new_full_history = self._history + history_extension
+        new_full_history = self.data + history_extension
 
         return History(history=new_full_history)
 
@@ -228,7 +228,7 @@ class History(SupportsControllerStateHistory):
 
     @property
     def _by_kind(self):
-        return _history_to_kind(self._history)
+        return _history_to_kind(self.data)
 
     @property
     def variables(self) -> VariableCollection:
@@ -371,7 +371,7 @@ class History(SupportsControllerStateHistory):
             [..., Result(data={'new': 'param'}, kind=ResultKind.PARAMS)]
 
         """
-        return self._history
+        return self.data
 
     def filter_by(self, kind: Optional[Set[Union[str, ResultKind]]] = None) -> History:
         """
@@ -408,7 +408,7 @@ class History(SupportsControllerStateHistory):
             return self
         else:
             kind_ = {ResultKind(s) for s in kind}
-            filtered_history = _filter_history(self._history, kind_)
+            filtered_history = _filter_history(self.data, kind_)
             new_object = History(history=filtered_history)
             return new_object
 

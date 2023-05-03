@@ -68,26 +68,22 @@ class Controller(BaseController[History]):
             models=[],
         )
 
-        self._experimentalist_pipeline = experimentalist
-        self._experiment_runner_callable = experiment_runner
-        self._theorist_estimator = theorist
-
         executor_collection = make_online_executor_collection(
             [
                 (
                     "experimentalist",
                     "experimentalist",
-                    self._experimentalist_pipeline,
+                    experimentalist,
                 ),
                 (
                     "experiment_runner",
                     "experiment_runner",
-                    self._experiment_runner_callable,
+                    experiment_runner,
                 ),
                 (
                     "theorist",
                     "theorist",
-                    self._theorist_estimator,
+                    theorist,
                 ),
             ]
         )

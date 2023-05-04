@@ -21,17 +21,13 @@ def main(
     verbose: bool = typer.Option(False, help="Turns on info logging level."),
     debug: bool = typer.Option(False, help="Turns on debug logging level."),
 ):
-    _logger.debug("initializing")
+    _logger.info("initializing")
     _configure_logger(debug, verbose)
     controller_ = _load_manager(input_path)
 
-    if step_name is not None:
-        controller_ = _set_next_step_name(controller_, step_name)
+    controller_ = controller_.run_once(step_name=step_name)
 
-    _logger.info("running next step")
-    next(controller_)
-
-    _logger.debug(f"last result: {controller_.state.history[-1]}")
+    _logger.info(f"last result: {controller_.state.history[-1]}")
 
     _logger.info("writing out results")
     _dump_manager(controller_, output_path)
@@ -59,12 +55,6 @@ def _dump_manager(controller_: Any, path: pathlib.Path) -> None:
     _logger.debug(f"_dump_manager: dumping to {path=}")
     with open(path, "wb") as f:
         dill.dump(controller_, f)
-
-
-def _set_next_step_name(controller: Controller, step_name: str):
-    _logger.info(f"setting next {step_name=}")
-    controller.planner = lambda _: step_name
-    return controller
 
 
 if __name__ == "__main__":

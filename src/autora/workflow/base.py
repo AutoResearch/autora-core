@@ -53,31 +53,41 @@ class BaseController(Generic[State]):
         self.executor_collection = executor_collection
         self.monitor = monitor
 
-    def run(self, num_steps: int = 1):
-        """Execute the next step in the cycle."""
-        for i in range(num_steps):
-            next(self)
-        return self
+    def run_once(self, step_name: Optional[str] = None):
+        """Run one step in the workflow, either by name or using the planner (default)."""
 
-    def __next__(self):
         # Plan
-        next_function_name = self.planner(self.state)
+        if step_name is None:
+            step_name = self.planner(self.state)
 
         # Map
-        next_function = self.executor_collection[next_function_name]
-        next_params = self.state.params.get(next_function_name, {})
+        _logger.info(f"getting {step_name=}")
+        next_function = self.executor_collection[step_name]
+        _logger.info(f"running {next_function=}")
+        next_params = self.state.params.get(step_name, {})
+        _logger.debug(f"{next_params=}")
 
         # Execute
         result = next_function(self.state, params=next_params)
+        _logger.debug(f"{result=}")
 
         # Update
+        _logger.debug(f"updating state")
         self.state = result
 
-        # Monitor
         if self.monitor is not None:
             self.monitor(self.state)
-
         return self
+
+    def run(self, num_steps: int = 1):
+        """Run the next num_steps planned steps in the workflow."""
+        for i in range(num_steps):
+            self.run_once(self)
+        return self
+
+    def __next__(self):
+        """Run the next planned step in the workflow."""
+        return self.run_once()
 
     def __iter__(self):
         return self

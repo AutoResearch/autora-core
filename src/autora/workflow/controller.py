@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import logging
-import pathlib
 from typing import Callable, Dict, Optional
 
 from autora.experimentalist.pipeline import Pipeline
@@ -17,7 +16,6 @@ from .executor import (
     from_theorist_estimator,
 )
 from .planner import last_result_kind_planner
-from .serializer import HistorySerializer
 from .state import History
 
 _logger = logging.getLogger(__name__)
@@ -89,14 +87,3 @@ class Controller(BaseController[History]):
     def seed(self, **kwargs):
         for key, value in kwargs.items():
             self.state = self.state.update(**{key: value})
-
-    def load(self, directory: pathlib.Path):
-        serializer = HistorySerializer(directory)
-        state = serializer.load()
-        self.state = state
-        return
-
-    def dump(self, directory: pathlib.Path):
-        serializer = HistorySerializer(directory)
-        serializer.dump(self.state)
-        return

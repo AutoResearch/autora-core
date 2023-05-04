@@ -20,15 +20,18 @@ experimentalist = make_experimentalist_pipeline(
     },
 )
 
+coefs = [2.0, 3.0, 1.0]
+noise_std = 10.0
 
-def experiment_runner(x, coefs=[2.0, 3.0, 1.0], noise_std=0.1, rng=rng):
+
+def experiment_runner(x, coefs_=coefs, noise_std_=noise_std, rng=rng):
     """Simple experiment."""
     x_ = np.array(x)  # assume we've got an array already
     y_ = (
-        coefs[0] * x_**2.0
-        + coefs[1] * x_
-        + coefs[2]
-        + rng.normal(0.0, noise_std, size=x_.shape)
+        coefs_[0] * x_**2.0
+        + coefs_[1] * x_
+        + coefs_[2]
+        + rng.normal(0.0, noise_std_, size=x_.shape)
     )
     return y_
 

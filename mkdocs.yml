@@ -3,9 +3,6 @@ INHERIT: mkdocs/base.yml  # use the shared AutoRA configuration by default
 
 site_name: AutoRA Workflow
 
-plugins:
-  include-markdown: {}
-
 nav:
 - Introduction: 'index.md'
 - Interactive:
@@ -14,6 +11,6 @@ nav:
     - "interactive/accessing-state-dependent-properties.ipynb"
     - "interactive/using-alternative-planners-and-executors.ipynb"
     - "interactive/saving-and-loading-dill.ipynb"
-# - Command line:
-# TODO: - Use workflows in batch computing environments
-- Code Reference: reference/
+- Command line:
+    - "cli/basic-usage/example.ipynb"
+

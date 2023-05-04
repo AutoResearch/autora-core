@@ -1,0 +1,42 @@
+[runtime]
+    [[setup]]
+        script = """
+            cp $CYLC_WORKFLOW_RUN_DIR/controller.dill $CYLC_WORKFLOW_SHARE_DIR;
+            conda create -p $CYLC_WORKFLOW_SHARE_DIR/env --clone autora-cylc
+        """
+    [[experimentalist]]
+        script = """
+            $CYLC_WORKFLOW_SHARE_DIR/env/bin/python -m autora.workflow \
+                "$CYLC_WORKFLOW_SHARE_DIR/controller.dill" \
+                "$CYLC_WORKFLOW_SHARE_DIR/controller.dill" \
+                experimentalist \
+                --debug
+        """
+    [[experiment_runner]]
+        script = """
+            $CYLC_WORKFLOW_SHARE_DIR/env/bin/python -m autora.workflow \
+                "$CYLC_WORKFLOW_SHARE_DIR/controller.dill" \
+                "$CYLC_WORKFLOW_SHARE_DIR/controller.dill" \
+                experiment_runner \
+                --debug
+        """
+    [[theorist]]
+        script = """
+            $CYLC_WORKFLOW_SHARE_DIR/env/bin/python -m autora.workflow \
+                "$CYLC_WORKFLOW_SHARE_DIR/controller.dill" \
+                "$CYLC_WORKFLOW_SHARE_DIR/controller.dill" \
+                theorist \
+                --debug
+        """
+
+[scheduling]
+    cycling mode = integer
+    initial cycle point = 1
+    [[graph]]
+        R1 = """
+        setup => experimentalist
+        """
+        P1 = """
+            experimentalist => experiment_runner => theorist
+            theorist[-P1] => experimentalist
+        """

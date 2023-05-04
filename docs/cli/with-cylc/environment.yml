@@ -4,4 +4,4 @@ channels:
   - defaults
 dependencies:
   - cylc-flow
-  - autora=3.0.0a0
+  - autora=3.0.0a7

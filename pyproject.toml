@@ -11,17 +11,14 @@ license = { text = "MIT License" }
 
 dependencies = [
     "autora-core",
-    "typer",
-    "rich",
-    "shellingham",
-    "pyyaml"
+    "typer[all]",
+    "dill",
 ]
 
 [project.optional-dependencies]
 dev = [
     "autora-core[dev]",
     "autora-workflow[docs]",
-    "dill"
 ]
 docs = [
     "mkdocs-include-markdown-plugin",

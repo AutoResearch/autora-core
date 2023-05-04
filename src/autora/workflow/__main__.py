@@ -1,5 +1,6 @@
 import logging
 import pathlib
+import pickle
 from typing import Any, Optional
 
 import dill
@@ -50,15 +51,29 @@ def _configure_logger(debug, verbose):
 
 def _load_manager(path: pathlib.Path) -> Controller:
     _logger.debug(f"_load_manager: loading from {path=}")
-    with open(path, "rb") as f:
-        controller_ = dill.load(f)
+    if path.suffix == ".pkl":
+        with open(path, "rb") as f:
+            controller_ = pickle.load(f)
+    elif path.suffix == ".dill":
+        with open(path, "rb") as f:
+            controller_ = dill.load(f)
+    else:
+        raise NotImplementedError(f"{path.suffix=} cannot be loaded")
     return controller_
 
 
 def _dump_manager(controller_: Any, path: pathlib.Path) -> None:
     _logger.debug(f"_dump_manager: dumping to {path=}")
-    with open(path, "wb") as f:
-        dill.dump(controller_, f)
+
+    if path.suffix == ".pkl":
+        with open(path, "wb") as f:
+            pickle.dump(controller_, f)
+    elif path.suffix == ".dill":
+        with open(path, "wb") as f:
+            dill.dump(controller_, f)
+    else:
+        raise NotImplementedError(f"{path.suffix=} cannot be dumped")
+    return
 
 
 def _set_next_step_name(controller: Controller, step_name: str):

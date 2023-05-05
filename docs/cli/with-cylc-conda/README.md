@@ -5,6 +5,7 @@ The command line interface can be used with workflow managers like cylc and cond
 ## Prerequisites
 
 This example requires a conda environment called `autora-cylc` with the following dependencies:
+
 - `autora` 3+
 - `cylc-flow`
 

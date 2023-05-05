@@ -1,11 +1,12 @@
 # Usage with Cylc workflow manager and Slurm
 
-The command line interface can be used with workflow managers like cylc in virtualenv environments.
+The command line interface can be used with cylc in environments which use a scheduler like slurm.
 
 ## Prerequisites
 
 This example requires:
 
+- `slurm`, e.g. on a high performance computing cluster.
 - `cylc`
 - `virtualenv`
 - `python` (so you can run `virtualenv venv -p python`)

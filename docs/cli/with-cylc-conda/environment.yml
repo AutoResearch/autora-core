@@ -1,7 +1,10 @@
+name: autora-cylc
 channels:
   - conda-forge
   - autoresearch
   - defaults
 dependencies:
   - cylc-flow
-  - autora=3.0.0a7
+  - autora=3.0.0
+  - ipykernel
+  - jupyter

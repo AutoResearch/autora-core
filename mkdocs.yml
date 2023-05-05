@@ -12,7 +12,8 @@ nav:
     - "interactive/using-alternative-planners-and-executors.ipynb"
     - "interactive/saving-and-loading-dill.ipynb"
 - Command line:
-    - "Basic Usage": "cli/basic-usage/index.ipynb"
-    - "With Cylc, Virtualenv and Pip": "cli/with-cylc-pip/index.md"
-    - "With Cylc and Conda": "cli/with-cylc-conda/index.md"
+    - "Basic Usage": "cli/basic-usage/README.ipynb"
+    - "With Cylc, Virtualenv and Pip": "cli/with-cylc-pip/README.md"
+    - "With Cylc and Conda": "cli/with-cylc-conda/README.md"
+    - "With Cylc and Slurm": "cli/with-cylc-slurm/README.md"
 

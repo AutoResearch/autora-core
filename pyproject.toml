@@ -23,6 +23,10 @@ dev = [
 docs = [
     "mkdocs-include-markdown-plugin",
 ]
+cylc = [
+    "cylc-flow",
+    "cylc-uiserver"
+]
 
 [project.urls]
 homepage = "http://www.empiricalresearch.ai/"

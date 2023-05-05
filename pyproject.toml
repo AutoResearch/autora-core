@@ -6,7 +6,7 @@ authors = [
 ]
 dynamic = ["version"]
 
-readme = "README.md"
+readme = "docs/index.md"
 license = { text = "MIT License" }
 
 dependencies = [

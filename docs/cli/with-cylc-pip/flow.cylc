@@ -22,7 +22,7 @@
     [[initialize_controller]]
     script = """
             $CYLC_WORKFLOW_SHARE_DIR/env/bin/python \
-                -m initialize \
+                -m dump_initial_controller \
                 "$CYLC_WORKFLOW_SHARE_DIR/controller.dill"
         """
     [[experimentalist]]

@@ -17,8 +17,8 @@ A new environment will be created during the setup phase of the `cylc` workflow 
 To initialize the workflow, we define a file with the code for the experiment, this time in the
 `lib/python` directory [(a cylc convention)](https://cylc.github.io/cylc-doc/stable/html/user-guide/writing-workflows/configuration.html#workflow-configuration-directories):
 
-```python title="lib/python/func0.py"
---8<-- "docs/cli/with-cylc-pip/lib/python/func0.py"
+```python title="lib/python/controller_setup.py"
+--8<-- "docs/cli/with-cylc-pip/lib/python/controller_setup.py"
 ```
 
 The first step in the workflow will be to:
@@ -28,8 +28,8 @@ The first step in the workflow will be to:
 
 This is handled by the initialization.py file:
 
-```python title="lib/python/initialize.py"
---8<-- "docs/cli/with-cylc-pip/lib/python/initialize.py"
+```python title="lib/python/dump_initial_controller.py"
+--8<-- "docs/cli/with-cylc-pip/lib/python/dump_initial_controller.py"
 ```
 
 The `flow.cylc` file defines the workflow:
@@ -74,7 +74,7 @@ import dill
 import numpy as np
 from matplotlib import pyplot as plt
 
-from func0 import experiment_runner as ground_truth, noise_std
+from controller_setup import experiment_runner as ground_truth, noise_std
 
 def plot_results(controller_):
     last_model = controller_.state.filter_by(kind={"MODEL"}).history[-1].data

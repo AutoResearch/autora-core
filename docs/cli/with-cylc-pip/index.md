@@ -1,19 +1,15 @@
 # Usage with Cylc workflow manager and conda
 
-The command line interface can be used with workflow managers like cylc and conda environments.
+The command line interface can be used with workflow managers like cylc in virtualenv environments.
 
 ## Prerequisites
 
-This example requires a conda environment called `autora-cylc` with the following dependencies:
-- `autora` 3+
-- `cylc-flow`
+This example requires 
+- `cylc`,
+- `virtualenv`,
+- `python3.10` (so you can run `virtualenv venv -p python3.10`),
 
-The conda environment will be cloned during the setup phase of the `cylc` workflow run.
-
-You can initialize the conda environment using the included environment.yml file.
-```shell
-conda env create -f environment.yml
-```
+A new environment will be created during the setup phase of the `cylc` workflow run.
 
 ## Workflow
 

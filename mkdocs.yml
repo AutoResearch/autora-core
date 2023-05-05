@@ -12,5 +12,6 @@ nav:
     - "interactive/using-alternative-planners-and-executors.ipynb"
     - "interactive/saving-and-loading-dill.ipynb"
 - Command line:
-    - "cli/basic-usage/example.ipynb"
+    - "Basic Usage": "cli/basic-usage/index.ipynb"
+    - "With Cylc and Conda": "cli/with-cylc-conda/index.ipynb"
 

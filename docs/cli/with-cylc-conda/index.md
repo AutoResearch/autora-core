@@ -30,21 +30,12 @@ To initialize the workflow, we again define a file with the code for the experim
 --8<-- "docs/cli/with-cylc-conda/lib/python/func0.py"
 ```
 
-In a new interactive python session, we add the `lib/python` directory to the current path, so that we can import from 
-the `func0` module:
-```python
-import sys, os
-sys.path.append(os.path.abspath('lib/python'))
-```
-
-Then, before we start the experiment, we
+The first step in the workflow will be to:
 - load the controller from the file
-- save its state to a `.dill` file.
-```python
-import dill
-from func0 import controller
-with open("controller.dill", "wb") as file:
-    dill.dump(controller, file)
+- save its state to a `.dill` file in the share directory.
+
+```python title="lib/python/initialize.py"
+--8<-- "docs/cli/with-cylc-conda/lib/python/initialize.py"
 ```
 
 The `flow.cylc` file defines the workflow:
@@ -52,7 +43,7 @@ The `flow.cylc` file defines the workflow:
 --8<-- "docs/cli/with-cylc-conda/flow.cylc"
 ```
 
-We can call the `cylc` command line interface as follows, in a new shell session (_not in the python session_).
+We can call the `cylc` command line interface as follows, in a shell session:
 
 First, we validate the `flow.cylc` file:
 ```shell

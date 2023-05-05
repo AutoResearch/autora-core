@@ -1,8 +1,13 @@
 [runtime]
-    [[setup]]
+    [[setup_python]]
         script = """
-            cp $CYLC_WORKFLOW_RUN_DIR/controller.dill $CYLC_WORKFLOW_SHARE_DIR;
             conda create -p $CYLC_WORKFLOW_SHARE_DIR/env --clone autora-cylc
+        """
+    [[initialize_controller]]
+    script = """
+            $CYLC_WORKFLOW_SHARE_DIR/env/bin/python \
+                -m initialize \
+                $CYLC_WORKFLOW_SHARE_DIR/controller.dill
         """
     [[experimentalist]]
         script = """
@@ -35,7 +40,7 @@
     final cycle point = 3
     [[graph]]
         R1 = """
-        setup => experimentalist
+        setup_python => initialize_controller => experimentalist
         """
         P1 = """
             experimentalist => experiment_runner => theorist

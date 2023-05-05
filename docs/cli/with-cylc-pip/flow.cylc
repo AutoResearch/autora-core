@@ -1,3 +1,16 @@
+[scheduling]
+    cycling mode = integer
+    initial cycle point = 1
+    final cycle point = 3
+    [[graph]]
+        R1 = """
+        setup_python => initialize_controller => experimentalist
+        """
+        P1 = """
+            experimentalist => experiment_runner => theorist
+            theorist[-P1] => experimentalist
+        """
+
 [runtime]
     [[setup_python]]
         script = """
@@ -37,15 +50,4 @@
                 --debug
         """
 
-[scheduling]
-    cycling mode = integer
-    initial cycle point = 1
-    final cycle point = 3
-    [[graph]]
-        R1 = """
-        setup_python => initialize_controller => experimentalist
-        """
-        P1 = """
-            experimentalist => experiment_runner => theorist
-            theorist[-P1] => experimentalist
-        """
+

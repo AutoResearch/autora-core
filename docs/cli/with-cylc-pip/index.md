@@ -4,16 +4,17 @@ The command line interface can be used with workflow managers like cylc in virtu
 
 ## Prerequisites
 
-This example requires 
-- `cylc`,
-- `virtualenv`,
-- `python3.10` (so you can run `virtualenv venv -p python3.10`),
+This example requires:
+
+- `cylc`
+- `virtualenv`
+- `python3.10` (so you can run `virtualenv venv -p python3.10`)
 
 A new environment will be created during the setup phase of the `cylc` workflow run.
 
 ## Workflow
 
-To initialize the workflow, we again define a file with the code for the experiment, this time in the
+To initialize the workflow, we define a file with the code for the experiment, this time in the
 `lib/python` directory [(a cylc convention)](https://cylc.github.io/cylc-doc/stable/html/user-guide/writing-workflows/configuration.html#workflow-configuration-directories):
 
 ```python title="lib/python/func0.py"
@@ -21,8 +22,11 @@ To initialize the workflow, we again define a file with the code for the experim
 ```
 
 The first step in the workflow will be to:
+
 - load the controller from the file
 - save its state to a `.dill` file in the share directory.
+
+This is handled by the initialization.py file:
 
 ```python title="lib/python/initialize.py"
 --8<-- "docs/cli/with-cylc-conda/lib/python/initialize.py"

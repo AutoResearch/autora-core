@@ -30,24 +30,21 @@
             $CYLC_WORKFLOW_SHARE_DIR/env/bin/python -m autora.workflow \
                 "$CYLC_WORKFLOW_SHARE_DIR/controller.dill" \
                 "$CYLC_WORKFLOW_SHARE_DIR/controller.dill" \
-                experimentalist \
-                --debug
+                experimentalist
         """
     [[experiment_runner]]
         script = """
             $CYLC_WORKFLOW_SHARE_DIR/env/bin/python -m autora.workflow \
                 "$CYLC_WORKFLOW_SHARE_DIR/controller.dill" \
                 "$CYLC_WORKFLOW_SHARE_DIR/controller.dill" \
-                experiment_runner \
-                --debug
+                experiment_runner
         """
     [[theorist]]
         script = """
             $CYLC_WORKFLOW_SHARE_DIR/env/bin/python -m autora.workflow \
                 "$CYLC_WORKFLOW_SHARE_DIR/controller.dill" \
                 "$CYLC_WORKFLOW_SHARE_DIR/controller.dill" \
-                theorist \
-                --debug
+                theorist
         """
 
 

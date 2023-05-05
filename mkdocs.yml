@@ -13,5 +13,6 @@ nav:
     - "interactive/saving-and-loading-dill.ipynb"
 - Command line:
     - "Basic Usage": "cli/basic-usage/index.ipynb"
+    - "With Cylc, Virtualenv and Pip": "cli/with-cylc-pip/index.md"
     - "With Cylc and Conda": "cli/with-cylc-conda/index.md"
 

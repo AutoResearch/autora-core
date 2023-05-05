@@ -8,7 +8,7 @@ This example requires:
 
 - `cylc`
 - `virtualenv`
-- `python3.10` (so you can run `virtualenv venv -p python3.10`)
+- `python` (so you can run `virtualenv venv -p python`)
 
 A new environment will be created during the setup phase of the `cylc` workflow run.
 
@@ -18,7 +18,7 @@ To initialize the workflow, we define a file with the code for the experiment, t
 `lib/python` directory [(a cylc convention)](https://cylc.github.io/cylc-doc/stable/html/user-guide/writing-workflows/configuration.html#workflow-configuration-directories):
 
 ```python title="lib/python/func0.py"
---8<-- "docs/cli/with-cylc-pip/lib/python/func0.py"
+--8<-- "docs/cli/with-cylc-slurm/lib/python/func0.py"
 ```
 
 The first step in the workflow will be to:
@@ -29,12 +29,12 @@ The first step in the workflow will be to:
 This is handled by the initialization.py file:
 
 ```python title="lib/python/initialize.py"
---8<-- "docs/cli/with-cylc-pip/lib/python/initialize.py"
+--8<-- "docs/cli/with-cylc-slurm/lib/python/initialize.py"
 ```
 
 The `flow.cylc` file defines the workflow:
 ```  title="flow.cylc"
---8<-- "docs/cli/with-cylc-pip/flow.cylc"
+--8<-- "docs/cli/with-cylc-slurm/flow.cylc"
 ```
 
 We can call the `cylc` command line interface as follows, in a shell session:
@@ -51,7 +51,7 @@ cylc install .
 
 We tell cylc to play the workflow:
 ```shell
-cylc play "with-cylc-pip"
+cylc play "with-cylc-slurm"
 ```
 
 (As a shortcut for "validate, install and play", use `cylc vip .`)
@@ -63,7 +63,7 @@ cylc gui
 
 ... or the text user interface (TUI):
 ```shell
-cylc tui "with-cylc-pip"
+cylc tui "with-cylc-slurm"
 ```
 
 We can load and interrogate the resulting object as follows:
@@ -92,7 +92,7 @@ def plot_results(controller_):
         plt.scatter(xi, yi, label=f"observation {i=}")
     plt.legend()
 
-with open(os.path.expanduser("~/cylc-run/with-cylc-pip/runN/share/controller.dill"),"rb") as file:
+with open(os.path.expanduser("~/cylc-run/with-cylc-slurm/runN/share/controller.dill"),"rb") as file:
     controller_result = dill.load(file)
 
 plot_results(controller_result)

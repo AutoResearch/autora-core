@@ -1,9 +1,10 @@
 [scheduling]
     cycling mode = integer
     initial cycle point = 1
+    final cycle point = 3
     [[graph]]
         R1 = """
-        setup => experimentalist
+        setup_python => initialize_controller => experimentalist
         """
         P1 = """
             experimentalist => experiment_runner => theorist
@@ -11,19 +12,53 @@
         """
 
 [runtime]
-    [[setup]]
+    [[setup_python]]
         script = """
-            cp $CYLC_WORKFLOW_RUN_DIR/controller.yml $CYLC_WORKFLOW_SHARE_DIR;
-            cp -R $CYLC_WORKFLOW_RUN_DIR/history $CYLC_WORKFLOW_SHARE_DIR/history
-            conda create -p $CYLC_WORKFLOW_SHARE_DIR/env --clone /users/jholla10/anaconda/autora-cylc
+            module load python/3.9.0
+            virtualenv "$CYLC_WORKFLOW_SHARE_DIR/env" -p python3.9
+            source "$CYLC_WORKFLOW_SHARE_DIR/env/bin/activate"
+            pip install --upgrade pip
+            pip install -r "$CYLC_WORKFLOW_RUN_DIR/requirements.txt"
         """
+        platform = oscar
+    
+    [[initialize_controller]]
+        script = """
+            module load python/3.9.0
+            $CYLC_WORKFLOW_SHARE_DIR/env/bin/python \
+                -m initialize \
+                "$CYLC_WORKFLOW_SHARE_DIR/controller.dill"
+        """
+        platform = oscar
+    
     [[experimentalist]]
-        script = $CYLC_WORKFLOW_SHARE_DIR/env/bin/python -m autora.controller "$CYLC_WORKFLOW_SHARE_DIR/controller.yml" "$CYLC_WORKFLOW_SHARE_DIR/history/." --step-name=experimentalist --verbose --debug
+        script = """
+            module load python/3.9.0
+            $CYLC_WORKFLOW_SHARE_DIR/env/bin/python -m autora.workflow \
+                "$CYLC_WORKFLOW_SHARE_DIR/controller.dill" \
+                "$CYLC_WORKFLOW_SHARE_DIR/controller.dill" \
+                experimentalist
+        """
         platform = oscar
+    
     [[experiment_runner]]
-        script = /$CYLC_WORKFLOW_SHARE_DIR/env/bin/python -m autora.controller "$CYLC_WORKFLOW_SHARE_DIR/controller.yml" "$CYLC_WORKFLOW_SHARE_DIR/history/." --step-name=experiment_runner --verbose --debug
+        script = """
+            module load python/3.9.0
+            $CYLC_WORKFLOW_SHARE_DIR/env/bin/python -m autora.workflow \
+                "$CYLC_WORKFLOW_SHARE_DIR/controller.dill" \
+                "$CYLC_WORKFLOW_SHARE_DIR/controller.dill" \
+                experiment_runner
+        """
         platform = oscar
+    
     [[theorist]]
-        script = $CYLC_WORKFLOW_SHARE_DIR/env/bin/python -m autora.controller "$CYLC_WORKFLOW_SHARE_DIR/controller.yml" "$CYLC_WORKFLOW_SHARE_DIR/history/." --step-name=theorist --verbose --debug
+        script = """
+            module load python/3.9.0
+            $CYLC_WORKFLOW_SHARE_DIR/env/bin/python -m autora.workflow \
+                "$CYLC_WORKFLOW_SHARE_DIR/controller.dill" \
+                "$CYLC_WORKFLOW_SHARE_DIR/controller.dill" \
+                theorist
+        """
         platform = oscar
+
 

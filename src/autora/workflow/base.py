@@ -82,7 +82,7 @@ class BaseController(Generic[State]):
     def run(self, num_steps: int = 1):
         """Run the next num_steps planned steps in the workflow."""
         for i in range(num_steps):
-            self.run_once(self)
+            self.run_once()
         return self
 
     def __next__(self):

@@ -61,7 +61,7 @@ ignore_missing_imports=true
 
 [project.urls]
 homepage = "http://www.empiricalresearch.ai"
-repository = "https://github.com/AutoResearch/autora-theorist-template"
+repository = "https://github.com/AutoResearch/autora-core"
 documentation = "https://autoresearch.github.io/autora/"
 
 

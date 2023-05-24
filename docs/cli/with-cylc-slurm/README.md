@@ -37,7 +37,7 @@ The first step in the workflow will be to:
 This is handled by the initialization.py file:
 
 ```python title="lib/python/dump_initial_controller.py"
---8<-- "docs/cli/with-cylc-slurm/lib/python/dump_initial_controller.py"
+--8<-- "temp_dir/user-guide-workflow/docs/cli/with-cylc-slurm/lib/python/dump_initial_controller.py"
 ```
 
 The `flow.cylc` file defines the workflow, including special directives to use "Oscar" specific settings for the runtime:

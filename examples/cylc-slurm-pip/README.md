@@ -1,41 +1,37 @@
-# Usage with Cylc workflow manager and conda
+# Usage with Cylc workflow manager and Slurm
 
-The command line interface can be used with workflow managers like cylc in virtualenv environments.
+The command line interface can be used with cylc in environments which use a scheduler like slurm.
 
 ## Prerequisites
 
 This example requires:
 
-- `cylc`
+- `slurm`, e.g. on a high performance computing cluster.
+- familiarity with and a working installation of `cylc` (e.g. by going through the
+  [tutorial](https://cylc.github.io/cylc-doc/latest/html/tutorial/index.html))
 - `virtualenv`
-- `python3.10` (so you can run `virtualenv venv -p python3.10`)
+- `python` (so you can run `virtualenv venv -p python`)
 
 A new environment will be created during the setup phase of the `cylc` workflow run.
 
-## Workflow
+Cylc requires a site-specific setup when using a scheduler like slurm. See the cylc documentation for a guide on setting up cylc on your platform.
+For Oscar at Brown University, we can use the following configuration in 
+[`./global.cylc`](./global.cylc)
 
-To initialize the workflow, we define a file with the code for the experiment, this time in the
-`lib/python` directory [(a cylc convention)](https://cylc.github.io/cylc-doc/stable/html/user-guide/writing-workflows/configuration.html#workflow-configuration-directories):
+## Setup
 
-```python title="lib/python/controller_setup.py"
---8<-- "lib/python/controller_setup.py"
-```
+To initialize the workflow, we define a file in the`lib/python` directory 
+[(a cylc convention)](https://cylc.github.io/cylc-doc/stable/html/user-guide/writing-workflows/configuration.html#workflow-configuration-directories) with the code for the experiment: 
+[`lib/python/controller_setup.py`](./lib/python/controller_setup.py)
 
 The first step in the workflow will be to:
-
 - load the controller from the file
 - save its state to a `.dill` file in the share directory.
+This is done with the file [`lib/python/dump_initial_controller.py`](./lib/python/dump_initial_controller.py).
 
-This is handled by the initialization.py file:
+The [`flow.cylc`](./flow.cylc) file defines the workflow.
 
-```python title="lib/python/dump_initial_controller.py"
---8<-- "docs/cli/with-cylc-pip/lib/python/dump_initial_controller.py"
-```
-
-The `flow.cylc` file defines the workflow:
-```  title="flow.cylc"
---8<-- "flow.cylc"
-```
+## Execution
 
 We can call the `cylc` command line interface as follows, in a shell session:
 
@@ -51,7 +47,7 @@ cylc install .
 
 We tell cylc to play the workflow:
 ```shell
-cylc play "with-cylc-pip"
+cylc play "with-cylc-slurm"
 ```
 
 (As a shortcut for "validate, install and play", use `cylc vip .`)
@@ -63,10 +59,12 @@ cylc gui
 
 ... or the text user interface (TUI):
 ```shell
-cylc tui "with-cylc-pip"
+cylc tui "with-cylc-slurm"
 ```
 
-We can load and interrogate the resulting object as follows:
+## Results
+
+We can load and interrogate the resulting object in Python as follows:
 
 ```python
 import os
@@ -92,7 +90,7 @@ def plot_results(controller_):
         plt.scatter(xi, yi, label=f"observation {i=}")
     plt.legend()
 
-with open(os.path.expanduser("~/cylc-run/with-cylc-pip/runN/share/controller.dill"),"rb") as file:
+with open(os.path.expanduser("~/cylc-run/with-cylc-slurm/runN/share/controller.dill"),"rb") as file:
     controller_result = dill.load(file)
 
 plot_results(controller_result)

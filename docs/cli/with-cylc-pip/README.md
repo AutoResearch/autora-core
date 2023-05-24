@@ -29,7 +29,7 @@ The first step in the workflow will be to:
 This is handled by the initialization.py file:
 
 ```python title="lib/python/dump_initial_controller.py"
---8<-- "lib/python/dump_initial_controller.py"
+--8<-- "docs/cli/with-cylc-pip/lib/python/dump_initial_controller.py"
 ```
 
 The `flow.cylc` file defines the workflow:

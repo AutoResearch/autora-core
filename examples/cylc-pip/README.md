@@ -22,6 +22,7 @@ To initialize the workflow, we define a file in the`lib/python` directory
 The first step in the workflow will be to:
 - load the controller from the file
 - save its state to a `.dill` file in the share directory.
+
 This is done with the file [`lib/python/dump_initial_controller.py`](./lib/python/dump_initial_controller.py).
 
 The [`flow.cylc`](./flow.cylc) file defines the workflow.

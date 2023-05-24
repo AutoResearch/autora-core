@@ -1,42 +1,37 @@
-# Usage with Cylc workflow manager and conda
+# Using the Cylc workflow manager and conda
 
 The command line interface can be used with workflow managers like cylc and conda environments.
 
 ## Prerequisites
 
-This example requires a conda environment called `autora-cylc` with the following dependencies:
+This example requires:
 
-- `autora` 3+
-- `cylc-flow`
+- familiarity with and a working installation of `cylc` (e.g. by going through the
+  [tutorial](https://cylc.github.io/cylc-doc/latest/html/tutorial/index.html))
+- a conda environment called `autora-cylc` with the following dependencies:
+  - `autora` 3+
+  - `cylc-flow`
+  
+  The conda environment will be cloned during the setup phase of the `cylc` workflow run.
+    You can initialize the conda environment using the included environment.yml file.
+    ```shell
+    conda env create -f environment.yml
+    ```
 
-The conda environment will be cloned during the setup phase of the `cylc` workflow run.
+## Setup
 
-You can initialize the conda environment using the included environment.yml file.
-```shell
-conda env create -f environment.yml
-```
-
-## Workflow
-
-To initialize the workflow, we again define a file with the code for the experiment, this time in the
-`lib/python` directory [(a cylc convention)](https://cylc.github.io/cylc-doc/stable/html/user-guide/writing-workflows/configuration.html#workflow-configuration-directories):
-
-```python title="lib/python/controller_setup.py"
---8<-- "lib/python/controller_setup.py"
-```
+To initialize the workflow, we define a file in the`lib/python` directory 
+[(a cylc convention)](https://cylc.github.io/cylc-doc/stable/html/user-guide/writing-workflows/configuration.html#workflow-configuration-directories) with the code for the experiment: 
+[`lib/python/controller_setup.py`](./lib/python/controller_setup.py)
 
 The first step in the workflow will be to:
 - load the controller from the file
 - save its state to a `.dill` file in the share directory.
+This is done with the file [`lib/python/dump_initial_controller.py`](./lib/python/dump_initial_controller.py).
 
-```python title="lib/python/dump_initial_controller.py"
---8<-- "lib/python/dump_initial_controller.py"
-```
+The [`flow.cylc`](./flow.cylc) file defines the workflow.
 
-The `flow.cylc` file defines the workflow:
-```  title="flow.cylc"
---8<-- "flow.cylc"
-```
+## Execution
 
 We can call the `cylc` command line interface as follows, in a shell session:
 
@@ -67,7 +62,9 @@ cylc gui
 cylc tui "with-cylc-conda"
 ```
 
-We can load and interrogate the resulting object as follows:
+## Results
+
+We can load and interrogate the resulting object in a python session as follows:
 
 ```python
 import os

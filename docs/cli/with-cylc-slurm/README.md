@@ -17,7 +17,7 @@ Cylc requires a site-specific setup when using a scheduler like slurm. See the c
 For Oscar at Brown University, we can use the following global configuration:
 
 ```python title="global.cylc"
---8<-- "docs/cli/with-cylc-slurm/global.cylc"
+--8<-- "global.cylc"
 ```
 
 ## Workflow
@@ -26,7 +26,7 @@ To initialize the workflow, we define a file with the code for the experiment, i
 `lib/python` directory [(a cylc convention)](https://cylc.github.io/cylc-doc/stable/html/user-guide/writing-workflows/configuration.html#workflow-configuration-directories):
 
 ```python title="lib/python/controller_setup.py"
---8<-- "docs/cli/with-cylc-slurm/lib/python/controller_setup.py"
+--8<-- "lib/python/controller_setup.py"
 ```
 
 The first step in the workflow will be to:
@@ -37,12 +37,12 @@ The first step in the workflow will be to:
 This is handled by the initialization.py file:
 
 ```python title="lib/python/dump_initial_controller.py"
---8<-- "docs/cli/with-cylc-slurm/lib/python/dump_initial_controller.py"
+--8<-- "lib/python/dump_initial_controller.py"
 ```
 
 The `flow.cylc` file defines the workflow, including special directives to use "Oscar" specific settings for the runtime:
 ```  title="flow.cylc"
---8<-- "docs/cli/with-cylc-slurm/flow.cylc"
+--8<-- "flow.cylc"
 ```
 
 We can call the `cylc` command line interface as follows, in a shell session:

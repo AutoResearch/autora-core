@@ -22,7 +22,7 @@ To initialize the workflow, we again define a file with the code for the experim
 `lib/python` directory [(a cylc convention)](https://cylc.github.io/cylc-doc/stable/html/user-guide/writing-workflows/configuration.html#workflow-configuration-directories):
 
 ```python title="lib/python/controller_setup.py"
---8<-- "docs/cli/with-cylc-conda/lib/python/controller_setup.py"
+--8<-- "lib/python/controller_setup.py"
 ```
 
 The first step in the workflow will be to:
@@ -30,12 +30,12 @@ The first step in the workflow will be to:
 - save its state to a `.dill` file in the share directory.
 
 ```python title="lib/python/dump_initial_controller.py"
---8<-- "docs/cli/with-cylc-conda/lib/python/dump_initial_controller.py"
+--8<-- "lib/python/dump_initial_controller.py"
 ```
 
 The `flow.cylc` file defines the workflow:
 ```  title="flow.cylc"
---8<-- "docs/cli/with-cylc-conda/flow.cylc"
+--8<-- "flow.cylc"
 ```
 
 We can call the `cylc` command line interface as follows, in a shell session:

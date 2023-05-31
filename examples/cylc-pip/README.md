@@ -1,4 +1,4 @@
-# Usage with Cylc workflow manager and conda
+# Usage with Cylc workflow manager and pip
 
 The command line interface can be used with workflow managers like cylc in virtualenv environments.
 

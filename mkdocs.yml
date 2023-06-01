@@ -6,12 +6,12 @@ site_name: AutoRA Workflow
 nav:
 - Introduction: 'index.md'
 - Interactive:
-    - 'interactive/basic-usage.ipynb'
-    - 'interactive/passing-static-parameters.ipynb'
-    - "interactive/accessing-state-dependent-properties.ipynb"
-    - "interactive/using-alternative-planners-and-executors.ipynb"
-    - "Saving and loading with dill": "interactive/saving-and-loading-dill.ipynb"
+    - 'interactive/Basic Usage.ipynb'
+    - 'interactive/Passing Static Parameters.ipynb'
+    - "interactive/Accessing State Dependent Properties.ipynb"
+    - "interactive/Using Alternative Planners And Executors.ipynb"
+    - "interactive/Saving And Loading With Dill.ipynb"
 - Command line:
-    - "Basic Usage": "cli/basic-usage/README.ipynb"
+    - "Basic Usage": "cli/basic-usage/Readme.ipynb"
     - "Using Cylc": "cli/with-cylc/README.md"
 

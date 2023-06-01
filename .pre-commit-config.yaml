@@ -27,6 +27,11 @@ repos:
         args:
           - "--namespace-packages"
           - "--explicit-package-bases"
-
+  - repo: https://github.com/srstevenson/nb-clean
+    rev: 2.4.0
+    hooks:
+      - id: nb-clean
+        args:
+          - --preserve-cell-outputs
 default_language_version:
   python: python3

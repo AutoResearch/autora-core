@@ -23,6 +23,7 @@ dependencies = [
 dev = [
     "autora-core[dev]",
     "autora-workflow[docs]",
+    "autora-workflow[test]",
 ]
 docs = [
     "autora-core[docs]"

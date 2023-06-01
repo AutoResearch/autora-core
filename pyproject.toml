@@ -11,6 +11,9 @@ license = { text = "MIT License" }
 
 dependencies = [
     "autora-core",
+    "scikit-learn",
+    "matplotlib",
+    "pandas",
     "typer[all]",
     "dill",
 ]
@@ -21,7 +24,7 @@ dev = [
     "autora-workflow[docs]",
 ]
 docs = [
-    "mkdocs-include-markdown-plugin",
+    "autora-core[docs]"
 ]
 cylc = [
     "cylc-flow",

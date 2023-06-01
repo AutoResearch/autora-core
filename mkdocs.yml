@@ -10,7 +10,7 @@ nav:
     - 'interactive/Passing Static Parameters.ipynb'
     - "interactive/Accessing State Dependent Properties.ipynb"
     - "interactive/Using Alternative Planners And Executors.ipynb"
-    - "interactive/Saving And Loading Dill.ipynb"
+    - "interactive/Saving And Loading With Dill.ipynb"
 - Command line:
     - "Basic Usage": "cli/basic-usage/Read Me.ipynb"
     - "Using Cylc": "cli/with-cylc/README.md"

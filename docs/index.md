@@ -1,4 +1,4 @@
-# AutoRA Workflow
+# Workflow
 
 Workflow management tools for AutoRA.
 
@@ -11,7 +11,7 @@ You will need:
 Workflow is a part of the `autora` package:
 
 ```shell
-pip install -U "autora" --pre
+pip install -U "autora"
 ```
 
 !!! success

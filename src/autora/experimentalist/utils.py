@@ -21,16 +21,16 @@ def sequence_to_array(iterable):
         For mixed datatypes, the highest-level type common to all the inputs will be used, so
         consider using [_sequence_to_recarray][autora.experimentalist.utils._sequence_to_recarray]
         instead.
-        >>> sequence_to_array(zip(range(5), "abcde"))  # doctest: +NORMALIZE_WHITESPACE
-        array([['0', 'a'], ['1', 'b'], ['2', 'c'], ['3', 'd'], ['4', 'e']],  dtype='<U21')
+        >>> sequence_to_array(zip(range(5), "abcde"))  # doctest: +NORMALIZE_WHITESPACE +ELLIPSIS
+        array([['0', 'a'], ['1', 'b'], ['2', 'c'], ['3', 'd'], ['4', 'e']],  dtype='<U...')
 
         Single strings are broken into characters:
-        >>> sequence_to_array("abcde")  # doctest: +NORMALIZE_WHITESPACE
-        array([['a'], ['b'], ['c'], ['d'], ['e']], dtype='<U1')
+        >>> sequence_to_array("abcde")  # doctest: +NORMALIZE_WHITESPACE +ELLIPSIS
+        array([['a'], ['b'], ['c'], ['d'], ['e']], dtype='<U...')
 
         Multiple strings are treated as individual entries:
-        >>> sequence_to_array(["abc", "de"])  # doctest: +NORMALIZE_WHITESPACE
-        array([['abc'], ['de']], dtype='<U3')
+        >>> sequence_to_array(["abc", "de"])  # doctest: +NORMALIZE_WHITESPACE +ELLIPSIS
+        array([['abc'], ['de']], dtype='<U...')
 
     """
     deque = collections.deque(iterable)
@@ -48,12 +48,12 @@ def sequence_to_recarray(iterable):
 
         A simple range object is converted into a recarray of dimension 2:
         >>> sequence_to_recarray(range(5)) # doctest: +NORMALIZE_WHITESPACE
-        rec.array([(0,), (1,), (2,), (3,), (4,)], dtype=[('f0', '<i8')])
+        rec.array([(0,), (1,), (2,), (3,), (4,)], dtype=[('f0', '<i...')])
 
         Mixed datatypes lead to multiple output types:
         >>> sequence_to_recarray(zip(range(5), "abcde"))  # doctest: +NORMALIZE_WHITESPACE
         rec.array([(0, 'a'), (1, 'b'), (2, 'c'), (3, 'd'), (4, 'e')],
-            dtype=[('f0', '<i8'), ('f1', '<U1')])
+            dtype=[('f0', '<i...'), ('f1', '<U1')])
 
         Single strings are broken into characters:
         >>> sequence_to_recarray("abcde")  # doctest: +NORMALIZE_WHITESPACE
@@ -114,7 +114,7 @@ def array_to_sequence(input: numpy.typing.ArrayLike):
         >>> a1 = np.rec.fromarrays([range(5), list("abcde")])
         >>> a1
         rec.array([(0, 'a'), (1, 'b'), (2, 'c'), (3, 'd'), (4, 'e')],
-                  dtype=[('f0', '<i8'), ('f1', '<U1')])
+                  dtype=[('f0', '<i...'), ('f1', '<U1')])
 
         This is converted into records:
         >>> l1 = list(array_to_sequence(a1))

@@ -66,7 +66,7 @@ def from_experimentalist_pipeline(pipeline: Pipeline) -> Executor:
         if isinstance(new_conditions, pd.DataFrame):
             new_conditions_array = new_conditions
         elif isinstance(new_conditions, np.ndarray):
-            _logger.warning(
+            _logger.debug(
                 f"{new_conditions=} is an ndarray, so variable confusion is a possibility"
             )
             new_conditions_array = new_conditions

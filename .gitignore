@@ -69,3 +69,6 @@ docs/reference/
 
 # Jupyter Notebook load data
 .ipynb_checkpoints
+
+# Dill pickle files
+*.dill

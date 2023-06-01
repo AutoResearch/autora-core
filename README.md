@@ -5,4 +5,10 @@
 automating multiple stages of the empirical research process, including model discovery, experimental design, data 
 collection, and documentation for open science.
 
+The primary purpose of this module is to provide utilities for: 
+- describing experiments, 
+- running experimentalist pipelines,
+- running cyclical experiments (currently in the 
+  [`autora-workflow` subpackage](https://github.com/autoresearch/autora-workflow))
+
 See the tutorials and user guide at [`autora`](https://autoresearch.github.io/autora/) to get started.

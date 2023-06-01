@@ -12,6 +12,6 @@ nav:
     - "interactive/Using Alternative Planners And Executors.ipynb"
     - "interactive/Saving And Loading With Dill.ipynb"
 - Command line:
-    - "Basic Usage": "cli/basic-usage/Read Me.ipynb"
+    - "Basic Usage": "cli/basic-usage/Readme.ipynb"
     - "Using Cylc": "cli/with-cylc/README.md"
 

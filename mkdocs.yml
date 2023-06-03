@@ -6,7 +6,7 @@ site_name: AutoRA Core
 repo_url: 'https://github.com/autoresearch/autora-core'
 
 nav:
-- Introduction: 'index.md'
+- Home: 'index.md'
 - Experimentalist Pipeline: 'pipeline/Experimentalist Pipeline Examples.ipynb'
 - Experimentalists:
   - Pooler:

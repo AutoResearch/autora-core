@@ -2,7 +2,7 @@ import random
 from typing import Iterable, Sequence, Union
 
 
-def random_sampler(conditions: Union[Iterable, Sequence], n: int = 1):
+def random_sample(conditions: Union[Iterable, Sequence], n: int = 1):
     """
     Uniform random sampling without replacement from a pool of conditions.
     Args:

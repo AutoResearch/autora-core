@@ -10,5 +10,5 @@ You will need:
 you can import the grid pooler via:
 
 ```python
-from autora.experimentalist.pooler.random import random_pool
+from autora.experimentalist.pooler.random_pooler import random_pool
 ```

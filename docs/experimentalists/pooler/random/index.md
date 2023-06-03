@@ -23,7 +23,7 @@ This means that there are 9 combinations that these variables can form, a random
 
 ### Example Code
 ```python
-from autora.experimentalist.pooler.random import random_pool
+from autora.experimentalist.pooler.random_pooler import random_pool
 
 pool = random_pool([1, 2, 3],[4, 5, 6], n=3)
 ```

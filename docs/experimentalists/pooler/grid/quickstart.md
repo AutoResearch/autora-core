@@ -6,3 +6,9 @@ You will need:
 
 
 *Grid Pooler* is part of the `autora-core` package and does not need to be installed separately
+
+you can import the grid pooler via:
+
+```python
+from autora.experimentalist.pooler.grid import grid_pool
+```

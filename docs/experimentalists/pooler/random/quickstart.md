@@ -7,7 +7,7 @@ You will need:
 
 *Random Pooler* is part of the `autora-core` package and does not need to be installed separately
 
-you can import the grid pooler via:
+you can import the random pooler via:
 
 ```python
 from autora.experimentalist.pooler.random_pooler import random_pool

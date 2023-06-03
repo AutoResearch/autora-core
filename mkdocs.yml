@@ -8,3 +8,16 @@ repo_url: 'https://github.com/autoresearch/autora-core'
 nav:
 - Introduction: 'index.md'
 - Experimentalist Pipeline: 'pipeline/Experimentalist Pipeline Examples.ipynb'
+- Experimentalists:
+  - Pooler:
+      - Grid:
+          - Home: 'experimentalists/pooler/grid/index.md'
+          - Quickstart: 'experimentalists/pooler/grid/quickstart.md'
+      - Random:
+          - Home: 'experimentalists/pooler/random/index.md'
+          - Quickstart: 'experimentalists/pooler/random/quickstart.md'
+  - Sampler:
+      - Random:
+          - Home: 'experimentalists/sampler/random/index.md'
+          - Quickstart: 'experimentalists/sampler/random/quickstart.md'
+

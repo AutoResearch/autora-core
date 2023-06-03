@@ -13,7 +13,7 @@ To illustrate the concept of a random pool of size 3, let's consider a situation
 | 2       | 5       |
 | 3       | 6       |
 
-This means that there are 9 combinations that these variables can form, a random pool of 3 randomly picks 3 out of the 9 possible cobinations.
+This means that there are 9 possible combinations for these variables (3x3), from which a random pool of size 3 draws 3 combinations.
 
 |    | 4     | 5     | 6   |
 |----|-------|-------|-----|

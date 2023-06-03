@@ -3,7 +3,7 @@ import random
 import numpy as np
 
 
-def random_pool(*args, n=1, duplicates=True):
+def random_pool(*args, n: int = 1, duplicates: bool = True):
     """
     Creates combinations from lists of discrete values using random selection.
     Args:

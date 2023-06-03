@@ -4,7 +4,7 @@ Creates exhaustive pool from discrete values using a Cartesian product of sets.
 
 ## Example
 
-To illustrate the concept of an exhaustive pool, let's consider a situation where a certain condition is defined by two variables: $x_{1}$ and $x_{2}$. The variable $x_{1}$ can take on the values of 1, 2, or 3, while $x_{2}$ can adapt the values of 4, 3, or 5.
+To illustrate the concept of an exhaustive pool, let's consider a situation where a certain condition is defined by two variables: $x_{1}$ and $x_{2}$. The variable $x_{1}$ can take on the values of 1, 2, or 3, while $x_{2}$ can adopt the values of 4, 5, or 6.
 
 | $x_{1}$ | $x_{2}$ |
 |---------|---------|

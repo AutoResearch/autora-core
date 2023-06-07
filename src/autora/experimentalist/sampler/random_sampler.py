@@ -1,6 +1,8 @@
 import random
 from typing import Iterable, Sequence, Union
 
+from autora.utils.deprecation import deprecated_alias
+
 
 def random_sample(conditions: Union[Iterable, Sequence], n: int = 1):
     """
@@ -19,3 +21,6 @@ def random_sample(conditions: Union[Iterable, Sequence], n: int = 1):
     samples = conditions[0:n]
 
     return samples
+
+
+random_sampler = deprecated_alias(random_sample, "random_sampler")

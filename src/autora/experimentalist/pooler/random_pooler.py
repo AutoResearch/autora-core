@@ -2,6 +2,8 @@ import random
 
 import numpy as np
 
+from autora.utils.deprecation import deprecated_alias
+
 
 def random_pool(*args, n: int = 1, duplicates: bool = True):
     """
@@ -35,3 +37,6 @@ def random_pool(*args, n: int = 1, duplicates: bool = True):
             l_samples = [*set(l_samples)]
 
     return iter(l_samples)
+
+
+random_pooler = deprecated_alias(random_pool, "random_pooler")

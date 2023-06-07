@@ -2,8 +2,10 @@ import random
 
 import numpy as np
 
+from autora.utils.deprecation import deprecated_alias
 
-def random_pool(*args, n=1, duplicates=True):
+
+def random_pool(*args, n: int = 1, duplicates: bool = True):
     """
     Creates combinations from lists of discrete values using random selection.
     Args:
@@ -35,3 +37,6 @@ def random_pool(*args, n=1, duplicates=True):
             l_samples = [*set(l_samples)]
 
     return iter(l_samples)
+
+
+random_pooler = deprecated_alias(random_pool, "random_pooler")

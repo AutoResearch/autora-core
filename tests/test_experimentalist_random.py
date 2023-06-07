@@ -5,7 +5,7 @@ import pytest
 
 from autora.experimentalist.pipeline import make_pipeline
 from autora.experimentalist.pooler.grid import grid_pool
-from autora.experimentalist.sampler.random_sampler import random_sampler
+from autora.experimentalist.sampler.random_sampler import random_sample
 from autora.variable import DV, IV, ValueType, VariableCollection
 
 
@@ -26,7 +26,7 @@ def test_random_experimentalist(metadata):
     # ---Implementation 1 - Pool using Callable via partial function----
     # Set up pipeline functions with partial
     pooler_callable = partial(grid_pool, ivs=metadata.independent_variables)
-    sampler = partial(random_sampler, n=n_trials)
+    sampler = partial(random_sample, n=n_trials)
     pipeline_random_samp = make_pipeline(
         [pooler_callable, weber_filter, sampler],
     )
@@ -64,7 +64,7 @@ def test_random_experimentalist_generator(metadata):
     n_trials = 25  # Number of trails for sampler to select
 
     pooler_generator = grid_pool(metadata.independent_variables)
-    sampler = partial(random_sampler, n=n_trials)
+    sampler = partial(random_sample, n=n_trials)
     pipeline_random_samp_poolgen = make_pipeline(
         [pooler_generator, weber_filter, sampler]
     )

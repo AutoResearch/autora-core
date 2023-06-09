@@ -71,3 +71,8 @@ site/
 
 # Jupyter Notebook load data
 .ipynb_checkpoints
+
+
+# IDE-specific directories
+.idea
+

@@ -72,3 +72,6 @@ docs/reference/
 
 # Dill pickle files
 *.dill
+# IDE-specific directories
+.idea
+

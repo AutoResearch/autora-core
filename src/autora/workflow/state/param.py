@@ -47,6 +47,16 @@ def _get_state_dependent_properties(state: SupportsControllerState):
                 [np.empty([0, n_ivs + n_dvs])] + list(state.observations)
             )[:, 0:n_ivs],
             "%observations.dvs%": lambda: np.row_stack(state.observations)[:, n_ivs:],
+            "%data.conditions[-1]%": lambda: np.array(state.observations[-1])[
+                :, 0:n_ivs
+            ],
+            "%observations.observations[-1]%": lambda: np.array(state.observations[-1])[
+                :, n_ivs:
+            ],
+            "%observations.conditions%": lambda: np.row_stack(
+                [np.empty([0, n_ivs + n_dvs])] + list(state.observations)
+            )[:, 0:n_ivs],
+            "%data.observations%": lambda: np.row_stack(state.observations)[:, n_ivs:],
             "%models[-1]%": lambda: state.models[-1],
             "%models%": lambda: state.models,
         }

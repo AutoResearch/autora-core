@@ -5,6 +5,48 @@ from typing import Callable
 _logger = logging.getLogger(__name__)
 
 
+def deprecate(
+    f: Callable,
+    message: str,
+    callback: Callable = _logger.warning,
+):
+    """
+    Wrapper to make function aliases which print a warning that a name is an alias.
+
+    Args:
+        f: the function to be aliased
+        message: the message to be emitted when the deprecated code is used
+        callback: a function to call to handle the warning message
+
+    Examples:
+        >>> def original():
+        ...     return 1
+        >>> deprecated = deprecate(original, "`original` is deprecated.")
+
+        The original function is unaffected:
+        >>> original()
+        1
+
+        The aliased function works the same way, but also emits a warning.
+        >>> deprecated()  # doctest: +SKIP
+        `original` is deprecated.
+        1
+
+        You can also set a custom callback instead of the default "warning":
+        >>> a0 = deprecate(original, "`original` is deprecated.", callback=print)
+        >>> a0()
+        `original` is deprecated.
+        1
+    """
+
+    @wraps(f)
+    def wrapper(*args, **kwds):
+        callback(message)
+        return f(*args, **kwds)
+
+    return wrapper
+
+
 def deprecated_alias(
     f: Callable, alias_name: str, callback: Callable = _logger.warning
 ):
@@ -44,10 +86,6 @@ def deprecated_alias(
         alternative message
         1
     """
-
-    @wraps(f)
-    def wrapper(*args, **kwds):
-        callback("Use `%s` instead. `%s` is deprecated." % (f.__name__, alias_name))
-        return f(*args, **kwds)
-
-    return wrapper
+    message = "Use `%s` instead. `%s` is deprecated." % (f.__name__, alias_name)
+    wrapped = deprecate(f=f, message=message, callback=callback)
+    return wrapped

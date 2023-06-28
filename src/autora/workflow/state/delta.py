@@ -19,7 +19,7 @@ class Delta(Generic[S]):
 
         Use the Delta to handle updates to a state containing two lists.
 
-        First we define the dataclass *with optional types* to act as the basis:
+        First we define the dataclass to act as the basis:
         >>> from typing import Optional, List
         >>> @dataclass(frozen=True)
         ... class ListState:
@@ -27,7 +27,8 @@ class Delta(Generic[S]):
         ...     m: Optional[List] = None
 
         Next we define the delta dataclass – this inherits its fields from the basis, and inherits
-        the delta-logic from the `Delta` class.
+        the delta-logic from the `Delta` class. It is important that the types of this object
+        default to "None" if they are not set.
         >>> @dataclass(frozen=True)
         ... class ListStateDelta(ListState, Delta):
         ...     pass
@@ -50,10 +51,11 @@ class Delta(Generic[S]):
         >>> s + e
         ListState(l=['b', 'c'], m=['f'])
 
-        We can also make a delta which replaces a particular field but leaves any others:
-        >>> f = ListStateDelta(kind="replace", l=list("repl"))
+        We can also make a "replace" delta which replaces a particular field but leaves any others
+        unchanged:
+        >>> f = ListStateDelta(kind="replace", l=list("lace"))
         >>> s + e + f
-        ListState(l=['r', 'e', 'p', 'l'], m=['f'])
+        ListState(l=['l', 'a', 'c', 'e'], m=['f'])
 
         Use the Delta to handle updates to a state containing a dataframe:
         >>> import pandas as pd

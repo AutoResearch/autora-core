@@ -90,6 +90,7 @@ class Delta(Generic[S]):
                     updates[f.name] = value
                 elif self.kind == "extend":
                     other_value = getattr(other, f.name)
+                    # TODO: Refactor this as single dispatch functions on (other, value)
                     if isinstance(other_value, list):
                         assert isinstance(value, list)
                         updates[f.name] = other_value + value

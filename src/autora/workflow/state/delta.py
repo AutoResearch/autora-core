@@ -2,6 +2,8 @@
 from __future__ import annotations
 
 import dataclasses
+import inspect
+from functools import wraps
 from typing import Generic, Literal, Optional, TypeVar, Union
 
 import numpy as np
@@ -200,3 +202,22 @@ class StateDelta(State, Delta):
     """"""
 
     pass
+
+
+def wrap_to_use_state(f):
+    signature = inspect.signature(f)
+    parameters = signature.parameters
+    print(parameters)
+
+    @wraps(f)
+    def _f(state, params: Optional[dict] = None):
+        arguments = dict()
+        # Mock – do something with the arguments here
+        arguments.update(conditions=pd.Series(np.linspace(-10, 10, 101), name="x"))
+
+        delta = f(**arguments)
+        new_state = state + delta
+        print(new_state)
+        return new_state
+
+    return _f

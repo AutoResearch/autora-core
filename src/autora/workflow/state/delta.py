@@ -90,18 +90,8 @@ class Delta(Generic[S]):
                     updates[f.name] = value
                 elif self.kind == "extend":
                     other_value = getattr(other, f.name)
-                    # TODO: Refactor this as single dispatch functions on (other, value)
-                    if isinstance(other_value, list):
-                        assert isinstance(value, list)
-                        updates[f.name] = other_value + value
-                    elif isinstance(other_value, pd.DataFrame):
-                        updates[f.name] = pd.concat(
-                            (other_value, value), ignore_index=True
-                        )
-                    elif isinstance(other_value, np.ndarray):
-                        updates[f.name] = np.row_stack([other_value, value])
-                    elif isinstance(other_value, dict):
-                        updates[f.name] = dict(other_value, **value)
+                    extended_value = _get_extended_value(other_value, value)
+                    updates[f.name] = extended_value
         new = dataclasses.replace(other, **updates)
         return new
 
@@ -181,17 +171,23 @@ class GeneralDelta(Generic[S]):
                 updates[key] = value
             elif self.kind == "extend":
                 other_value = getattr(other, key)
-                if isinstance(other_value, list):
-                    assert isinstance(value, list)
-                    updates[key] = other_value + value
-                elif isinstance(other_value, pd.DataFrame):
-                    updates[key] = pd.concat((other_value, value), ignore_index=True)
-                elif isinstance(other_value, np.ndarray):
-                    updates[key] = np.row_stack([other_value, value])
-                elif isinstance(other_value, dict):
-                    updates[key] = dict(other_value, **value)
+                extended_value = _get_extended_value(other_value, value)
+                updates[key] = extended_value
+
         new = dataclasses.replace(other, **updates)
         return new
+
+
+def _get_extended_value(base, extension):
+    if isinstance(base, list):
+        assert isinstance(extension, list)
+        return base + extension
+    elif isinstance(base, pd.DataFrame):
+        return pd.concat((base, extension), ignore_index=True)
+    elif isinstance(base, np.ndarray):
+        return np.row_stack([base, extension])
+    elif isinstance(base, dict):
+        return dict(base, **extension)
 
 
 @dataclasses.dataclass(frozen=True)

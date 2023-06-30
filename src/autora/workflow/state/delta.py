@@ -1,19 +1,16 @@
 """Classes to represent cycle state $S$ as $S_n = S_{0} + \sum_{i=1}^n \Delta S_{i}"""
 from __future__ import annotations
 
-import dataclasses
 import inspect
 from collections import UserDict
+from dataclasses import dataclass, field, fields, replace
 from functools import wraps
-from typing import Generic, Literal, Optional, TypeVar, Union
+from typing import Generic, List, Optional, TypeVar
 
 import numpy as np
 import pandas as pd
 
 S = TypeVar("S")
-
-from dataclasses import dataclass, field, fields, replace
-from typing import List
 
 
 class BaseState:

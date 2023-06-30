@@ -11,7 +11,7 @@ from autora.variable import Variable, VariableCollection
 from sklearn.base import BaseEstimator
 from sklearn.linear_model import LinearRegression
 
-from autora.workflow_.state import BaseDelta, BaseState, S
+from autora.workflow_.state import BaseState, Delta, S
 
 
 def wrap_to_use_state(f):
@@ -31,7 +31,7 @@ def wrap_to_use_state(f):
         >>> @wrap_to_use_state
         ... def function(conditions):
         ...     new_conditions = [c + 10 for c in conditions]
-        ...     return BaseDelta(conditions=new_conditions)
+        ...     return Delta(conditions=new_conditions)
 
         >>> function(S(conditions=[1,2,3,4]))
         S(conditions=[11, 12, 13, 14])
@@ -49,7 +49,7 @@ def wrap_to_use_state(f):
         ...     dvs = [v.name for v in variables.dependent_variables]
         ...     X, y = experimental_data[ivs], experimental_data[dvs]
         ...     new_model = LinearRegression(fit_intercept=True).fit(X, y)
-        ...     return BaseDelta(model=new_model)
+        ...     return Delta(model=new_model)
 
         >>> @dataclass(frozen=True)
         ... class T(BaseState):

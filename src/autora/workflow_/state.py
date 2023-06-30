@@ -32,30 +32,30 @@ class BaseState:
         ListState(l=['a', 'b', 'c'], m=['x', 'y', 'z'])
 
         ... and can add deltas to it. `l` will be extended:
-        >>> l + BaseDelta(l=list("def"))
+        >>> l + Delta(l=list("def"))
         ListState(l=['a', 'b', 'c', 'd', 'e', 'f'], m=['x', 'y', 'z'])
 
         ... wheras `m` will be replaced:
-        >>> l + BaseDelta(m=list("uvw"))
+        >>> l + Delta(m=list("uvw"))
         ListState(l=['a', 'b', 'c'], m=['u', 'v', 'w'])
 
         ... they can be chained:
-        >>> l + BaseDelta(l=list("def")) + BaseDelta(m=list("uvw"))
+        >>> l + Delta(l=list("def")) + Delta(m=list("uvw"))
         ListState(l=['a', 'b', 'c', 'd', 'e', 'f'], m=['u', 'v', 'w'])
 
         ... and we update multiple fields with one Delta:
-        >>> l + BaseDelta(l=list("ghi"), m=list("rst"))
+        >>> l + Delta(l=list("ghi"), m=list("rst"))
         ListState(l=['a', 'b', 'c', 'g', 'h', 'i'], m=['r', 's', 't'])
 
         Passing a nonexistent field will cause an error:
-        >>> l + BaseDelta(o="not a field")
+        >>> l + Delta(o="not a field")
         Traceback (most recent call last):
         ...
         AttributeError: key=`o` is missing on ListState(l=['a', 'b', 'c'], m=['x', 'y', 'z'])
 
     """
 
-    def __add__(self, other: BaseDelta):
+    def __add__(self, other: Delta):
         updates = dict()
         for key, other_value in other.data.items():
             try:
@@ -78,7 +78,7 @@ class BaseState:
         return new
 
 
-class BaseDelta(UserDict, Generic[S]):
+class Delta(UserDict, Generic[S]):
     """
     Represents a delta where the base object determines the extension behavior.
 

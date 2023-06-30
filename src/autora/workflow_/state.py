@@ -1,10 +1,10 @@
-"""Classes to represent cycle state $S$ as $S_n = S_{0} + \sum_{i=1}^n \Delta S_{i}"""
+"""Classes to represent cycle state $S$ as $S_n = S_{0} + \\sum_{i=1}^n \\Delta S_{i}"""
 from __future__ import annotations
 
 from collections import UserDict
-from dataclasses import dataclass, field, fields, replace
+from dataclasses import dataclass, fields, replace
 from functools import singledispatch
-from typing import Generic, List, TypeVar
+from typing import Generic, TypeVar
 
 import numpy as np
 import pandas as pd
@@ -12,6 +12,7 @@ import pandas as pd
 S = TypeVar("S")
 
 
+@dataclass(frozen=True)
 class BaseState:
     """
     BaseState for dataclasses which use the Delta mechanism.

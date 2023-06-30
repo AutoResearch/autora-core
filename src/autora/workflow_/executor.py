@@ -19,12 +19,15 @@ def wrap_to_use_state(f):
     Returns:
 
     Examples:
+        >>> from autora.workflow_ import BaseState, Delta
         >>> from dataclasses import dataclass, field
+        >>> import pandas as pd
+        >>> from typing import List, Optional
 
         The `State` it operates on needs to have the metadata described in the state module:
-        >>> @dataclass
+        >>> @dataclass(frozen=True)
         ... class S(BaseState):
-        ...     conditions: list[int] = field(metadata={"delta": "replace"})
+        ...     conditions: List[int] = field(metadata={"delta": "replace"})
 
         As before, we indicate the inputs required by the parameter names.
         The output must be a `Delta` object.

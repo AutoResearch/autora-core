@@ -66,7 +66,7 @@ class BaseState:
             delta_behavior = self_field.metadata["delta"]
             self_value = getattr(self, key)
             if delta_behavior == "extend":
-                extended_value = _get_extended_value(self_value, other_value)
+                extended_value = extend(self_value, other_value)
                 updates[key] = extended_value
             elif delta_behavior == "replace":
                 updates[key] = other_value
@@ -98,7 +98,18 @@ class BaseDelta(UserDict, Generic[S]):
     pass
 
 
-def _get_extended_value(base, extension):
+def extend(base: S, extension: S) -> S:
+    """
+    Function to extend supported datatypes.
+
+    Examples:
+        >>> extend([], [])
+        []
+
+        >>> extend([1,2], [3])
+        [1, 2, 3]
+
+    """
     if isinstance(base, list):
         assert isinstance(extension, list)
         return base + extension
@@ -108,6 +119,10 @@ def _get_extended_value(base, extension):
         return np.row_stack([base, extension])
     elif isinstance(base, dict):
         return dict(base, **extension)
+    else:
+        raise NotImplementedError(
+            "`extend` not implemented for %s, %s" % (base, extension)
+        )
 
 
 def wrap_to_use_state(f):

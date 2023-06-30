@@ -15,6 +15,7 @@ S = TypeVar("S")
 from dataclasses import dataclass, field, fields, replace
 from typing import List
 
+
 class BaseState:
     """
     BaseState for dataclasses which use the Delta mechanism.
@@ -57,14 +58,14 @@ class BaseState:
         AttributeError: key=`o` is missing on ListState(l=['a', 'b', 'c'], m=['x', 'y', 'z'])
 
     """
-    def __add__(self, other: BaseDelta):
 
+    def __add__(self, other: BaseDelta):
         updates = dict()
         for key, other_value in other.data.items():
             try:
                 self_field = next(filter(lambda f: f.name == key, fields(self)))
             except StopIteration:
-                raise AttributeError("key=`%s` is missing on %s"%(key, self))
+                raise AttributeError("key=`%s` is missing on %s" % (key, self))
             delta_behavior = self_field.metadata["delta"]
             self_value = getattr(self, key)
             if delta_behavior == "extend":
@@ -73,7 +74,9 @@ class BaseState:
             elif delta_behavior == "replace":
                 updates[key] = other_value
             else:
-                raise NotImplementedError("delta_behaviour=`%s` not implemented"%(delta_behavior))
+                raise NotImplementedError(
+                    "delta_behaviour=`%s` not implemented" % (delta_behavior)
+                )
 
         new = replace(self, **updates)
         return new
@@ -94,6 +97,7 @@ class BaseDelta(UserDict, Generic[S]):
         ...     m: Optional[List] = None
         ...
     """
+
     pass
 
 
@@ -120,13 +124,13 @@ def wrap_to_use_state(f):
     Examples:
         >>> from dataclasses import dataclass
         >>> @dataclass
-        ... class S:
-        ...     conditions: list[int]
+        ... class S(BaseState):
+        ...     conditions: list[int] = field(metadata={"delta": "replace"})
 
         >>> @wrap_to_use_state
         ... def function(conditions):
         ...     new_conditions = [c + 10 for c in conditions]
-        ...     return Delta(conditions=new_conditions)
+        ...     return BaseDelta(conditions=new_conditions)
 
         >>> function(S(conditions=[1,2,3,4]))
         S(conditions=[11, 12, 13, 14])
@@ -144,13 +148,13 @@ def wrap_to_use_state(f):
         ...     dvs = [v.name for v in variables.dependent_variables]
         ...     X, y = experimental_data[ivs], experimental_data[dvs]
         ...     new_model = LinearRegression(fit_intercept=True).fit(X, y)
-        ...     return GeneralDelta("replace", model=new_model)
+        ...     return BaseDelta(model=new_model)
 
-        >>> @dataclass
-        ... class T:
-        ...     variables: VariableCollection
-        ...     experimental_data: pd.DataFrame
-        ...     model: Optional[BaseEstimator] = None
+        >>> @dataclass(frozen=True)
+        ... class T(BaseState):
+        ...     variables: VariableCollection  # field(metadata={"delta":... }) omitted ∴ immutable
+        ...     experimental_data: pd.DataFrame = field(metadata={"delta": "extend"})
+        ...     model: Optional[BaseEstimator] = field(metadata={"delta": "replace"}, default=None)
 
         >>> t = T(
         ...     variables=VariableCollection(independent_variables=[Variable("x")],

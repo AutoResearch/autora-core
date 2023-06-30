@@ -4,7 +4,7 @@ from __future__ import annotations
 import inspect
 from collections import UserDict
 from dataclasses import dataclass, field, fields, replace
-from functools import wraps
+from functools import singledispatch, wraps
 from typing import Generic, List, Optional, TypeVar
 
 import numpy as np
@@ -98,7 +98,8 @@ class BaseDelta(UserDict, Generic[S]):
     pass
 
 
-def extend(base: S, extension: S) -> S:
+@singledispatch
+def extend(a: S, b: S) -> S:
     """
     Function to extend supported datatypes.
 
@@ -110,19 +111,63 @@ def extend(base: S, extension: S) -> S:
         [1, 2, 3]
 
     """
-    if isinstance(base, list):
-        assert isinstance(extension, list)
-        return base + extension
-    elif isinstance(base, pd.DataFrame):
-        return pd.concat((base, extension), ignore_index=True)
-    elif isinstance(base, np.ndarray):
-        return np.row_stack([base, extension])
-    elif isinstance(base, dict):
-        return dict(base, **extension)
-    else:
-        raise NotImplementedError(
-            "`extend` not implemented for %s, %s" % (base, extension)
-        )
+    raise NotImplementedError("`extend` not implemented for %s, %s" % (a, b))
+
+
+@extend.register
+def extend_list(a: list, b: list) -> list:
+    """
+    Examples:
+        >>> extend([], [])
+        []
+
+        >>> extend([1,2], [3])
+        [1, 2, 3]
+    """
+    return a + b
+
+
+@extend.register
+def extend_pd_dataframe(a: pd.DataFrame, b: pd.DataFrame) -> pd.DataFrame:
+    """
+    Examples:
+        >>> extend(pd.DataFrame({"a": []}), pd.DataFrame({"a": []}))
+        Empty DataFrame
+        Columns: [a]
+        Index: []
+
+        >>> extend(pd.DataFrame({"a": [1,2,3]}), pd.DataFrame({"a": [4,5,6]}))
+           a
+        0  1
+        1  2
+        2  3
+        3  4
+        4  5
+        5  6
+    """
+    return pd.concat((a, b), ignore_index=True)
+
+
+@extend.register
+def extend_np_ndarray(a: np.ndarray, b: np.ndarray) -> np.ndarray:
+    """
+    Examples:
+        >>> extend(np.array([(1,2,3), (4,5,6)]), np.array([(7,8,9)]))
+        array([[1, 2, 3],
+               [4, 5, 6],
+               [7, 8, 9]])
+    """
+    return np.row_stack([a, b])
+
+
+@extend.register
+def extend_dict(a: dict, b: dict) -> dict:
+    """
+    Examples:
+        >>> extend({"a": "cats"}, {"b": "dogs"})
+        {'a': 'cats', 'b': 'dogs'}
+    """
+    return dict(a, **b)
 
 
 def wrap_to_use_state(f):

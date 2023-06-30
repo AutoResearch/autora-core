@@ -13,6 +13,8 @@ def wrap_to_use_state(f):
 
     This wrapper makes it easier to pass arguments to a function from a State.
 
+    It was inspired by the pytest "fixtures" mechanism.
+
     Args:
         f:
 

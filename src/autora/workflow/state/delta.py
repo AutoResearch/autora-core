@@ -162,6 +162,7 @@ class GeneralDelta(Generic[S]):
         self.data: dict = kwargs
 
     def __radd__(self, other):
+        """This is the default behavior for the GeneralDelta, which concatenates dataframes"""
         if self.kind is None:
             return other
 
@@ -193,18 +194,6 @@ def _get_extended_value(base, extension):
         return np.row_stack([base, extension])
     elif isinstance(base, dict):
         return dict(base, **extension)
-
-
-@dataclasses.dataclass(frozen=True)
-class State:
-    data: Optional[Union[pd.DataFrame, np.typing.ArrayLike]]
-
-
-@dataclasses.dataclass(frozen=True)
-class StateDelta(State, Delta):
-    """"""
-
-    pass
 
 
 def wrap_to_use_state(f):

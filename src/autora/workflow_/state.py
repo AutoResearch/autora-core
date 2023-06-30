@@ -13,9 +13,9 @@ S = TypeVar("S")
 
 
 @dataclass(frozen=True)
-class BaseState:
+class State:
     """
-    BaseState for dataclasses which use the Delta mechanism.
+    Base object for dataclasses which use the Delta mechanism.
 
     Examples:
         >>> from dataclasses import dataclass, field
@@ -23,7 +23,7 @@ class BaseState:
         We define a dataclass where each field (which is going to be delta-ed) has additional
         metadata "delta" which describes its delta behaviour.
         >>> @dataclass(frozen=True)
-        ... class ListState(BaseState):
+        ... class ListState(State):
         ...    l: List = field(default_factory=list, metadata={"delta": "extend"})
         ...    m: List = field(default_factory=list, metadata={"delta": "replace"})
 

@@ -19,14 +19,14 @@ def wrap_to_use_state(f):
     Returns:
 
     Examples:
-        >>> from autora.workflow_ import BaseState, Delta
+        >>> from autora.workflow_ import State, Delta
         >>> from dataclasses import dataclass, field
         >>> import pandas as pd
         >>> from typing import List, Optional
 
         The `State` it operates on needs to have the metadata described in the state module:
         >>> @dataclass(frozen=True)
-        ... class S(BaseState):
+        ... class S(State):
         ...     conditions: List[int] = field(metadata={"delta": "replace"})
 
         As before, we indicate the inputs required by the parameter names.
@@ -56,7 +56,7 @@ def wrap_to_use_state(f):
         ...     return Delta(model=new_model)
 
         >>> @dataclass(frozen=True)
-        ... class T(BaseState):
+        ... class T(State):
         ...     variables: VariableCollection  # field(metadata={"delta":... }) omitted ∴ immutable
         ...     experimental_data: pd.DataFrame = field(metadata={"delta": "extend"})
         ...     model: Optional[BaseEstimator] = field(metadata={"delta": "replace"}, default=None)

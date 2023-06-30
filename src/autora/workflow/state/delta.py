@@ -12,6 +12,72 @@ import pandas as pd
 
 S = TypeVar("S")
 
+from dataclasses import dataclass, field, fields, replace
+from typing import List
+
+class BaseState:
+    """
+    BaseState for dataclasses which use the Delta mechanism.
+
+    Examples:
+        >>> from dataclasses import dataclass, field
+
+        We define a dataclass where each field (which is going to be delta-ed) has additional
+        metadata "delta" which describes its delta behaviour.
+        >>> @dataclass(frozen=True)
+        ... class ListState(BaseState):
+        ...    l: List = field(default_factory=list, metadata={"delta": "extend"})
+        ...    m: List = field(default_factory=list, metadata={"delta": "replace"})
+
+        Now we instantiate the dataclass...
+        >>> l = ListState(l=list("abc"), m=list("xyz"))
+        >>> l
+        ListState(l=['a', 'b', 'c'], m=['x', 'y', 'z'])
+
+        ... and can add deltas to it. `l` will be extended:
+        >>> l + BaseDelta(l=list("def"))
+        ListState(l=['a', 'b', 'c', 'd', 'e', 'f'], m=['x', 'y', 'z'])
+
+        ... wheras `m` will be replaced:
+        >>> l + BaseDelta(m=list("uvw"))
+        ListState(l=['a', 'b', 'c'], m=['u', 'v', 'w'])
+
+        ... they can be chained:
+        >>> l + BaseDelta(l=list("def")) + BaseDelta(m=list("uvw"))
+        ListState(l=['a', 'b', 'c', 'd', 'e', 'f'], m=['u', 'v', 'w'])
+
+        ... and we update multiple fields with one Delta:
+        >>> l + BaseDelta(l=list("ghi"), m=list("rst"))
+        ListState(l=['a', 'b', 'c', 'g', 'h', 'i'], m=['r', 's', 't'])
+
+        Passing a nonexistent field will cause an error:
+        >>> l + BaseDelta(o="not a field")
+        Traceback (most recent call last):
+        ...
+        AttributeError: key=`o` is missing on ListState(l=['a', 'b', 'c'], m=['x', 'y', 'z'])
+
+    """
+    def __add__(self, other: BaseDelta):
+
+        updates = dict()
+        for key, other_value in other.data.items():
+            try:
+                self_field = next(filter(lambda f: f.name == key, fields(self)))
+            except StopIteration:
+                raise AttributeError("key=`%s` is missing on %s"%(key, self))
+            delta_behavior = self_field.metadata["delta"]
+            self_value = getattr(self, key)
+            if delta_behavior == "extend":
+                extended_value = _get_extended_value(self_value, other_value)
+                updates[key] = extended_value
+            elif delta_behavior == "replace":
+                updates[key] = other_value
+            else:
+                raise NotImplementedError("delta_behaviour=`%s` not implemented"%(delta_behavior))
+
+        new = replace(self, **updates)
+        return new
+
 
 @dataclasses.dataclass(frozen=True)
 class Delta(Generic[S]):
@@ -185,7 +251,25 @@ class GeneralDelta(Generic[S]):
         return new
 
 
-class DeltaReplace(UserDict, Generic[S]):
+class BaseDelta(UserDict, Generic[S]):
+    """
+    Represents a delta where the base object determines the extension behavior.
+
+    Examples:
+        >>> from dataclasses import dataclass
+
+        First we define the dataclass to act as the basis:
+        >>> from typing import Optional, List
+        >>> @dataclass(frozen=True)
+        ... class ListState:
+        ...     l: Optional[List] = None
+        ...     m: Optional[List] = None
+        ...
+    """
+    pass
+
+
+class DeltaReplace(BaseDelta, Generic[S]):
     """Representing an update to a dataclass where all the values are replaced.
 
     Examples:
@@ -245,7 +329,7 @@ class DeltaReplace(UserDict, Generic[S]):
         return new
 
 
-class DeltaExtend(UserDict, Generic[S]):
+class DeltaExtend(BaseDelta, Generic[S]):
     """Representing a delta on top of a dataclass, where values are extended.
 
     Examples:
@@ -316,6 +400,7 @@ class DeltaExtend(UserDict, Generic[S]):
         return new
 
 
+
 def _get_extended_value(base, extension):
     if isinstance(base, list):
         assert isinstance(extension, list)
@@ -345,7 +430,7 @@ def wrap_to_use_state(f):
         >>> @wrap_to_use_state
         ... def function(conditions):
         ...     new_conditions = [c + 10 for c in conditions]
-        ...     return GeneralDelta("replace", conditions=new_conditions)
+        ...     return Delta(conditions=new_conditions)
 
         >>> function(S(conditions=[1,2,3,4]))
         S(conditions=[11, 12, 13, 14])

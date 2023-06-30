@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import dataclasses
 import inspect
+from collections import UserDict
 from functools import wraps
 from typing import Generic, Literal, Optional, TypeVar, Union
 
@@ -179,6 +180,137 @@ class GeneralDelta(Generic[S]):
                 other_value = getattr(other, key)
                 extended_value = _get_extended_value(other_value, value)
                 updates[key] = extended_value
+
+        new = dataclasses.replace(other, **updates)
+        return new
+
+
+class DeltaReplace(UserDict, Generic[S]):
+    """Representing an update to a dataclass where all the values are replaced.
+
+    Examples:
+        >>> from dataclasses import dataclass
+
+        Use the Delta to handle updates to a state containing two lists.
+
+        First we define the dataclass to act as the basis:
+        >>> from typing import Optional, List
+        >>> @dataclass(frozen=True)
+        ... class ListState:
+        ...     l: Optional[List] = None
+        ...     m: Optional[List] = None
+
+        We start with an emtpy list-state:
+        >>> s = ListState(l=[], m=[])
+        >>> s
+        ListState(l=[], m=[])
+
+        We can extend the state (extending each of the lists independently) by adding a delta:
+        >>> d = DeltaReplace(l=["a"], m=list("abcde"))
+        >>> s + d
+        ListState(l=['a'], m=['a', 'b', 'c', 'd', 'e'])
+
+        ... or adding multiple deltas at once:
+        >>> e = DeltaReplace(l=list("bc"), m=["f"])
+        >>> s + d + e
+        ListState(l=['b', 'c'], m=['f'])
+
+        If we add just one field to the delta, it leaves any others unchanged:
+        >>> f = DeltaReplace(l=list("lace"))
+        >>> (s + d) + f
+        ListState(l=['l', 'a', 'c', 'e'], m=['a', 'b', 'c', 'd', 'e'])
+
+        Use the Delta to handle updates to a state containing a dataframe:
+        >>> import pandas as pd
+        >>> @dataclass(frozen=True)
+        ... class DataFrameState:
+        ...     data: pd.DataFrame
+
+
+        >>> s = DataFrameState(data=pd.DataFrame({"a": [1], "b": ["f"]}))
+        >>> s.data
+           a  b
+        0  1  f
+
+        >>> d = DeltaReplace(data=pd.DataFrame({"a":[2], "b":["s"]}))
+        >>> (s + d).data
+           a  b
+        0  2  s
+
+    """
+
+    def __radd__(self, other):
+        """This is the default behavior for the GeneralDelta, which concatenates dataframes"""
+        new = dataclasses.replace(other, **self.data)
+        return new
+
+
+class DeltaExtend(UserDict, Generic[S]):
+    """Representing a delta on top of a dataclass, where values are extended.
+
+    Examples:
+        >>> from dataclasses import dataclass
+
+        Use the Delta to handle updates to a state containing two lists.
+
+        First we define the dataclass to act as the basis:
+        >>> from typing import Optional, List
+        >>> @dataclass(frozen=True)
+        ... class ListState:
+        ...     l: Optional[List] = None
+        ...     m: Optional[List] = None
+
+        We start with an emtpy list-state:
+        >>> s = ListState(l=[], m=[])
+        >>> s
+        ListState(l=[], m=[])
+
+        We can extend the state (extending each of the lists independently) by adding a delta:
+        >>> d = DeltaExtend(l=["a"], m=list("abcde"))
+        >>> s + d
+        ListState(l=['a'], m=['a', 'b', 'c', 'd', 'e'])
+
+        ... or adding multiple deltas at once:
+        >>> e = DeltaExtend(l=list("bc"), m=["f"])
+        >>> s + d + e
+        ListState(l=['a', 'b', 'c'], m=['a', 'b', 'c', 'd', 'e', 'f'])
+
+        >>> s + e
+        ListState(l=['b', 'c'], m=['f'])
+
+        Use the Delta to handle updates to a state containing a dataframe:
+        >>> import pandas as pd
+        >>> @dataclass(frozen=True)
+        ... class DataFrameState:
+        ...     data: pd.DataFrame
+
+
+        >>> s = DataFrameState(data=pd.DataFrame({"a": [1], "b": ["f"]}))
+        >>> s.data
+           a  b
+        0  1  f
+
+        >>> d = DeltaExtend(data=pd.DataFrame({"a":[2], "b":["s"]}))
+        >>> (s + d).data
+           a  b
+        0  1  f
+        1  2  s
+
+    """
+
+    def __radd__(self, other):
+        """This is the default behavior for the DeltaExtend, which concatenates values"""
+
+        other_fields = set(field.name for field in dataclasses.fields(other))
+
+        updates = dict()
+        for key, value in self.data.items():
+            assert key in other_fields, f"{key=} must be in the left dataclass"
+            assert value is not None, f"{value=} may not be None"
+
+            other_value = getattr(other, key)
+            extended_value = _get_extended_value(other_value, value)
+            updates[key] = extended_value
 
         new = dataclasses.replace(other, **updates)
         return new

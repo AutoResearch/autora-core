@@ -262,6 +262,7 @@ def wrap_to_use_state(f):
     parameters = inspect.signature(f).parameters
 
     @wraps(f)
+    # TODO: how do we handle the params here?
     def _f(state: S, params: Optional[dict] = None) -> S:
         # Convert the dataclass to a dict of parameters
         arguments = dict((p, getattr(state, p)) for p in parameters)

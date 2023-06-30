@@ -2,16 +2,10 @@
 from __future__ import annotations
 
 import inspect
-from dataclasses import dataclass, field
 from functools import wraps
-from typing import Optional
+from typing import TypeVar
 
-import pandas as pd
-from autora.variable import Variable, VariableCollection
-from sklearn.base import BaseEstimator
-from sklearn.linear_model import LinearRegression
-
-from autora.workflow_.state import BaseState, Delta, S
+S = TypeVar("S")
 
 
 def wrap_to_use_state(f):
@@ -25,7 +19,7 @@ def wrap_to_use_state(f):
     Returns:
 
     Examples:
-        >>> from dataclasses import dataclass
+        >>> from dataclasses import dataclass, field
 
         The `State` it operates on needs to have the metadata described in the state module:
         >>> @dataclass
@@ -73,10 +67,17 @@ def wrap_to_use_state(f):
         >>> t_prime.model.coef_, t_prime.model.intercept_
         (array([[1.]]), array([2.]))
 
-        Arguments from the state can be overridden by passing them in as keyword arguments (
-        kwargs):
+        Arguments from the state can be overridden by passing them in as keyword arguments (kwargs):
+        >>> theorist(t, experimental_data=pd.DataFrame({"x": [0,1,2,3], "y": [12,13,14,15]}))\\
+        ...     .model.intercept_
+        array([12.])
+
+        ... and other arguments supported by the inner function can also be passed
+        (if and only if the inner function allows for and handles `**kwargs` arguments alongside
+        the values from the state).
         >>> theorist(t, fit_intercept=False).model.intercept_
         0.0
+
     """
     parameters_ = inspect.signature(f).parameters
 

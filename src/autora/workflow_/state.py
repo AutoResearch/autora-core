@@ -99,23 +99,16 @@ class Delta(UserDict, Generic[S]):
 
 
 @singledispatch
-def extend(a: S, b: S) -> S:
+def extend(a, b):
     """
     Function to extend supported datatypes.
-
-    Examples:
-        >>> extend([], [])
-        []
-
-        >>> extend([1,2], [3])
-        [1, 2, 3]
 
     """
     raise NotImplementedError("`extend` not implemented for %s, %s" % (a, b))
 
 
-@extend.register
-def extend_list(a: list, b: list) -> list:
+@extend.register(list)
+def extend_list(a, b):
     """
     Examples:
         >>> extend([], [])
@@ -127,8 +120,8 @@ def extend_list(a: list, b: list) -> list:
     return a + b
 
 
-@extend.register
-def extend_pd_dataframe(a: pd.DataFrame, b: pd.DataFrame) -> pd.DataFrame:
+@extend.register(pd.DataFrame)
+def extend_pd_dataframe(a, b):
     """
     Examples:
         >>> extend(pd.DataFrame({"a": []}), pd.DataFrame({"a": []}))
@@ -148,8 +141,8 @@ def extend_pd_dataframe(a: pd.DataFrame, b: pd.DataFrame) -> pd.DataFrame:
     return pd.concat((a, b), ignore_index=True)
 
 
-@extend.register
-def extend_np_ndarray(a: np.ndarray, b: np.ndarray) -> np.ndarray:
+@extend.register(np.ndarray)
+def extend_np_ndarray(a, b):
     """
     Examples:
         >>> extend(np.array([(1,2,3), (4,5,6)]), np.array([(7,8,9)]))
@@ -160,8 +153,8 @@ def extend_np_ndarray(a: np.ndarray, b: np.ndarray) -> np.ndarray:
     return np.row_stack([a, b])
 
 
-@extend.register
-def extend_dict(a: dict, b: dict) -> dict:
+@extend.register(dict)
+def extend_dict(a, b):
     """
     Examples:
         >>> extend({"a": "cats"}, {"b": "dogs"})

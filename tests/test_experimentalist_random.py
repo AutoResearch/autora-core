@@ -5,6 +5,7 @@ import pytest
 
 from autora.experimentalist.pipeline import make_pipeline
 from autora.experimentalist.pooler.grid import grid_pool
+from autora.experimentalist.pooler.random_pooler import random_pool
 from autora.experimentalist.sampler.random_sampler import random_sample
 from autora.variable import DV, IV, ValueType, VariableCollection
 
@@ -13,7 +14,24 @@ def weber_filter(values):
     return filter(lambda s: s[0] <= s[1], values)
 
 
-def test_random_experimentalist(metadata):
+def test_random_pooler_experimentalist(metadata):
+    """
+    Tests the implementation of a random pooler.
+    """
+    num_samples = 10
+
+    conditions = random_pool(metadata.independent_variables, num_samples=num_samples)
+
+    conditions = np.array(list(conditions))
+
+    assert conditions.shape[0] == num_samples
+    assert conditions.shape[1] == len(metadata.independent_variables)
+    for condition in conditions:
+        for idx, value in enumerate(condition):
+            assert value in metadata.independent_variables[idx].allowed_values
+
+
+def test_random_sampler_experimentalist(metadata):
     """
     Tests the implementation of the experimentalist pipeline with an exhaustive pool of discrete
     values, Weber filter, random selector. Tests two different implementations of the pool function
@@ -26,7 +44,7 @@ def test_random_experimentalist(metadata):
     # ---Implementation 1 - Pool using Callable via partial function----
     # Set up pipeline functions with partial
     pooler_callable = partial(grid_pool, ivs=metadata.independent_variables)
-    sampler = partial(random_sample, n=n_trials)
+    sampler = partial(random_sample, num_samples=n_trials)
     pipeline_random_samp = make_pipeline(
         [pooler_callable, weber_filter, sampler],
     )
@@ -64,7 +82,7 @@ def test_random_experimentalist_generator(metadata):
     n_trials = 25  # Number of trails for sampler to select
 
     pooler_generator = grid_pool(metadata.independent_variables)
-    sampler = partial(random_sample, n=n_trials)
+    sampler = partial(random_sample, num_samples=n_trials)
     pipeline_random_samp_poolgen = make_pipeline(
         [pooler_generator, weber_filter, sampler]
     )

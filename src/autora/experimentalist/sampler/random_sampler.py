@@ -4,7 +4,7 @@ from typing import Iterable, Sequence, Union
 from autora.utils.deprecation import deprecated_alias
 
 
-def random_sample(conditions: Union[Iterable, Sequence], n: int = 1):
+def random_sample(conditions: Union[Iterable, Sequence], num_samples: int = 1):
     """
     Uniform random sampling without replacement from a pool of conditions.
     Args:
@@ -18,7 +18,7 @@ def random_sample(conditions: Union[Iterable, Sequence], n: int = 1):
     if isinstance(conditions, Iterable):
         conditions = list(conditions)
     random.shuffle(conditions)
-    samples = conditions[0:n]
+    samples = conditions[0:num_samples]
 
     return samples
 

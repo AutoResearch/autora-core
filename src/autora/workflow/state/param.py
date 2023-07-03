@@ -3,18 +3,15 @@ from __future__ import annotations
 
 import copy
 import logging
-from functools import partial
 from typing import Dict, Mapping
 
 import numpy as np
-from autora.utils.deprecation import deprecate as deprecate_
+from autora.utils.deprecation import deprecate as deprecate
 from autora.utils.dictionary import LazyDict
 
 from ..protocol import SupportsControllerState
 
 _logger = logging.getLogger(__name__)
-
-deprecate = partial(deprecate_, callback=_logger.warning)
 
 
 def _get_state_dependent_properties(state: SupportsControllerState):

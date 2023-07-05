@@ -8,6 +8,8 @@ from autora.variable import VariableCollection
 from numpy.typing import ArrayLike
 from sklearn.base import BaseEstimator
 
+from autora.workflow_ import Delta
+
 from ..protocol import ResultKind, SupportsControllerStateHistory, SupportsDataKind
 from .snapshot import Snapshot
 
@@ -222,6 +224,110 @@ class History(SupportsControllerStateHistory):
         new_full_history = self.data + history_extension
 
         return History(history=new_full_history)
+
+    def __add__(self, other: Delta):
+        """The initial object is empty:
+        >>> h0 = History()
+        >>> h0
+        History([])
+
+        We can update the variables using the `.update` method:
+        >>> from autora.variable import VariableCollection
+        >>> h1 = h0 + Delta(variables=VariableCollection())
+        >>> h1  # doctest: +ELLIPSIS +NORMALIZE_WHITESPACE
+        History([Result(data=VariableCollection(...), kind=ResultKind.VARIABLES)])
+
+        ... the original object is unchanged:
+        >>> h0
+        History([])
+
+        We can update the variables again:
+        >>> h2 = h1 + Delta(variables=VariableCollection(["some IV"]))
+        >>> h2._by_kind  # doctest: +ELLIPSIS
+        Snapshot(variables=VariableCollection(independent_variables=['some IV'],...), ...)
+
+        ... and we see that there is only ever one variables object returned.
+
+        Params is treated the same way as variables:
+        >>> hp = h0 + Delta(params={'first': 'params'})
+        >>> hp
+        History([Result(data={'first': 'params'}, kind=ResultKind.PARAMS)])
+
+        ... where only the most recent "params" object is returned from the `.params` property.
+        >>> hp = hp + Delta(params={'second': 'params'})
+        >>> hp.params
+        {'second': 'params'}
+
+        ... however, the full history of the params objects remains available, if needed:
+        >>> hp  # doctest: +NORMALIZE_WHITESPACE
+        History([Result(data={'first': 'params'}, kind=ResultKind.PARAMS),
+                                Result(data={'second': 'params'}, kind=ResultKind.PARAMS)])
+
+        When we update the conditions, observations or models, a new entry is added to the
+        history:
+        >>> h3 = h0 + Delta(models=["1st model"])
+        >>> h3  # doctest: +NORMALIZE_WHITESPACE
+        History([Result(data='1st model', kind=ResultKind.MODEL)])
+
+        ... so we can see the history of all the models, for instance.
+        >>> h3 = h3 + Delta(models=["2nd model"])  # doctest: +NORMALIZE_WHITESPACE
+        >>> h3  # doctest: +NORMALIZE_WHITESPACE
+        History([Result(data='1st model', kind=ResultKind.MODEL),
+                                Result(data='2nd model', kind=ResultKind.MODEL)])
+
+        ... and the full history of models is available using the `.models` parameter:
+        >>> h3.models
+        ['1st model', '2nd model']
+
+        The same for the observations:
+        >>> h4 = h0 + Delta(observations=["1st observation"])
+        >>> h4
+        History([Result(data='1st observation', kind=ResultKind.OBSERVATION)])
+
+        >>> h4 + Delta(observations=["2nd observation"]
+        ... )  # doctest: +ELLIPSIS +NORMALIZE_WHITESPACE
+        History([Result(data='1st observation', kind=ResultKind.OBSERVATION),
+                                Result(data='2nd observation', kind=ResultKind.OBSERVATION)])
+
+
+        The same for the conditions:
+        >>> h5 = h0 + Delta(conditions=["1st condition"])
+        >>> h5
+        History([Result(data='1st condition', kind=ResultKind.CONDITION)])
+
+        >>> h5 + Delta(conditions=["2nd condition"])  # doctest: +NORMALIZE_WHITESPACE
+        History([Result(data='1st condition', kind=ResultKind.CONDITION),
+                                Result(data='2nd condition', kind=ResultKind.CONDITION)])
+
+        You can also update with multiple conditions, observations and models:
+        >>> h0 + Delta(conditions=['c1', 'c2'])  # doctest: +NORMALIZE_WHITESPACE
+        History([Result(data='c1', kind=ResultKind.CONDITION),
+                                Result(data='c2', kind=ResultKind.CONDITION)])
+
+        >>> h0 + Delta(models=['m1', 'm2'], variables={'m': 1}
+        ... ) # doctest: +NORMALIZE_WHITESPACE
+        History([Result(data={'m': 1}, kind=ResultKind.VARIABLES),
+                 Result(data='m1', kind=ResultKind.MODEL),
+                 Result(data='m2', kind=ResultKind.MODEL)])
+
+        >>> h0 + Delta(models=['m1'], observations=['o1'], variables={'m': 1}
+        ... )  # doctest: +NORMALIZE_WHITESPACE
+        History([Result(data={'m': 1}, kind=ResultKind.VARIABLES),
+                 Result(data='o1', kind=ResultKind.OBSERVATION),
+                 Result(data='m1', kind=ResultKind.MODEL)])
+
+        We can also update with a complete history:
+        >>> History() + Delta(history=[Result(data={'m': 2}, kind=ResultKind.VARIABLES),
+        ...                           Result(data='o1', kind=ResultKind.OBSERVATION),
+        ...                           Result(data='m1', kind=ResultKind.MODEL)],
+        ...                  conditions=['c1']
+        ... )  # doctest: +NORMALIZE_WHITESPACE
+        History([Result(data={'m': 2}, kind=ResultKind.VARIABLES),
+                 Result(data='o1', kind=ResultKind.OBSERVATION),
+                 Result(data='m1', kind=ResultKind.MODEL),
+                 Result(data='c1', kind=ResultKind.CONDITION)])
+        """
+        return self.update(**other)
 
     def __repr__(self):
         return f"{type(self).__name__}({self.history})"

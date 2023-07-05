@@ -134,7 +134,7 @@ def wrap_to_use_state(f):
         # All others must be provided as kwargs or default values on f.
         assert dataclasses.is_dataclass(state_)
         from_state = parameters_.intersection(
-            {f.name for f in dataclasses.fields(state_)}
+            {i.name for i in dataclasses.fields(state_)}
         )
         arguments_from_state = {k: getattr(state_, k) for k in from_state}
         arguments = dict(arguments_from_state, **kwargs)

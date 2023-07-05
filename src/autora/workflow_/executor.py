@@ -7,9 +7,11 @@ from __future__ import annotations
 import dataclasses
 import inspect
 from functools import wraps
-from typing import Callable, TypeVar
+from typing import Callable, Iterable, TypeVar
 
+import numpy as np
 import pandas as pd
+from autora.experimentalist.pipeline import Pipeline
 from autora.variable import VariableCollection
 from sklearn.base import BaseEstimator
 
@@ -167,7 +169,7 @@ def theorist_from_estimator(estimator: BaseEstimator) -> Executor:
 
 
 def experiment_runner_from_x_to_y_function(f: Callable[[X], Y]) -> Executor:
-    """Wrapper for experimentalists of the form $f(x) \rarrow y$, where `f` returns just the $y$
+    """Wrapper for experiment_runner of the form $f(x) \rarrow y$, where `f` returns just the $y$
     values"""
 
     @wrap_to_use_state
@@ -181,7 +183,7 @@ def experiment_runner_from_x_to_y_function(f: Callable[[X], Y]) -> Executor:
 
 
 def experiment_runner_from_x_to_xy_function(f: Callable[[X], XY]) -> Executor:
-    """Wrapper for experimentalists of the form $f(x) \rarrow (x,y)$, where `f`
+    """Wrapper for experiment_runner of the form $f(x) \rarrow (x,y)$, where `f`
     returns both $x$ and $y$ values in a complete dataframe."""
 
     @wrap_to_use_state
@@ -191,3 +193,21 @@ def experiment_runner_from_x_to_xy_function(f: Callable[[X], XY]) -> Executor:
         return Delta(experimental_data=experimental_data)
 
     return experiment_runner
+
+
+def experimentalist_from_pipeline(pipeline: Pipeline) -> Executor:
+    """Wrapper for experimentalists of the form $f() \rarrow x$, where `f`
+    returns both $x$ and $y$ values in a complete dataframe."""
+
+    @wrap_to_use_state
+    def experimentalist(params):
+        conditions = pipeline(**params)
+        if isinstance(conditions, (pd.DataFrame, np.ndarray, np.recarray)):
+            conditions_ = conditions
+        elif isinstance(conditions, Iterable):
+            conditions_ = np.array(list(conditions))
+        else:
+            raise NotImplementedError("type `%s` is not supported" % (type(conditions)))
+        return Delta(conditions=conditions_)
+
+    return experimentalist

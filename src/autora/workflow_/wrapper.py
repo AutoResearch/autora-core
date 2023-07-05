@@ -37,28 +37,28 @@ def theorist_from_estimator(estimator: BaseEstimator) -> Executor:
     return theorist
 
 
-def experimentalist_from_x_to_y_function(f: Callable[[X], Y]) -> Executor:
+def experiment_runner_from_x_to_y_function(f: Callable[[X], Y]) -> Executor:
     """Wrapper for experimentalists of the form $f(x) \rarrow y$, where `f` returns just the $y$
     values"""
 
     @wrap_to_use_state
-    def experimentalist(conditions: pd.DataFrame, **kwargs):
+    def experiment_runner(conditions: pd.DataFrame, **kwargs):
         x = conditions
         y = f(x, **kwargs)
         experimental_data = pd.DataFrame.merge(x, y, left_index=True, right_index=True)
         return Delta(experimental_data=experimental_data)
 
-    return experimentalist
+    return experiment_runner
 
 
-def experimentalist_from_x_to_xy_function(f: Callable[[X], XY]) -> Executor:
+def experiment_runner_from_x_to_xy_function(f: Callable[[X], XY]) -> Executor:
     """Wrapper for experimentalists of the form $f(x) \rarrow (x,y)$, where `f`
     returns both $x$ and $y$ values in a complete dataframe."""
 
     @wrap_to_use_state
-    def experimentalist(conditions: pd.DataFrame, **kwargs):
+    def experiment_runner(conditions: pd.DataFrame, **kwargs):
         x = conditions
         experimental_data = f(x, **kwargs)
         return Delta(experimental_data=experimental_data)
 
-    return experimentalist
+    return experiment_runner

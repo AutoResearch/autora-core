@@ -1,6 +1,7 @@
 """Functions to represent processes $f_i$ on states $S$ as $f_n(...(f_1(f_0(S))))$"""
 from __future__ import annotations
 
+import dataclasses
 import inspect
 from functools import wraps
 from typing import TypeVar
@@ -31,7 +32,7 @@ def wrap_to_use_state(f):
         ... class S(State):
         ...     conditions: List[int] = field(metadata={"delta": "replace"})
 
-        As before, we indicate the inputs required by the parameter names.
+        We indicate the inputs required by the parameter names.
         The output must be a `Delta` object.
         >>> from autora.workflow_ import Delta
         >>> @wrap_to_use_state
@@ -83,15 +84,46 @@ def wrap_to_use_state(f):
         >>> theorist(t, fit_intercept=False).model.intercept_
         0.0
 
+        Any parameters not provided by the state must be provided by default values or by the
+        caller. If the default is specified:
+        >>> @wrap_to_use_state
+        ... def experimentalist(conditions, offset=25):
+        ...     new_conditions = [c + offset for c in conditions]
+        ...     return Delta(conditions=new_conditions)
+
+        ... then it need not be passed.
+        >>> experimentalist(S(conditions=[1,2,3,4]))
+        S(conditions=[26, 27, 28, 29])
+
+        If a default isn't specified:
+        >>> @wrap_to_use_state
+        ... def experimentalist(conditions, offset):
+        ...     new_conditions = [c + offset for c in conditions]
+        ...     return Delta(conditions=new_conditions)
+
+        ... then calling the experimentalist without it will throw an error:
+        >>> experimentalist(S(conditions=[1,2,3,4]))
+        Traceback (most recent call last):
+        ...
+        TypeError: experimentalist() missing 1 required positional argument: 'offset'
+
+        ... which can be fixed by passing the argument as a keyword to the wrapped function.
+        >>> experimentalist(S(conditions=[1,2,3,4]), offset=2)
+        S(conditions=[3, 4, 5, 6])
+
     """
-    parameters_ = inspect.signature(f).parameters
+    # Get the set of parameter names from function f's signature
+    parameters_ = set(inspect.signature(f).parameters.keys())
 
     @wraps(f)
     def _f(state_: S, /, **kwargs) -> S:
-        # Convert the dataclass to a dict of parameters
-        arguments_from_state = dict(
-            (p, getattr(state_, p)) for p in parameters_ if p != "kwargs"
+        # Get the parameters needed which are available from the state_.
+        # All others must be provided as kwargs or default values on f.
+        assert dataclasses.is_dataclass(state_)
+        from_state = parameters_.intersection(
+            {f.name for f in dataclasses.fields(state_)}
         )
+        arguments_from_state = {k: getattr(state_, k) for k in from_state}
         arguments = dict(arguments_from_state, **kwargs)
         delta = f(**arguments)
         new_state = state_ + delta

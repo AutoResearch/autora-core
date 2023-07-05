@@ -1,1 +1,0 @@
-"""Generalized functional pipeline."""

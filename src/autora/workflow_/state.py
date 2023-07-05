@@ -98,6 +98,10 @@ class Delta(UserDict, Generic[S]):
     pass
 
 
+Result = Delta
+"""`Result` is an alias for `Delta`."""
+
+
 @singledispatch
 def extend(a, b):
     """

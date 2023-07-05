@@ -110,12 +110,12 @@ class Snapshot(State):
             TypeError: can only concatenate list (not "str") to list
 
         """
-
-        delta = Delta(
+        args = dict(
             variables=variables,
             params=params,
             conditions=conditions,
             observations=observations,
             models=models,
         )
+        delta = Delta((k, v) for k, v in args.items() if v is not None)
         return self + delta

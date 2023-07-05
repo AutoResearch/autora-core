@@ -59,8 +59,6 @@ class State:
     def __add__(self, other: Delta):
         updates = dict()
         for key, other_value in other.data.items():
-            if other_value is None:  # ignore "None"
-                continue
             try:
                 self_field = next(filter(lambda f: f.name == key, fields(self)))
             except StopIteration:

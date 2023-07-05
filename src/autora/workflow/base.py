@@ -2,11 +2,12 @@
 from __future__ import annotations
 
 import logging
-from typing import Callable, Generic, Mapping, Optional
-
-from .protocol import State
+from typing import Callable, Generic, Mapping, Optional, TypeVar
 
 _logger = logging.getLogger(__name__)
+
+
+State = TypeVar("State")
 
 
 class BaseController(Generic[State]):

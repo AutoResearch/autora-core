@@ -54,6 +54,10 @@ class State:
         ...
         AttributeError: key=`o` is missing on ListState(l=['a', 'b', 'c'], m=['x', 'y', 'z'])
 
+        We can also use the `.update` method to do the same thing:
+        >>> l.update(l=list("ghi"), m=list("rst"))
+        ListState(l=['a', 'b', 'c', 'g', 'h', 'i'], m=['r', 's', 't'])
+
     """
 
     def __add__(self, other: Delta):
@@ -77,6 +81,9 @@ class State:
 
         new = replace(self, **updates)
         return new
+
+    def update(self, **kwargs):
+        return self + Delta(**kwargs)
 
 
 class Delta(UserDict, Generic[S]):

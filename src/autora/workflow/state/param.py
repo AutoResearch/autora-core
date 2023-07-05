@@ -57,16 +57,18 @@ def _get_state_dependent_properties(state: SupportsControllerState):
                 lambda: np.row_stack(state.observations)[:, n_ivs:],
                 "%observations.dvs% is deprecated, " "use %data.observations% instead",
             ),
-            "%data.conditions[-1]%": lambda: np.array(state.observations[-1])[
-                :, 0:n_ivs
-            ],
-            "%data.observations[-1]%": lambda: np.array(state.observations[-1])[
-                :, n_ivs:
-            ],
-            "%data.conditions%": lambda: np.row_stack(
+            "%experiment_data.conditions[-1]%": lambda: np.array(
+                state.observations[-1]
+            )[:, 0:n_ivs],
+            "%experiment_data.observations[-1]%": lambda: np.array(
+                state.observations[-1]
+            )[:, n_ivs:],
+            "%experiment_data.conditions%": lambda: np.row_stack(
                 [np.empty([0, n_ivs + n_dvs])] + list(state.observations)
             )[:, 0:n_ivs],
-            "%data.observations%": lambda: np.row_stack(state.observations)[:, n_ivs:],
+            "%experiment_data.observations%": lambda: np.row_stack(state.observations)[
+                :, n_ivs:
+            ],
             "%models[-1]%": lambda: state.models[-1],
             "%models%": lambda: state.models,
         }

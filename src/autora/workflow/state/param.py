@@ -30,8 +30,9 @@ def _get_state_dependent_properties(state: SupportsControllerState):
         Nevertheless, we can iterate through its keys no problem:
         >>> [key for key in state_dependent_properties.keys()] # doctest: +NORMALIZE_WHITESPACE
         ['%observations.ivs[-1]%', '%observations.dvs[-1]%', '%observations.ivs%',
-         '%observations.dvs%', '%data.conditions[-1]%', '%data.observations[-1]%',
-         '%data.conditions%', '%data.observations%', '%models[-1]%', '%models%']
+         '%observations.dvs%', '%experiment_data.conditions[-1]%',
+         '%experiment_data.observations[-1]%', '%experiment_data.conditions%',
+         '%experiment_data.observations%', '%models[-1]%', '%models%']
 
     """
 

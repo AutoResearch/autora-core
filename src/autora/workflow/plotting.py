@@ -12,6 +12,7 @@ from matplotlib.ticker import MaxNLocator
 from .protocol import SupportsControllerState
 
 # Change default plot styles
+# TODO: move these into a context
 rcParams["axes.spines.top"] = False
 rcParams["axes.spines.right"] = False
 rcParams["legend.frameon"] = False

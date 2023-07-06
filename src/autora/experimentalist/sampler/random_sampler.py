@@ -1,6 +1,8 @@
 import random
 from typing import Iterable, Sequence, Union
 
+import numpy as np
+
 from autora.utils.deprecation import deprecated_alias
 
 
@@ -20,7 +22,7 @@ def random_sample(conditions: Union[Iterable, Sequence], num_samples: int = 1):
     random.shuffle(conditions)
     samples = conditions[0:num_samples]
 
-    return samples
+    return np.array(samples)
 
 
 random_sampler = deprecated_alias(random_sample, "random_sampler")

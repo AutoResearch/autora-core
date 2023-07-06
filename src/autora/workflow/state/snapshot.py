@@ -6,9 +6,8 @@ from autora.variable import VariableCollection
 from numpy.typing import ArrayLike
 from sklearn.base import BaseEstimator
 
-from autora.workflow_ import Delta
-
 from ..protocol import SupportsControllerStateFields
+from .delta import Delta
 
 
 @dataclass(frozen=True)
@@ -137,7 +136,7 @@ class Snapshot(SupportsControllerStateFields):
                             observations=[], models=[])
 
             We can update the params using the `+` operator:
-            >>> from autora.workflow_ import Delta
+            >>> from autora.workflow import Delta
             >>> s0 + Delta(params={'first': 'params'})  # doctest: +ELLIPSIS +NORMALIZE_WHITESPACE
             Snapshot(..., params={'first': 'params'}, ...)
 

@@ -189,7 +189,7 @@ def wrap_to_use_state(f):
     Returns:
 
     Examples:
-        >>> from autora.workflow_ import State, Delta
+        >>> from autora.workflow import State, Delta
         >>> from dataclasses import dataclass, field
         >>> import pandas as pd
         >>> from typing import List, Optional
@@ -201,7 +201,7 @@ def wrap_to_use_state(f):
 
         We indicate the inputs required by the parameter names.
         The output must be a `Delta` object.
-        >>> from autora.workflow_ import Delta
+        >>> from autora.workflow import Delta
         >>> @wrap_to_use_state
         ... def experimentalist(conditions):
         ...     new_conditions = [c + 10 for c in conditions]

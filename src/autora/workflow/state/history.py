@@ -8,9 +8,8 @@ from autora.variable import VariableCollection
 from numpy.typing import ArrayLike
 from sklearn.base import BaseEstimator
 
-from autora.workflow_ import Delta
-
 from ..protocol import ResultKind, SupportsControllerStateHistory, SupportsDataKind
+from .delta import Delta
 from .snapshot import Snapshot
 
 

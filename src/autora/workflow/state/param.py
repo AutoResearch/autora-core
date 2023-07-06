@@ -52,7 +52,7 @@ def _get_state_dependent_properties(state: SupportsControllerState):
                 lambda: np.row_stack(
                     [np.empty([0, n_ivs + n_dvs])] + list(state.observations)
                 )[:, 0:n_ivs],
-                "%observations.ivs% is deprecated, use %data.conditions% instead.",
+                "%observations.ivs% is deprecated, use %experiment_data.conditions% instead.",
             ),
             "%observations.dvs%": deprecate(
                 lambda: np.row_stack(state.observations)[:, n_ivs:],

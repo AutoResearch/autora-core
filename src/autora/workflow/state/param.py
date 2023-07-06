@@ -56,7 +56,7 @@ def _get_state_dependent_properties(state: SupportsControllerState):
             ),
             "%observations.dvs%": deprecate(
                 lambda: np.row_stack(state.observations)[:, n_ivs:],
-                "%observations.dvs% is deprecated, " "use %data.observations% instead",
+                "%observations.dvs% is deprecated, " "use %experiment_data.observations% instead",
             ),
             "%experiment_data.conditions[-1]%": lambda: np.array(
                 state.observations[-1]

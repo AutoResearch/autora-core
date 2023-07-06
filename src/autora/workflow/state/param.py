@@ -42,7 +42,7 @@ def _get_state_dependent_properties(state: SupportsControllerState):
         {
             "%observations.ivs[-1]%": deprecate(
                 lambda: np.array(state.observations[-1])[:, 0:n_ivs],
-                "%observations.ivs[-1]% is deprecated, use %data.conditions[-1]% instead.",
+                "%observations.ivs[-1]% is deprecated, use %experiment_data.conditions[-1]% instead.",
             ),
             "%observations.dvs[-1]%": deprecate(
                 lambda: np.array(state.observations[-1])[:, n_ivs:],

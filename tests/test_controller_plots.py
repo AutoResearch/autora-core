@@ -4,7 +4,7 @@ import numpy as np
 import pytest
 from autora.experimentalist.pipeline import Pipeline
 from autora.experimentalist.pooler.grid import grid_pool
-from autora.experimentalist.sampler.random_sampler import random_sampler
+from autora.experimentalist.sampler.random_sampler import random_sample
 from autora.variable import Variable, VariableCollection
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import r2_score
@@ -47,7 +47,7 @@ def state_lr(ground_truth_1x):
     example_experimentalist = Pipeline(
         [
             ("pool", grid_pool),
-            ("sampler", random_sampler),
+            ("sampler", random_sample),
             ("transform", lambda x: [s[0] for s in x]),
         ],
         params={
@@ -112,7 +112,7 @@ def cycle_multi_lr(ground_truth_2x):
     example_experimentalist = Pipeline(
         [
             ("pool", grid_pool),
-            ("sampler", random_sampler),
+            ("sampler", random_sample),
             ("transform", lambda x: np.array(x)),
         ],
         params={

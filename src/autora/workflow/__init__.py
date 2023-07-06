@@ -472,14 +472,14 @@ Examples:
 
 
     ... whereas we need some model for this sampler:
-    >>> from autora.experimentalist.sampler.model_disagreement import model_disagreement_sampler
+    >>> from autora.experimentalist.sampler.model_disagreement import model_disagreement_sample
     >>> experimentalist_which_needs_a_model = Pipeline([
     ...     ('pool', np.linspace(*variables_2.independent_variables[0].value_range, 1_000)),
-    ...     ('sampler', partial(model_disagreement_sampler, num_samples=5)),])
+    ...     ('sampler', partial(model_disagreement_sample, num_samples=5)),])
     >>> experimentalist_which_needs_a_model()
     Traceback (most recent call last):
     ...
-    TypeError: model_disagreement_sampler() missing 1 required positional argument: 'models'
+    TypeError: model_disagreement_sample() missing 1 required positional argument: 'models'
 
     We'll have to provide the models during the cycle run.
 

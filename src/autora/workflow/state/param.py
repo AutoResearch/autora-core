@@ -6,6 +6,7 @@ import logging
 from typing import Dict, Mapping
 
 import numpy as np
+from autora.utils.deprecation import deprecate as deprecate
 from autora.utils.dictionary import LazyDict
 
 from ..protocol import SupportsControllerState
@@ -29,7 +30,9 @@ def _get_state_dependent_properties(state: SupportsControllerState):
         Nevertheless, we can iterate through its keys no problem:
         >>> [key for key in state_dependent_properties.keys()] # doctest: +NORMALIZE_WHITESPACE
         ['%observations.ivs[-1]%', '%observations.dvs[-1]%', '%observations.ivs%',
-        '%observations.dvs%', '%models[-1]%', '%models%']
+         '%observations.dvs%', '%experiment_data.conditions[-1]%',
+         '%experiment_data.observations[-1]%', '%experiment_data.conditions%',
+         '%experiment_data.observations%', '%models[-1]%', '%models%']
 
     """
 
@@ -37,16 +40,36 @@ def _get_state_dependent_properties(state: SupportsControllerState):
     n_dvs = len(state.variables.dependent_variables)
     state_dependent_property_dict = LazyDict(
         {
-            "%observations.ivs[-1]%": lambda: np.array(state.observations[-1])[
-                :, 0:n_ivs
-            ],
-            "%observations.dvs[-1]%": lambda: np.array(state.observations[-1])[
-                :, n_ivs:
-            ],
-            "%observations.ivs%": lambda: np.row_stack(
+            "%observations.ivs[-1]%": deprecate(
+                lambda: np.array(state.observations[-1])[:, 0:n_ivs],
+                "%observations.ivs[-1]% is deprecated, use %data.conditions[-1]% instead.",
+            ),
+            "%observations.dvs[-1]%": deprecate(
+                lambda: np.array(state.observations[-1])[:, n_ivs:],
+                "%observations.dvs[-1]% is deprecated, use %data.observations[-1]% instead.",
+            ),
+            "%observations.ivs%": deprecate(
+                lambda: np.row_stack(
+                    [np.empty([0, n_ivs + n_dvs])] + list(state.observations)
+                )[:, 0:n_ivs],
+                "%observations.ivs% is deprecated, use %data.conditions% instead.",
+            ),
+            "%observations.dvs%": deprecate(
+                lambda: np.row_stack(state.observations)[:, n_ivs:],
+                "%observations.dvs% is deprecated, " "use %data.observations% instead",
+            ),
+            "%experiment_data.conditions[-1]%": lambda: np.array(
+                state.observations[-1]
+            )[:, 0:n_ivs],
+            "%experiment_data.observations[-1]%": lambda: np.array(
+                state.observations[-1]
+            )[:, n_ivs:],
+            "%experiment_data.conditions%": lambda: np.row_stack(
                 [np.empty([0, n_ivs + n_dvs])] + list(state.observations)
             )[:, 0:n_ivs],
-            "%observations.dvs%": lambda: np.row_stack(state.observations)[:, n_ivs:],
+            "%experiment_data.observations%": lambda: np.row_stack(state.observations)[
+                :, n_ivs:
+            ],
             "%models[-1]%": lambda: state.models[-1],
             "%models%": lambda: state.models,
         }

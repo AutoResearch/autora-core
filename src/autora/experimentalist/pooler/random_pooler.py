@@ -11,7 +11,7 @@ from autora.variable import IV, ValueType, Variable, VariableCollection
 
 
 @wrap_to_use_state
-def experimentalist(
+def random_experimentalist(
     variables: VariableCollection,
     num_samples=5,
     random_state=None,
@@ -47,7 +47,7 @@ def experimentalist(
         ... ]))
 
         ... we get some of those values back when running the experimentalist:
-        >>> experimentalist(s, random_state=1).conditions
+        >>> random_experimentalist(s, random_state=1).conditions
            x
         0  4
         1  5
@@ -62,7 +62,7 @@ def experimentalist(
         ... ]))
 
         ... we get a sample of the range back when running the experimentalist:
-        >>> experimentalist(t, random_state=1).conditions
+        >>> random_experimentalist(t, random_state=1).conditions
                   x
         0  0.118216
         1  4.504637
@@ -73,7 +73,7 @@ def experimentalist(
 
 
         The allowed_values or value_range must be specified:
-        >>> experimentalist(
+        >>> random_experimentalist(
         ...     S(variables=VariableCollection(independent_variables=[Variable(name="x")])))
         Traceback (most recent call last):
         ...
@@ -85,7 +85,7 @@ def experimentalist(
         ...         Variable(name="x1", allowed_values=range(1, 5)),
         ...         Variable(name="x2", allowed_values=range(1, 500)),
         ... ]))
-        >>> experimentalist(t, num_samples=10, duplicates=True, random_state=1).conditions
+        >>> random_experimentalist(t, num_samples=10, duplicates=True, random_state=1).conditions
            x1   x2
         0   2  434
         1   3  212
@@ -99,7 +99,7 @@ def experimentalist(
         9   2   14
 
         If any of the variables have unspecified allowed_values, we get an error:
-        >>> experimentalist(S(
+        >>> random_experimentalist(S(
         ...     variables=VariableCollection(independent_variables=[
         ...         Variable(name="x1", allowed_values=[1, 2]),
         ...         Variable(name="x2"),
@@ -116,7 +116,7 @@ def experimentalist(
         ...         Variable(name="y", allowed_values=[3, 4]),
         ...         Variable(name="z", allowed_values=np.linspace(20, 30, 11)),
         ... ]))
-        >>> experimentalist(u, random_state=1).conditions
+        >>> random_experimentalist(u, random_state=1).conditions
              x  y     z
         0 -0.6  3  29.0
         1  0.2  4  24.0
@@ -126,16 +126,16 @@ def experimentalist(
 
         The output can be in several formats. The default is pd.DataFrame.
         Alternative: `np.recarray`:
-        >>> experimentalist(s, fmt=np.recarray, random_state=1).conditions
+        >>> random_experimentalist(s, fmt=np.recarray, random_state=1).conditions
         rec.array([(4,), (5,), (7,), (9,), (0,)],
                   dtype=[('x', '<i...')])
 
-        >>> experimentalist(t, fmt=np.recarray, random_state=1).conditions
+        >>> random_experimentalist(t, fmt=np.recarray, random_state=1).conditions
         rec.array([(2,  72), (3, 411), (4, 474), (4, 125), (1, 156)],
                   dtype=[('x1', '<i...'), ('x2', '<i...')])
 
         Alternative: `np.array` (without field names):
-        >>> experimentalist(t, fmt=np.array, random_state=1).conditions
+        >>> random_experimentalist(t, fmt=np.array, random_state=1).conditions
         array([[  2,  72],
                [  3, 411],
                [  4, 474],

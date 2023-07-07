@@ -8,11 +8,11 @@ from typing import Callable, Iterable, TypeVar
 
 import numpy as np
 import pandas as pd
-from autora.experimentalist.pipeline import Pipeline
-from autora.variable import VariableCollection
 from sklearn.base import BaseEstimator
 
+from autora.experimentalist.pipeline import Pipeline
 from autora.state.delta import Delta, State, wrap_to_use_state
+from autora.variable import VariableCollection
 
 S = TypeVar("S")
 X = TypeVar("X")

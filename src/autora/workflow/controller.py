@@ -4,11 +4,11 @@ from __future__ import annotations
 import logging
 from typing import Callable, Dict, Optional
 
-from autora.experimentalist.pipeline import Pipeline
-from autora.variable import VariableCollection
 from sklearn.base import BaseEstimator
 
+from autora.experimentalist.pipeline import Pipeline
 from autora.state.history import History
+from autora.variable import VariableCollection
 
 from .base import BaseController
 from .executor import (

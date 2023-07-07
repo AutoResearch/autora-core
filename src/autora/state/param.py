@@ -6,10 +6,10 @@ import logging
 from typing import Dict, Mapping
 
 import numpy as np
-from autora.utils.deprecation import deprecate as deprecate
-from autora.utils.dictionary import LazyDict
 
 from autora.state.protocol import SupportsControllerState
+from autora.utils.deprecation import deprecate as deprecate
+from autora.utils.dictionary import LazyDict
 
 _logger = logging.getLogger(__name__)
 

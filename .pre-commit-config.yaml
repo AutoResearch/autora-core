@@ -27,5 +27,6 @@ repos:
       - id: nb-clean
         args:
           - --preserve-cell-outputs
+          - --remove-empty-cells
 default_language_version:
   python: python3

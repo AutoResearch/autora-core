@@ -22,9 +22,7 @@ This means that there are various combinations that these variables can form, th
 
 
 ### Example Code
-
 ```python
-
 from autora.experimentalist.pooler.grid import grid_pool
 from autora.variable import Variable
 

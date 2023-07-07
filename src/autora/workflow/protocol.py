@@ -62,10 +62,21 @@ class SupportsDataKind(Protocol):
     kind: Optional[ResultKind]
 
 
-class SupportsStateParams(Protocol):
+class SupportsStateParamsField(Protocol):
     """Support a state with a params property."""
 
     params: Dict
+
+
+class SupportsStateParamsProperty(Protocol):
+    """Support a state with a params property."""
+
+    @property
+    def params(self) -> Dict:
+        ...
+
+
+SupportsStateParams = Union[SupportsStateParamsField, SupportsStateParamsProperty]
 
 
 class SupportsControllerStateFields(Protocol):

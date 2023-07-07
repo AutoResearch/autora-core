@@ -12,13 +12,13 @@ from autora.utils.deprecation import deprecated_alias
 def random_sample(conditions, num_samples: int = 1, random_state: Optional[int] = None):
     """
     Uniform random sampling without replacement from a pool of conditions.
+
     Args:
         conditions: Pool of conditions
         num_samples: number of samples to collect
+        random_state: initialization parameter for the random sampler
 
     Returns: Sampled pool
-
-    Examples:
 
     """
 
@@ -32,6 +32,8 @@ def random_sample_sequence(
     conditions, num_samples: int = 1, random_state: Optional[int] = None
 ):
     """
+    Single dispatch variant of random_sample for list, range and filter objects
+
     Examples:
         From a range:
         >>> random.seed(1)
@@ -63,12 +65,7 @@ def random_sample_dataframe(
     conditions, num_samples: int = 1, random_state: Optional[int] = None
 ):
     """
-
-    Args:
-        conditions:
-        num_samples:
-
-    Returns:
+    Single dispatch variant of random_sample for pd.DataFrames
 
     Examples:
         From a pd.DataFrame:
@@ -83,7 +80,9 @@ def random_sample_dataframe(
         96  196
 
     """
-    return pd.DataFrame.sample(conditions, random_state=random_state, n=num_samples)
+    return pd.DataFrame.sample(
+        conditions, random_state=random_state, n=num_samples, replace=False
+    )
 
 
 @random_sample.register(np.ndarray)
@@ -92,23 +91,18 @@ def random_sample_np_array(
     conditions, num_samples: int = 1, random_state: Optional[int] = None
 ):
     """
-
-    Args:
-        conditions:
-        num_samples:
-
-    Returns:
+    Single dispatch variant of random_sample for np.ndarray and np.recarray
 
     Examples:
         From a pd.DataFrame:
         >>> import numpy as np
         >>> random_sample(np.linspace([-1, -100], [1, 100], 101), num_samples=5,
         ...     random_state=180)
-        array([[ -0.52, -52.  ],
-               [  0.16,  16.  ],
-               [  0.14,  14.  ],
-               [  0.34,  34.  ],
-               [ -0.18, -18.  ]])
+        array([[  0.12,  12.  ],
+               [ -0.18, -18.  ],
+               [ -0.54, -54.  ],
+               [  0.32,  32.  ],
+               [  0.96,  96.  ]])
 
         >>> random_sample(np.core.records.fromrecords([
         ...     ("a", 1, "alpha"),
@@ -120,7 +114,7 @@ def random_sample_np_array(
               dtype=(numpy.record, [('l', '<U1'), ('n', '<i8'), ('g', '<U5')]))
     """
     rng = np.random.default_rng(random_state)
-    return rng.choice(conditions, size=num_samples)
+    return rng.choice(conditions, size=num_samples, replace=False)
 
 
 random_sampler = deprecated_alias(random_sample, "random_sampler")

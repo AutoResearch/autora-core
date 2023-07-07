@@ -2,13 +2,16 @@ import pickle
 import tempfile
 from abc import abstractmethod
 from pathlib import Path
-from typing import Generic, Mapping, NamedTuple, Type, Union
+from typing import Generic, Mapping, NamedTuple, Type, TypeVar, Union
 
 import numpy as np
 
-from ..protocol import ResultKind, State, SupportsLoadDump
+from autora.state.history import History
+from autora.state.protocol import ResultKind, SupportsLoadDump
+
 from ..serializer import yaml_ as YAMLSerializer
-from ..state import History
+
+State = TypeVar("State")
 
 
 class _DumpSpec(NamedTuple):
@@ -71,7 +74,7 @@ class HistorySerializer(StateSerializer[History]):
             First, we need to initialize a FilesystemCycleDataCollection. This is usually handled
             by the cycle itself. We start with a data collection as it would be at the very start of
             an experiment, with just a VariableCollection.
-            >>> from autora.workflow.state.history import History
+            >>> from autora.state.history import History
             >>> c = History()
             >>> c  #doctest: +NORMALIZE_WHITESPACE
             History([])
@@ -146,7 +149,7 @@ class HistorySerializer(StateSerializer[History]):
             >>> from sklearn.linear_model import LinearRegression
             >>> from autora.variable import VariableCollection
             >>> import numpy as np
-            >>> from autora.workflow.state.history import History
+            >>> from autora.state.history import History
             >>> import tempfile
             >>> x = np.linspace(-2, 2, 10).reshape(-1, 1) * np.pi
             >>> y = 3. * x + 0.1 * np.sin(x - 0.1) - 2.
@@ -162,7 +165,7 @@ class HistorySerializer(StateSerializer[History]):
 
             We can now compare the dumped object "c" with the reloaded object "e". The data arrays
             should be equal, and the models should
-            >>> from autora.workflow.protocol import ResultKind
+            >>> from autora.state.protocol import ResultKind
             >>> for e_i, c_i in zip(e.history, c.history):
             ...     assert isinstance(e_i.data, type(c_i.data)) # Types match
             ...     if e_i.kind in (ResultKind.CONDITION, ResultKind.OBSERVATION):

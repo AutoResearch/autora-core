@@ -8,6 +8,8 @@ from autora.experimentalist.pipeline import Pipeline
 from autora.variable import VariableCollection
 from sklearn.base import BaseEstimator
 
+from autora.state.history import History
+
 from .base import BaseController
 from .executor import (
     ChainedFunctionMapping,
@@ -16,7 +18,6 @@ from .executor import (
     from_theorist_estimator,
 )
 from .planner import last_result_kind_planner
-from .state import History
 
 _logger = logging.getLogger(__name__)
 

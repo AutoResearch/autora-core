@@ -12,7 +12,7 @@ from autora.experimentalist.pipeline import Pipeline
 from autora.variable import VariableCollection
 from sklearn.base import BaseEstimator
 
-from .state.delta import Delta, State, wrap_to_use_state
+from autora.state.delta import Delta, State, wrap_to_use_state
 
 S = TypeVar("S")
 X = TypeVar("X")

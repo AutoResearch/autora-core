@@ -4,7 +4,7 @@ from __future__ import annotations
 import logging
 from typing import Callable, Generic, Mapping, Optional, TypeVar
 
-from .protocol import Executor, SupportsStateParams
+from autora.state.protocol import Executor, SupportsStateParams
 
 _logger = logging.getLogger(__name__)
 

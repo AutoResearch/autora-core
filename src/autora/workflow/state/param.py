@@ -6,5 +6,5 @@ _logger = logging.getLogger(__name__)
 
 _logger.warning(
     "`autora.workflow.state.param` will be removed in a future release. "
-    "Use `autora.state.param` in future."
+    "Use `autora.state.param` instead."
 )

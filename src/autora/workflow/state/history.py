@@ -6,5 +6,5 @@ _logger = logging.getLogger(__name__)
 
 _logger.warning(
     "`autora.workflow.state.history` will be removed in a future release. "
-    "Use `autora.state.history` in future."
+    "Use `autora.state.history` instead."
 )

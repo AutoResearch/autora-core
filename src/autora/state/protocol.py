@@ -13,9 +13,10 @@ from typing import (
     runtime_checkable,
 )
 
-from autora.variable import VariableCollection
 from numpy.typing import ArrayLike
 from sklearn.base import BaseEstimator
+
+from autora.variable import VariableCollection
 
 State = TypeVar("State")
 

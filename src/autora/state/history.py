@@ -4,7 +4,6 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any, Dict, Iterable, List, Optional, Sequence, Set, Union
 
-from autora.variable import VariableCollection
 from numpy.typing import ArrayLike
 from sklearn.base import BaseEstimator
 
@@ -15,6 +14,7 @@ from autora.state.protocol import (
     SupportsDataKind,
 )
 from autora.state.snapshot import Snapshot
+from autora.variable import VariableCollection
 
 
 class History(SupportsControllerStateHistory):

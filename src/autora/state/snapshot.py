@@ -2,12 +2,12 @@
 from dataclasses import dataclass, field
 from typing import Dict, List
 
-from autora.variable import VariableCollection
 from numpy.typing import ArrayLike
 from sklearn.base import BaseEstimator
 
 from autora.state.delta import Delta
 from autora.state.protocol import SupportsControllerStateFields
+from autora.variable import VariableCollection
 
 
 @dataclass(frozen=True)

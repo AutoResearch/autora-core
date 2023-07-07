@@ -2,6 +2,7 @@ from enum import Enum
 from typing import (
     Any,
     Dict,
+    Generic,
     Mapping,
     Optional,
     Protocol,
@@ -59,6 +60,12 @@ class SupportsDataKind(Protocol):
 
     data: Optional[Any]
     kind: Optional[ResultKind]
+
+
+class SupportsStateParams(Protocol):
+    """Support a state with a params property."""
+
+    params: Dict
 
 
 class SupportsControllerStateFields(Protocol):
@@ -120,10 +127,10 @@ class SupportsControllerStateHistory(SupportsControllerStateProperties, Protocol
         ...
 
 
-class Executor(Protocol):
+class Executor(Protocol, Generic[State]):
     """A Callable which, given some state, and some parameters, returns an updated state."""
 
-    def __call__(self, __state: State, __params: Dict) -> State:
+    def __call__(self, ___state: State, params: Dict) -> State:
         ...
 
 

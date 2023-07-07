@@ -464,7 +464,7 @@ Examples:
     Wen can run the seed pipeline with no data:
     >>> experimentalist_which_needs_no_data = make_pipeline([
     ...     np.linspace(*variables_2.independent_variables[0].value_range, 1_000),
-    ...     partial(random_sampler, n=10)]
+    ...     partial(random_sampler, num_samples=10)]
     ... )
     >>> np.array(experimentalist_which_needs_no_data())
     array([ 6.71671672, -0.73073073, -5.05505506,  6.13613614,  0.03003003,

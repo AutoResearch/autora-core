@@ -20,4 +20,5 @@ nav:
       - Random:
           - Home: 'experimentalists/sampler/random/index.md'
           - Quickstart: 'experimentalists/sampler/random/quickstart.md'
-
+- Cycle:
+  - Functional: 'cycle/Linear and Cyclical Workflows using Functions and States.ipynb'

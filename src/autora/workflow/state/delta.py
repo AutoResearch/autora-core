@@ -6,12 +6,13 @@ import inspect
 from collections import UserDict
 from dataclasses import dataclass, fields, replace
 from functools import singledispatch, wraps
-from typing import Generic, TypeVar
+from typing import Generic, List, TypeVar
 
 import numpy as np
 import pandas as pd
 
 S = TypeVar("S")
+T = TypeVar("T")
 
 
 @dataclass(frozen=True)
@@ -60,6 +61,19 @@ class State:
         >>> l.update(l=list("ghi"), m=list("rst"))
         ListState(l=['a', 'b', 'c', 'g', 'h', 'i'], m=['r', 's', 't'])
 
+        We can also define fields which `append` the last result:
+        >>> @dataclass(frozen=True)
+        ... class AppendState(State):
+        ...    n: List = field(default_factory=list, metadata={"delta": "append"})
+
+        >>> m = AppendState(n=list("ɑβɣ"))
+        >>> m
+        AppendState(n=['ɑ', 'β', 'ɣ'])
+
+        `n` will be appended:
+        >>> m + Delta(n="∂")
+        AppendState(n=['ɑ', 'β', 'ɣ', '∂'])
+
     """
 
     def __add__(self, other: Delta):
@@ -74,6 +88,9 @@ class State:
             if delta_behavior == "extend":
                 extended_value = extend(self_value, other_value)
                 updates[key] = extended_value
+            elif delta_behavior == "append":
+                appended_value = append(self_value, other_value)
+                updates[key] = appended_value
             elif delta_behavior == "replace":
                 updates[key] = other_value
             else:
@@ -152,6 +169,11 @@ def extend_pd_dataframe(a, b):
         5  6
     """
     return pd.concat((a, b), ignore_index=True)
+
+
+def append(a: List[T], b: T) -> List[T]:
+    # TODO: add DOCTESTS
+    return a + [b]
 
 
 @extend.register(np.ndarray)

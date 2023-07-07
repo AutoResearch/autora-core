@@ -5,7 +5,9 @@ site_name: AutoRA Workflow
 
 nav:
 - Introduction: 'index.md'
-- Interactive:
+- Functional Approach:
+    - 'interactive/Linear and Cyclical Workflows using Functions and States.ipynb'
+- Object-Oriented Approach:
     - 'interactive/Basic Usage.ipynb'
     - 'interactive/Passing Static Parameters.ipynb'
     - "interactive/Accessing State Dependent Properties.ipynb"

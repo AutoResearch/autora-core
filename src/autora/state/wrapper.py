@@ -31,11 +31,11 @@ def theorist_from_estimator(estimator: BaseEstimator) -> Executor:
 
     @wrap_to_use_state
     def theorist(
-        experimental_data: pd.DataFrame, variables: VariableCollection, **kwargs
+        experiment_data: pd.DataFrame, variables: VariableCollection, **kwargs
     ):
         ivs = [v.name for v in variables.independent_variables]
         dvs = [v.name for v in variables.dependent_variables]
-        X, y = experimental_data[ivs], experimental_data[dvs]
+        X, y = experiment_data[ivs], experiment_data[dvs]
         new_model = estimator.set_params(**kwargs).fit(X, y)
         return Delta(model=new_model)
 
@@ -50,8 +50,8 @@ def experiment_runner_from_x_to_y_function(f: Callable[[X], Y]) -> Executor:
     def experiment_runner(conditions: pd.DataFrame, **kwargs):
         x = conditions
         y = f(x, **kwargs)
-        experimental_data = pd.DataFrame.merge(x, y, left_index=True, right_index=True)
-        return Delta(experimental_data=experimental_data)
+        experiment_data = pd.DataFrame.merge(x, y, left_index=True, right_index=True)
+        return Delta(experiment_data=experiment_data)
 
     return experiment_runner
 
@@ -63,8 +63,8 @@ def experiment_runner_from_x_to_xy_function(f: Callable[[X], XY]) -> Executor:
     @wrap_to_use_state
     def experiment_runner(conditions: pd.DataFrame, **kwargs):
         x = conditions
-        experimental_data = f(x, **kwargs)
-        return Delta(experimental_data=experimental_data)
+        experiment_data = f(x, **kwargs)
+        return Delta(experiment_data=experiment_data)
 
     return experiment_runner
 

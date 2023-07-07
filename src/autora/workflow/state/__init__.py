@@ -8,6 +8,6 @@ from autora.state.snapshot import Snapshot
 _logger = logging.getLogger(__name__)
 
 _logger.warning(
-    "`autora.workflow.state` will be removed in a future release. "
+    "`autora.workflow.state` and its submodules will be removed in a future release. "
     "Use `autora.state` in future."
 )

@@ -1,19 +1,14 @@
-from itertools import product
-from typing import List
+import logging
 
-from autora.variable import IV
+from autora.experimentalist.grid_ import grid_pool as grid_pool_
+from autora.utils.deprecation import deprecate
 
+_logger = logging.getLogger(__name__)
 
-def grid_pool(ivs: List[IV]):
-    """Creates exhaustive pool from discrete values using a Cartesian product of sets"""
-    # Get allowed values for each IV
-    l_iv_values = []
-    for iv in ivs:
-        assert iv.allowed_values is not None, (
-            f"gridsearch_pool only supports independent variables with discrete allowed values, "
-            f"but allowed_values is None on {iv=} "
-        )
-        l_iv_values.append(iv.allowed_values)
-
-    # Return Cartesian product of all IV values
-    return product(*l_iv_values)
+grid_pool = deprecate(
+    grid_pool_,
+    "`from autora.experimentalist.pooler.grid import grid_pool` "
+    "will be deprecated in future. Instead, use"
+    "`from autora.experimentalist.grid import grid_pool`",
+    callback=_logger.info,
+)

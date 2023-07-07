@@ -141,7 +141,7 @@ class SupportsControllerStateHistory(SupportsControllerStateProperties, Protocol
 class Executor(Protocol, Generic[State]):
     """A Callable which, given some state, and some parameters, returns an updated state."""
 
-    def __call__(self, ___state: State, params: Dict) -> State:
+    def __call__(self, __state: State, params: Dict) -> State:
         ...
 
 

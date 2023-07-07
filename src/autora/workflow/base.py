@@ -2,11 +2,14 @@
 from __future__ import annotations
 
 import logging
-from typing import Callable, Generic, Mapping, Optional
+from typing import Callable, Generic, Mapping, Optional, TypeVar
 
-from .protocol import State
+from .protocol import Executor, SupportsStateParams
 
 _logger = logging.getLogger(__name__)
+
+
+State = TypeVar("State", bound=SupportsStateParams)
 
 
 class BaseController(Generic[State]):
@@ -35,7 +38,7 @@ class BaseController(Generic[State]):
         self,
         state: State,
         planner: Callable[[State], str],
-        executor_collection: Mapping[str, Callable[[State], State]],
+        executor_collection: Mapping[str, Executor[State]],
         monitor: Optional[Callable[[State], None]] = None,
     ):
         """

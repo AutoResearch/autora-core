@@ -48,7 +48,7 @@ class ChainedFunctionMapping(collections.UserDict):
 
     """
 
-    def __getitem__(self, key):
+    def __getitem__(self, key: str):
         functions: List = list(reversed(self.data[key]))
         f = functions[0]
         for fi in functions[1:]:

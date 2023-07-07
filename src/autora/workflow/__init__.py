@@ -556,8 +556,3 @@ Examples:
 """
 from .controller import Controller
 from .cycle import Cycle
-from .wrapper import (
-    experiment_runner_from_x_to_xy_function,
-    experiment_runner_from_x_to_y_function,
-    theorist_from_estimator,
-)

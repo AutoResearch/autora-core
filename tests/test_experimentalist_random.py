@@ -3,7 +3,6 @@ from functools import partial
 import numpy as np
 import pytest
 
-from autora.experimentalist.grid_ import grid_pool
 from autora.experimentalist.pipeline import make_pipeline
 from autora.experimentalist.pooler.grid import grid_pool
 from autora.experimentalist.pooler.random_pooler import random_pool

@@ -11,5 +11,5 @@ you can import the grid pooler via:
 
 ```python
 
-from autora.experimentalist.grid_ import grid_pool
+from autora.experimentalist.pooler.grid import grid_pool
 ```

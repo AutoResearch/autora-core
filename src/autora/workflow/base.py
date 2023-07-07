@@ -72,7 +72,7 @@ class BaseController(Generic[State]):
         _logger.debug(f"{result=}")
 
         # Update
-        _logger.debug(f"updating state")
+        _logger.debug("updating state")
         self.state = result
 
         if self.monitor is not None:

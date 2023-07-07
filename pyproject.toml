@@ -10,7 +10,7 @@ readme = "docs/index.md"
 license = { text = "MIT License" }
 
 dependencies = [
-    "autora-core>=3.2.0",
+    "autora-core>=3.3.0",
     "scikit-learn",
     "matplotlib",
     "pandas",

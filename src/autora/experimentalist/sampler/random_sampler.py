@@ -111,7 +111,7 @@ def random_sample_np_array(
         ...     ("d", 4, "delta"),
         ... ], names=["l", "n", "g"]), num_samples=2, random_state=1)
         array([('b', 2, 'beta'), ('c', 3, 'gamma')],
-              dtype=(numpy.record, [('l', '<U1'), ('n', '<i8'), ('g', '<U5')]))
+              dtype=(numpy.record, [('l', '<U1'), ('n', '<i...'), ('g', '<U5')]))
     """
     rng = np.random.default_rng(random_state)
     return rng.choice(conditions, size=num_samples, replace=False)

@@ -1,13 +1,13 @@
 import numpy as np
-from autora.experimentalist.pipeline import (
-    make_pipeline as make_experimentalist_pipeline,
-)
-from autora.variable import Variable, VariableCollection
 from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import GridSearchCV
 from sklearn.pipeline import make_pipeline as make_theorist_pipeline
 from sklearn.preprocessing import PolynomialFeatures
 
+from autora.experimentalist.pipeline import (
+    make_pipeline as make_experimentalist_pipeline,
+)
+from autora.variable import Variable, VariableCollection
 from autora.workflow import Controller
 
 rng = np.random.default_rng(180)

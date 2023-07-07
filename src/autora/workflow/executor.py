@@ -9,9 +9,9 @@ from typing import Callable, Dict, Iterable, List
 
 import numpy as np
 import pandas as pd
-from autora.experimentalist.pipeline import Pipeline
 from sklearn.base import BaseEstimator
 
+from autora.experimentalist.pipeline import Pipeline
 from autora.state.param import resolve_state_params
 from autora.state.protocol import Executor, SupportsControllerState
 

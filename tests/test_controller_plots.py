@@ -52,7 +52,7 @@ def state_lr(ground_truth_1x):
         ],
         params={
             "pool": {"ivs": study_variables.independent_variables},
-            "sampler": {"n": 5},
+            "sampler": {"num_samples": 5},
         },
     )
 
@@ -117,7 +117,7 @@ def cycle_multi_lr(ground_truth_2x):
         ],
         params={
             "pool": {"ivs": study_variables.independent_variables},
-            "sampler": {"n": 10},
+            "sampler": {"num_samples": 10},
         },
     )
 

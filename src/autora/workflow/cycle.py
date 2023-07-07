@@ -8,10 +8,11 @@ from autora.experimentalist.pipeline import Pipeline
 from autora.variable import VariableCollection
 from sklearn.base import BaseEstimator
 
+from autora.state.snapshot import Snapshot
+
 from .base import BaseController
 from .executor import full_cycle_wrapper
 from .planner import full_cycle_planner
-from .state import Snapshot
 
 _logger = logging.getLogger(__name__)
 

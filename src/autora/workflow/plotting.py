@@ -9,7 +9,7 @@ from matplotlib import rcParams
 from matplotlib.patches import Patch
 from matplotlib.ticker import MaxNLocator
 
-from .protocol import SupportsControllerState
+from autora.state.protocol import SupportsControllerState
 
 # Change default plot styles
 controller_plotting_rc_context = {

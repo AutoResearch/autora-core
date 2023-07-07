@@ -334,7 +334,7 @@ Examples:
     different times in the cycle, e.g. for initial seeding.
     >>> from autora.workflow.planner import random_operation_planner
     >>> def monitor(state):
-    ...     print(f"MONITOR: Generated new {state.history[-1].kind.value}")
+    ...     print(f"MONITOR: Generated new { state.history[-1].kind.value}")
     >>> controller_with_random_planner = Controller(
     ...     planner=random_operation_planner,
     ...     monitor=monitor,
@@ -420,7 +420,7 @@ Examples:
 
     We now define a planner which chooses a different experimentalist when supplied with no data
     versus some data.
-    >>> from autora.workflow.protocol import ResultKind
+    >>> from autora.state.protocol import ResultKind
     >>> from autora.workflow.planner import last_result_kind_planner
     >>> def seeding_planner(state):
     ...     # We're going to reuse the "last_available_result" planner, and modify its output.
@@ -435,7 +435,7 @@ Examples:
 
     Now we can see what would happen with a particular state. If there are no results,
     then we get the seed experimentalist:
-    >>> from autora.workflow.state import History
+    >>> from autora.state.history import History
     >>> seeding_planner(History())
     'seed_experimentalist'
 
@@ -513,7 +513,7 @@ Examples:
 
     We now instantiate the controller:
     >>> from autora.workflow.base import BaseController
-    >>> from autora.workflow.state import History
+    >>> from autora.state.history import History
     >>> c = BaseController(
     ...         state=History(variables=variables_2, params=params),
     ...         planner=seeding_planner,
@@ -556,7 +556,6 @@ Examples:
 """
 from .controller import Controller
 from .cycle import Cycle
-from .state import Delta, State, extend, wrap_to_use_state
 from .wrapper import (
     experiment_runner_from_x_to_xy_function,
     experiment_runner_from_x_to_y_function,

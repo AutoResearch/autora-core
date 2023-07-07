@@ -9,7 +9,7 @@ import numpy as np
 from autora.utils.deprecation import deprecate as deprecate
 from autora.utils.dictionary import LazyDict
 
-from ..protocol import SupportsControllerState
+from autora.state.protocol import SupportsControllerState
 
 _logger = logging.getLogger(__name__)
 
@@ -18,7 +18,7 @@ def _get_state_dependent_properties(state: SupportsControllerState):
     """
     Examples:
         Even with an empty data object, we can initialize the dictionary,
-        >>> from autora.workflow.state import Snapshot
+        >>> from autora.state.snapshot import Snapshot
         >>> state_dependent_properties = _get_state_dependent_properties(Snapshot())
 
         ... but it will raise an exception if a value isn't yet available when we try to use it
@@ -131,7 +131,7 @@ def resolve_state_params(params: Dict, state: SupportsControllerState) -> Dict:
     Returns the `params` attribute of the input, with `cycle properties` resolved.
 
     Examples:
-        >>> from autora.workflow.state import History
+        >>> from autora.state.history import History
         >>> params = {"experimentalist": {"source": "%models[-1]%"}}
         >>> s = History(models=["the first model", "the second model"])
         >>> resolve_state_params(params, s)

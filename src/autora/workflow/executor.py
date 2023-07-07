@@ -12,8 +12,8 @@ import pandas as pd
 from autora.experimentalist.pipeline import Pipeline
 from sklearn.base import BaseEstimator
 
-from .protocol import Executor, SupportsControllerState
-from .state import resolve_state_params
+from autora.state.param import resolve_state_params
+from autora.state.protocol import Executor, SupportsControllerState
 
 _logger = logging.getLogger(__name__)
 
@@ -194,7 +194,7 @@ def no_op(state, params):
     An Executor which has no effect on the state.
 
     Examples:
-         >>> from autora.workflow.state import Snapshot
+         >>> from autora.state.snapshot import Snapshot
          >>> s = Snapshot()
          >>> s_returned = no_op(s, {})
          >>> assert s_returned is s

@@ -8,9 +8,13 @@ from autora.variable import VariableCollection
 from numpy.typing import ArrayLike
 from sklearn.base import BaseEstimator
 
-from ..protocol import ResultKind, SupportsControllerStateHistory, SupportsDataKind
-from .delta import Delta
-from .snapshot import Snapshot
+from autora.state.delta import Delta
+from autora.state.protocol import (
+    ResultKind,
+    SupportsControllerStateHistory,
+    SupportsDataKind,
+)
+from autora.state.snapshot import Snapshot
 
 
 class History(SupportsControllerStateHistory):

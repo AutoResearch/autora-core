@@ -104,11 +104,11 @@ def experimentalist(variables: VariableCollection, fmt: Type = pd.DataFrame):
         Alternative: `np.recarray`:
         >>> experimentalist(s, fmt=np.recarray).conditions
         rec.array([(1,), (2,), (3,)],
-                  dtype=[('x', '<i8')])
+                  dtype=[('x', '<i...')])
 
         >>> experimentalist(t, fmt=np.recarray).conditions
         rec.array([(1, 3), (1, 4), (2, 3), (2, 4)],
-                  dtype=[('x1', '<i8'), ('x2', '<i8')])
+                  dtype=[('x1', '<i...'), ('x2', '<i...')])
 
         Alternative: `np.array` (without field names):
         >>> experimentalist(t, fmt=np.array).conditions

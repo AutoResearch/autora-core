@@ -3,8 +3,8 @@ from functools import partial
 import numpy as np
 import pytest
 
+from autora.experimentalist.grid_ import grid_pool
 from autora.experimentalist.pipeline import make_pipeline
-from autora.experimentalist.pooler.grid import grid_pool
 from autora.experimentalist.sampler.random_sampler import random_sample
 from autora.variable import DV, IV, ValueType, VariableCollection
 

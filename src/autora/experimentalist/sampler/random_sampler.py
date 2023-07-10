@@ -1,38 +1,15 @@
 import random
-from functools import singledispatch
 from typing import Iterable, Optional
 
-import numpy as np
 import pandas as pd
 
+from autora.state.delta import Result, wrap_to_use_state
 from autora.utils.deprecation import deprecated_alias
 
 
-@singledispatch
 def random_sample(conditions, num_samples: int = 1, random_state: Optional[int] = None):
     """
-    Uniform random sampling without replacement from a pool of conditions.
 
-    Args:
-        conditions: Pool of conditions
-        num_samples: number of samples to collect
-        random_state: initialization parameter for the random sampler
-
-    Returns: Sampled pool
-
-    """
-
-    raise NotImplementedError("%s is not supported" % (type(conditions)))
-
-
-@random_sample.register(list)
-@random_sample.register(range)
-@random_sample.register(filter)
-def random_sample_sequence(
-    conditions, num_samples: int = 1, random_state: Optional[int] = None
-):
-    """
-    Single dispatch variant of random_sample for list, range and filter objects
 
     Examples:
         From a range:
@@ -60,61 +37,79 @@ def random_sample_sequence(
     return samples
 
 
-@random_sample.register(pd.DataFrame)
-def random_sample_dataframe(
-    conditions, num_samples: int = 1, random_state: Optional[int] = None
-):
+random_sampler = deprecated_alias(random_sample, "random_sampler")
+
+
+def random_sample_from_conditions(
+    conditions,
+    num_samples: int = 1,
+    random_state: Optional[int] = None,
+    replace: bool = False,
+) -> Result:
     """
-    Single dispatch variant of random_sample for pd.DataFrames
+    Take a random sample from some conditions.
+
+    Args:
+        conditions: the conditions to sample from
+        num_samples:
+        random_state:
+        replace:
+
+    Returns: a Result object with a field `conditions` with a DataFrame of the sampled conditions
 
     Examples:
         From a pd.DataFrame:
         >>> import pandas as pd
         >>> random.seed(1)
-        >>> random_sample(pd.DataFrame({"x": range(100, 200)}), num_samples=5, random_state=180)
-              x
+        >>> random_sample_from_conditions(
+        ...     pd.DataFrame({"x": range(100, 200)}), num_samples=5, random_state=180)
+        {'conditions':       x
         67  167
         71  171
         64  164
         63  163
-        96  196
+        96  196}
 
     """
-    return pd.DataFrame.sample(
-        conditions, random_state=random_state, n=num_samples, replace=False
+    return Result(
+        conditions=pd.DataFrame.sample(
+            conditions, random_state=random_state, n=num_samples, replace=replace
+        )
     )
 
 
-@random_sample.register(np.ndarray)
-@random_sample.register(np.recarray)
-def random_sample_np_array(
-    conditions, num_samples: int = 1, random_state: Optional[int] = None
-):
-    """
-    Single dispatch variant of random_sample for np.ndarray and np.recarray
+random_sample_executor = wrap_to_use_state(random_sample_from_conditions)
+random_sample_executor.__doc__ = """
+Examples:
+    >>> from autora.state.delta import State
+    >>> from autora.variable import VariableCollection, Variable
+    >>> from dataclasses import dataclass, field
+    >>> import pandas as pd
+    >>> import numpy as np
+    >>> from autora.experimentalist.pooler.grid import grid_pool_executor
 
-    Examples:
-        From a pd.DataFrame:
-        >>> import numpy as np
-        >>> random_sample(np.linspace([-1, -100], [1, 100], 101), num_samples=5,
-        ...     random_state=180)
-        array([[  0.12,  12.  ],
-               [ -0.18, -18.  ],
-               [ -0.54, -54.  ],
-               [  0.32,  32.  ],
-               [  0.96,  96.  ]])
+    We define a state object with the fields we need:
+    >>> @dataclass(frozen=True)
+    ... class S(State):
+    ...     variables: VariableCollection = field(default_factory=VariableCollection)
+    ...     conditions: pd.DataFrame = field(default_factory=pd.DataFrame,
+    ...                                      metadata={"delta": "replace"})
 
-        >>> random_sample(np.core.records.fromrecords([
-        ...     ("a", 1, "alpha"),
-        ...     ("b", 2, "beta"),
-        ...     ("c", 3, "gamma"),
-        ...     ("d", 4, "delta"),
-        ... ], names=["l", "n", "g"]), num_samples=2, random_state=1)
-        array([('b', 2, 'beta'), ('c', 3, 'gamma')],
-              dtype=(numpy.record, [('l', '<U1'), ('n', '<i...'), ('g', '<U5')]))
-    """
-    rng = np.random.default_rng(random_state)
-    return rng.choice(conditions, size=num_samples, replace=False)
+    With one independent variable "x", and some allowed values:
+    >>> s = S(
+    ...     variables=VariableCollection(independent_variables=[
+    ...         Variable(name="x", allowed_values=range(100))
+    ... ]))
 
+    ... we can update the state with a sample from the allowed values:
+    >>> s_ = grid_pool_executor(s)
+    >>> random_sample_executor(s_, num_samples=5, random_state=1
+    ... )  # doctest: +ELLIPSIS +NORMALIZE_WHITESPACE
+    S(variables=..., conditions=     x
+    80  80
+    84  84
+    33  33
+    81  81
+    93  93)
 
-random_sampler = deprecated_alias(random_sample, "random_sampler")
+"""

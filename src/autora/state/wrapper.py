@@ -163,8 +163,10 @@ def wrap_to_use_state_general(
         Again, we use the wrapper:
         >>> theorist_on_state = wrap_to_use_state_general(
         ...                                         f=theorist,
-        ...                                         input_state_mapping={'x':'experiment_data', 'v':'variables'},
-        ...                                          output_field_name='model')
+        ...                                         input_state_mapping={
+        ...                                             'x':'experiment_data',
+        ...                                             'v':'variables'},
+        ...                                         output_field_name='model')
 
         >>> t_prime = theorist_on_state(t)
         >>> t_prime.model.coef_, t_prime.model.intercept_

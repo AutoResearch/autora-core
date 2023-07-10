@@ -220,7 +220,7 @@ Examples:
     >>> grid_pool_executor(t).conditions
     array([[1],
            [2],
-           [3]])
+           [3]]...)
 
     This also works for multiple variables:
     >>> t = T(
@@ -233,5 +233,5 @@ Examples:
     array([[1, 3],
            [1, 4],
            [2, 3],
-           [2, 4]])
+           [2, 4]]...)
 """

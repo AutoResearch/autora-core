@@ -275,6 +275,11 @@ def extend_pd_dataframe(a, b):
     return pd.concat((a, b), ignore_index=True)
 
 
+def append(a: List[T], b: T) -> List[T]:
+    # TODO: add DOCTESTS
+    return a + [b]
+
+
 @extend.register(np.ndarray)
 def extend_np_ndarray(a, b):
     """
@@ -285,11 +290,6 @@ def extend_np_ndarray(a, b):
                [7, 8, 9]])
     """
     return np.row_stack([a, b])
-
-
-def append(a: List[T], b: T) -> List[T]:
-    # TODO: add DOCTESTS
-    return a + [b]
 
 
 @extend.register(dict)

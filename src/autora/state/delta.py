@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import dataclasses
 import inspect
+import logging
 from collections import UserDict
 from dataclasses import dataclass, fields, replace
 from functools import singledispatch, wraps
@@ -11,6 +12,7 @@ from typing import Generic, List, TypeVar
 import numpy as np
 import pandas as pd
 
+_logger = logging.getLogger(__name__)
 S = TypeVar("S")
 T = TypeVar("T")
 
@@ -22,6 +24,7 @@ class State:
 
     Examples:
         >>> from dataclasses import dataclass, field
+        >>> from typing import List, Optional
 
         We define a dataclass where each field (which is going to be delta-ed) has additional
         metadata "delta" which describes its delta behaviour.
@@ -74,6 +77,106 @@ class State:
         >>> m + Delta(n="∂")
         AppendState(n=['ɑ', 'β', 'ɣ', '∂'])
 
+        The metadata key "converter" is used to coerce types (inspired by
+        [PEP 712](https://peps.python.org/pep-0712/)):
+        >>> @dataclass(frozen=True)
+        ... class CoerceStateList(State):
+        ...    o: Optional[List] = field(default=None, metadata={"delta": "replace"})
+        ...    p: List = field(default_factory=list, metadata={"delta": "replace",
+        ...                                                    "converter": list})
+
+        >>> r = CoerceStateList()
+
+        If there is no `metadata["converter"]` set for a field, no coercion occurs
+        >>> r + Delta(o="not a list")
+        CoerceStateList(o='not a list', p=[])
+
+        If there is a `metadata["converter"]` set for a field, the data are coerced:
+        >>> r + Delta(p="not a list")
+        CoerceStateList(o=None, p=['n', 'o', 't', ' ', 'a', ' ', 'l', 'i', 's', 't'])
+
+        If the input data are of the correct type, they are returned unaltered:
+        >>> p_ = ["a", "list"]
+        >>> r + Delta(p=["a", "list"])
+        CoerceStateList(o=None, p=['a', 'list'])
+
+        With a converter, inputs are converted to the type output by the converter:
+        >>> import pandas as pd
+        >>> @dataclass(frozen=True)
+        ... class CoerceStateDataFrame(State):
+        ...    q: pd.DataFrame = field(default_factory=pd.DataFrame,
+        ...                            metadata={"delta": "replace",
+        ...                                      "converter": pd.DataFrame})
+
+        If the type is already correct, the object is passed to the converter,
+        but should be returned unchanged:
+        >>> s = CoerceStateDataFrame()
+        >>> (s + Delta(q=pd.DataFrame([("a",1,"alpha"), ("b",2,"beta")], columns=list("xyz")))).q
+           x  y      z
+        0  a  1  alpha
+        1  b  2   beta
+
+        If the type is not correct, the object is converted if possible. For a dataframe,
+        we can convert records:
+        >>> (s + Delta(q=[("a",1,"alpha"), ("b",2,"beta")])).q
+           0  1      2
+        0  a  1  alpha
+        1  b  2   beta
+
+        ... or an array:
+        >>> (s + Delta(q=np.linspace([1, 2], [10, 15], 3))).q
+              0     1
+        0   1.0   2.0
+        1   5.5   8.5
+        2  10.0  15.0
+
+        ... or a dictionary:
+        >>> (s + Delta(q={"a": [1,2,3], "b": [4,5,6]})).q
+           a  b
+        0  1  4
+        1  2  5
+        2  3  6
+
+        ... or a list:
+        >>> (s + Delta(q=[11, 12, 13])).q
+            0
+        0  11
+        1  12
+        2  13
+
+        ... but not, for instance, a string:
+        >>> (s + Delta(q="not compatible with pd.DataFrame")).q
+        Traceback (most recent call last):
+        ...
+        ValueError: DataFrame constructor not properly called!
+
+        Without a converter:
+        >>> @dataclass(frozen=True)
+        ... class CoerceStateDataFrameNoConverter(State):
+        ...    r: pd.DataFrame = field(default_factory=pd.DataFrame, metadata={"delta": "replace"})
+
+        ... there is no coercion – the object is passed unchanged
+        >>> t = CoerceStateDataFrameNoConverter()
+        >>> (t + Delta(r=np.linspace([1, 2], [10, 15], 3))).r
+        array([[ 1. ,  2. ],
+               [ 5.5,  8.5],
+               [10. , 15. ]])
+
+
+        Converter can cast from a DataFrame to a np.ndarray (with a single datatype),
+        for instance:
+        >>> import numpy as np
+        >>> @dataclass(frozen=True)
+        ... class CoerceStateArray(State):
+        ...    r: Optional[np.array] = field(default=None,
+        ...                            metadata={"delta": "replace",
+        ...                                      "converter": np.asarray})
+
+        Here we pass a dataframe, but expect a numpy array:
+        >>> (CoerceStateArray() + Delta(r=pd.DataFrame([("a",1), ("b",2)], columns=list("xy")))).r
+        array([['a', 1],
+               ['b', 2]], dtype=object)
+
     """
 
     def __add__(self, other: Delta):
@@ -92,7 +195,13 @@ class State:
                 appended_value = append(self_value, other_value)
                 updates[key] = appended_value
             elif delta_behavior == "replace":
-                updates[key] = other_value
+                if (
+                    constructor := self_field.metadata.get("converter", None)
+                ) is not None:
+                    replaced_value = constructor(other_value)
+                else:
+                    replaced_value = other_value
+                updates[key] = replaced_value
             else:
                 raise NotImplementedError(
                     "delta_behaviour=`%s` not implemented" % (delta_behavior)

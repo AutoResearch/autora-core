@@ -9,15 +9,12 @@ from autora.variable import Variable, VariableCollection
 
 
 def grid_pool(ivs: Sequence[Variable]) -> product:
-    """
-    Low level function to create an exhaustive pool from discrete values
-    using a Cartesian product of sets.
-    """
+    """Creates exhaustive pool from discrete values using a Cartesian product of sets"""
     # Get allowed values for each IV
     l_iv_values = []
     for iv in ivs:
         assert iv.allowed_values is not None, (
-            f"grid_pool requires allowed_values to be set, "
+            f"gridsearch_pool only supports independent variables with discrete allowed values, "
             f"but allowed_values is None on {iv=} "
         )
         l_iv_values.append(iv.allowed_values)

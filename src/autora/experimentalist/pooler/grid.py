@@ -24,10 +24,11 @@ def grid_pool(ivs: Sequence[Variable]) -> product:
 
 
 def grid_pool_from_variables(variables: VariableCollection) -> pd.DataFrame:
-    """
+    """Creates exhaustive pool of conditions given a definition of variables with allowed_values.
 
     Args:
-        variables: the description of all the variables in the AER experiment.
+        variables: a VariableCollection with `independent_variables` – a sequence of Variable
+        objects, each of which has an attribute `allowed_values` containing a sequence of values.
 
     Returns: a Result / Delta object with the conditions as a pd.DataFrame in the `conditions` field
 
@@ -53,7 +54,7 @@ def grid_pool_from_variables(variables: VariableCollection) -> pd.DataFrame:
         ...     variables=VariableCollection(independent_variables=[Variable(name="x")]))
         Traceback (most recent call last):
         ...
-        AssertionError: grid_pool requires allowed_values to be set...
+        AssertionError: gridsearch_pool only supports independent variables with discrete...
 
         With two independent variables, we get the cartesian product:
         >>> grid_pool_from_variables(variables=VariableCollection(independent_variables=[
@@ -74,7 +75,7 @@ def grid_pool_from_variables(variables: VariableCollection) -> pd.DataFrame:
         ... ]))
         Traceback (most recent call last):
         ...
-        AssertionError: grid_pool requires allowed_values to be set...
+        AssertionError: gridsearch_pool only supports independent variables with discrete...
 
 
         We can specify arrays of allowed values:
@@ -147,7 +148,7 @@ Examples:
     ...     S(variables=VariableCollection(independent_variables=[Variable(name="x")])))
     Traceback (most recent call last):
     ...
-    AssertionError: grid_pool requires allowed_values to be set...
+    AssertionError: gridsearch_pool only supports independent variables with discrete...
 
     With two independent variables, we get the cartesian product:
     >>> t = S(
@@ -170,7 +171,7 @@ Examples:
     ... ])))
     Traceback (most recent call last):
     ...
-    AssertionError: grid_pool requires allowed_values to be set...
+    AssertionError: gridsearch_pool only supports independent variables with discrete...
 
 
     We can specify arrays of allowed values:

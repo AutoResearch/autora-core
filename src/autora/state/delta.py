@@ -195,7 +195,12 @@ class State:
                 appended_value = append(self_value, other_value)
                 updates[key] = appended_value
             elif delta_behavior == "replace":
-                replaced_value = convert(other_value, self_field)
+                if (
+                    constructor := self_field.metadata.get("converter", None)
+                ) is not None:
+                    replaced_value = constructor(other_value)
+                else:
+                    replaced_value = other_value
                 updates[key] = replaced_value
             else:
                 raise NotImplementedError(
@@ -300,15 +305,6 @@ def extend_dict(a, b):
         {'a': 'cats', 'b': 'dogs'}
     """
     return dict(a, **b)
-
-
-def convert(value, field):
-    converter = field.metadata.get("converter", None)
-    if converter is None:
-        replaced_value = value
-    else:
-        replaced_value = converter(value)
-    return replaced_value
 
 
 def wrap_to_use_state(f):

@@ -117,7 +117,7 @@ def wrap_to_use_state_general(
         ... class S(State):
         ...     conditions: List[int] = field(metadata={"delta": "replace"})
 
-        We define an arbitraty function
+        We define an arbitrary function
         >>> def experimentalist(x):
         ...     new_conditions = [c + 10 for c in x]
         ...     return new_conditions

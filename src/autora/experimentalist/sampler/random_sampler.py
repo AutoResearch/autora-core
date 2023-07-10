@@ -1,5 +1,5 @@
 import random
-from typing import Iterable, Optional
+from typing import Iterable, Optional, Sequence, Union
 
 import pandas as pd
 
@@ -7,9 +7,14 @@ from autora.state.delta import Result, wrap_to_use_state
 from autora.utils.deprecation import deprecated_alias
 
 
-def random_sample(conditions, num_samples: int = 1, random_state: Optional[int] = None):
+def random_sample(conditions: Union[Iterable, Sequence], num_samples: int = 1):
     """
+    Uniform random sampling without replacement from a pool of conditions.
+    Args:
+        conditions: Pool of conditions
+        num_samples: number of samples to collect
 
+    Returns: Sampled pool
 
     Examples:
         From a range:
@@ -27,8 +32,6 @@ def random_sample(conditions, num_samples: int = 1, random_state: Optional[int] 
         [375, 390, 600, 285, 885]
 
     """
-    if random_state is not None:
-        random.seed(random_state)
     if isinstance(conditions, Iterable):
         conditions = list(conditions)
     random.shuffle(conditions)

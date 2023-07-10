@@ -162,9 +162,9 @@ def wrap_to_use_state_general(
 
         Again, we use the wrapper:
         >>> theorist_on_state = wrap_to_use_state_general(
-        ...                                         theorist,
-        ...                                         {'x':'experiment_data', 'v':'variables'},
-        ...                                          'model')
+        ...                                         f=theorist,
+        ...                                         input_state_mapping={'x':'experiment_data', 'v':'variables'},
+        ...                                          output_field_name='model')
 
         >>> t_prime = theorist_on_state(t)
         >>> t_prime.model.coef_, t_prime.model.intercept_
@@ -177,7 +177,7 @@ def wrap_to_use_state_general(
         >>> theorist_on_state(t, fit_intercept=False).model.intercept_
         0.0
 
-        Any parameters not provided by the state can still be provided by to the wrapped function
+        Any parameters not provided by the state can still be provided to the wrapped function
         >>> def experimentalist(x, offset):
         ...     new_conditions = [c + offset for c in x]
         ...     return new_conditions

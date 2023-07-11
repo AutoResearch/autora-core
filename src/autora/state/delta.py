@@ -197,7 +197,13 @@ class State:
                 appended_value = append(self_value, other_value)
                 updates[self_field_key] = appended_value
             elif delta_behavior == "replace":
-                updates[self_field_key] = other_value
+                if (
+                    constructor := self_field.metadata.get("converter", None)
+                ) is not None:
+                    replaced_value = constructor(other_value)
+                else:
+                    replaced_value = other_value
+                updates[self_field_key] = replaced_value
             else:
                 raise NotImplementedError(
                     "delta_behaviour=`%s` not implemented" % (delta_behavior)

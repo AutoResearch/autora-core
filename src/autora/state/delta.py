@@ -160,7 +160,7 @@ class State:
                [10. , 15. ]])
 
 
-        Converter can cast from a DataFrame to a np.ndarray (with a single datatype),
+        A converter can cast from a DataFrame to a np.ndarray (with a single datatype),
         for instance:
         >>> import numpy as np
         >>> @dataclass(frozen=True)
@@ -226,10 +226,8 @@ class State:
     def __add__(self, other: Delta):
         updates = dict()
         for self_field in fields(self):
-
             self_field_key = self_field.name
 
-            other_value = None
             if self_field_key in other.data:
                 other_value = other.data[self_field_key]
             elif (

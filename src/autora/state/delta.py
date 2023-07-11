@@ -96,7 +96,6 @@ class State:
         CoerceStateList(o=None, p=['n', 'o', 't', ' ', 'a', ' ', 'l', 'i', 's', 't'])
 
         If the input data are of the correct type, they are returned unaltered:
-        >>> p_ = ["a", "list"]
         >>> r + Delta(p=["a", "list"])
         CoerceStateList(o=None, p=['a', 'list'])
 

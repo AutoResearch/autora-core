@@ -54,11 +54,9 @@ class State:
         >>> l + Delta(l=list("ghi"), m=list("rst"))
         ListState(l=['a', 'b', 'c', 'g', 'h', 'i'], m=['r', 's', 't'])
 
-        Passing a nonexistent field will cause an error:
+        A non-existent field will be ignored:
         >>> l + Delta(o="not a field")
-        Traceback (most recent call last):
-        ...
-        AttributeError: key=`o` is missing on ListState(l=['a', 'b', 'c'], m=['x', 'y', 'z'])
+        ListState(l=['a', 'b', 'c'], m=['x', 'y', 'z'])
 
         We can also use the `.update` method to do the same thing:
         >>> l.update(l=list("ghi"), m=list("rst"))
@@ -175,6 +173,53 @@ class State:
         >>> (CoerceStateArray() + Delta(r=pd.DataFrame([("a",1), ("b",2)], columns=list("xy")))).r
         array([['a', 1],
                ['b', 2]], dtype=object)
+
+        We can define aliases which can transform between different potential field
+        names.
+
+        >>> @dataclass(frozen=True)
+        ... class FieldAliasState(State):
+        ...    things: List[str] = field(
+        ...     default_factory=list,
+        ...     metadata={"delta": "extend",
+        ...               "aliases": {"thing": lambda m: [m]}}
+        ...     )
+
+        In the "normal" case, the Delta object is expected to include a list of data in the
+        correct format which is used to extend the object:
+        >>> FieldAliasState(things=["0"]) + Delta(things=["1", "2"])
+        FieldAliasState(things=['0', '1', '2'])
+
+        However, say the standard return from a step in AER is a single `thing`, rather than a
+        sequence of them:
+        >>> FieldAliasState(things=["0"]) + Delta(thing="1")
+        FieldAliasState(things=['0', '1'])
+
+
+        If a cycle function relies on the existence of the `s.thing` as a property of your state
+        `s`, rather than accessing `s.things[-1]`, then you could additionally define a `property`:
+
+        >>> class FieldAliasStateWithProperty(FieldAliasState):  # inherit from FieldAliasState
+        ...     @property
+        ...     def thing(self):
+        ...         return self.things[-1]
+
+        Now you can access both `s.things` and `s.thing` as required by your code. The State only
+        shows `things` in the string representation...
+        >>> s = FieldAliasStateWithProperty(things=["0"]) + Delta(thing="1")
+        >>> s
+        FieldAliasStateWithProperty(things=['0', '1'])
+
+        ... and exposes `things` as an attribute:
+        >>> s.things
+        ['0', '1']
+
+        ... but also exposes `thing`, always returning the last value.
+        >>> s.thing
+        '1'
+
+
+
 
     """
 

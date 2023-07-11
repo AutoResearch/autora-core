@@ -160,7 +160,7 @@ class State:
                [10. , 15. ]])
 
 
-        Converter can cast from a DataFrame to a np.ndarray (with a single datatype),
+        A converter can cast from a DataFrame to a np.ndarray (with a single datatype),
         for instance:
         >>> import numpy as np
         >>> @dataclass(frozen=True)

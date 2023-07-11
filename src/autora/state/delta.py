@@ -167,7 +167,7 @@ class State:
         >>> import numpy as np
         >>> @dataclass(frozen=True)
         ... class CoerceStateArray(State):
-        ...    r: Optional[np.array] = field(default=None,
+        ...    r: Optional[np.ndarray] = field(default=None,
         ...                            metadata={"delta": "replace",
         ...                                      "converter": np.asarray})
 

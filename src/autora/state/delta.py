@@ -225,19 +225,32 @@ class State:
 
     def __add__(self, other: Delta):
         updates = dict()
-        for key, other_value in other.data.items():
-            try:
-                self_field = next(filter(lambda f: f.name == key, fields(self)))
-            except StopIteration:
-                raise AttributeError("key=`%s` is missing on %s" % (key, self))
+        for self_field in fields(self):
+
+            self_field_key = self_field.name
+
+            other_value = None
+            if self_field_key in other.data:
+                other_value = other.data[self_field_key]
+            elif (
+                self_field_aliases := self_field.metadata.get("aliases", dict())
+            ) != dict():
+                for alias_key, wrapping_function in self_field_aliases.items():
+                    if alias_key in other.data:
+                        other_value = wrapping_function(other.data[alias_key])
+            else:
+                continue
+            assert other_value is not None
+
             delta_behavior = self_field.metadata["delta"]
-            self_value = getattr(self, key)
+            self_value = getattr(self, self_field.name)
+
             if delta_behavior == "extend":
                 extended_value = extend(self_value, other_value)
-                updates[key] = extended_value
+                updates[self_field_key] = extended_value
             elif delta_behavior == "append":
                 appended_value = append(self_value, other_value)
-                updates[key] = appended_value
+                updates[self_field_key] = appended_value
             elif delta_behavior == "replace":
                 if (
                     constructor := self_field.metadata.get("converter", None)
@@ -245,7 +258,7 @@ class State:
                     replaced_value = constructor(other_value)
                 else:
                     replaced_value = other_value
-                updates[key] = replaced_value
+                updates[self_field_key] = replaced_value
             else:
                 raise NotImplementedError(
                     "delta_behaviour=`%s` not implemented" % (delta_behavior)

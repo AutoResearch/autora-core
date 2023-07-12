@@ -12,14 +12,14 @@ from autora.variable import IV, ValueType, VariableCollection
 
 @singledispatch
 def random_pool(s, **kwargs):
-    """Function to create a sequence of conditions randomly sampled from given conditions."""
+    """Function to create a sequence of conditions randomly sampled from independent variables."""
     raise NotImplementedError(
         "random_pool doesn't have an implementation for %s (type=%s)" % (s, type(s))
     )
 
 
 @random_pool.register(State)
-def random_pool_on_state(s: State, **kwargs) -> State:
+def _random_pool_on_state(s: State, **kwargs) -> State:
     return wrap_to_use_state(random_pool_from_variables)(s, **kwargs)
 
 

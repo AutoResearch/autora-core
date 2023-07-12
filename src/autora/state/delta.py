@@ -386,7 +386,21 @@ def extend_dict(a, b):
 
 
 def append(a: List[T], b: T) -> List[T]:
-    # TODO: add DOCTESTS
+    """
+    Function to create a new list with an item appended to it.
+
+    Examples:
+        Given a starting list `a`:
+        >>> a = [1, 2, 3]
+
+        ... we can append a value:
+        >>> append(a, 4)
+        [1, 2, 3, 4]
+
+        `a` is unchanged
+        >>> a == [1, 2, 3]
+        True
+    """
     return a + [b]
 
 

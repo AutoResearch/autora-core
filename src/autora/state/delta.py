@@ -226,22 +226,14 @@ class State:
     def __add__(self, other: Delta):
         updates = dict()
         for self_field in fields(self):
-            self_field_key = self_field.name
 
-            if self_field_key in other.data:
-                other_value = other.data[self_field_key]
-            elif (
-                self_field_aliases := self_field.metadata.get("aliases", dict())
-            ) != dict():
-                for alias_key, wrapping_function in self_field_aliases.items():
-                    if alias_key in other.data:
-                        other_value = wrapping_function(other.data[alias_key])
-            else:
+            other_value = _get_value(self_field, other)
+            if other_value is None:
                 continue
-            assert other_value is not None
 
+            self_field_key = self_field.name
+            self_value = getattr(self, self_field_key)
             delta_behavior = self_field.metadata["delta"]
-            self_value = getattr(self, self_field.name)
 
             if delta_behavior == "extend":
                 extended_value = extend(self_value, other_value)
@@ -267,6 +259,30 @@ class State:
 
     def update(self, **kwargs):
         return self + Delta(**kwargs)
+
+
+def _get_value(f, other):
+    key = f.name
+
+    try:
+        value = other.data[key]
+        return value
+    except KeyError:
+        pass
+
+    try:
+        aliases = f.metadata["aliases"]
+    except KeyError:
+        return
+
+    for alias_key, wrapping_function in aliases.items():
+        try:
+            value = wrapping_function(other.data[alias_key])
+            return value
+        except KeyError:
+            pass
+
+    return
 
 
 class Delta(UserDict, Generic[S]):

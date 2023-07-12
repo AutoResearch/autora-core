@@ -17,17 +17,17 @@ class StandardState(State):
         >>> from autora.variable import VariableCollection, Variable
         >>> s = StandardState()
         >>> s
-        BasicAERState(variables=None, conditions=None, experiment_data=None, models=[])
+        StandardState(variables=None, conditions=None, experiment_data=None, models=[])
 
         The `variables` can be updated using a `Delta`:
         >>> dv1 = Delta(variables=VariableCollection(independent_variables=[Variable("1")]))
         >>> s + dv1
-        BasicAERState(variables=VariableCollection(independent_variables=[Variable(name='1',...)
+        StandardState(variables=VariableCollection(independent_variables=[Variable(name='1',...)
 
         ... and are replaced by each `Delta`:
         >>> dv2 = Delta(variables=VariableCollection(independent_variables=[Variable("2")]))
         >>> s + dv1 + dv2
-        BasicAERState(variables=VariableCollection(independent_variables=[Variable(name='2',...)
+        StandardState(variables=VariableCollection(independent_variables=[Variable(name='2',...)
 
         The `conditions` can be updated using a `Delta`:
         >>> dc1 = Delta(conditions=pd.DataFrame({"x": [1, 2, 3]}))

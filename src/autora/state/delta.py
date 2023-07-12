@@ -400,6 +400,13 @@ def append(a: List[T], b: T) -> List[T]:
         `a` is unchanged
         >>> a == [1, 2, 3]
         True
+
+        Why not just use `list.append`? `list.append` mutates `a` in place, which we can't allow
+        in the AER cycle – parts of the cycle rely on purely functional code which doesn't
+        (accidentally or intentionally) manipulate existing data.
+        >>> list.append(a, 4)  # not what we want
+        >>> a
+        [1, 2, 3, 4]
     """
     return a + [b]
 

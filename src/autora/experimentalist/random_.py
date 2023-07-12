@@ -1,3 +1,4 @@
+"""Tools to make randomly sampled experimental conditions."""
 import random
 from functools import singledispatch
 from typing import Optional, Union

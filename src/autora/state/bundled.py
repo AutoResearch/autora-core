@@ -132,6 +132,10 @@ class StandardState(State):
         >>> (s + dm1 + dm2).model
         DummyClassifier(constant=3)
 
+        If there is no model, `None` is returned:
+        >>> print(s.model)
+        None
+
         `models` can also be updated using a Delta with a single `model`:
         >>> dm3 = Delta(model=DummyClassifier(constant=4))
         >>> (s + dm1 + dm3).model
@@ -165,4 +169,7 @@ class StandardState(State):
     @property
     def model(self):
         """Alias for the last model in the `models`."""
-        return self.models[-1]
+        try:
+            return self.models[-1]
+        except IndexError:
+            return None

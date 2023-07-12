@@ -1,3 +1,4 @@
+import logging
 import random
 from typing import Iterable, List, Tuple
 
@@ -5,6 +6,12 @@ import numpy as np
 
 from autora.utils.deprecation import deprecated_alias
 from autora.variable import IV
+
+_logger = logging.getLogger(__name__)
+_logger.warning(
+    "`autora.experimentalist.pooler.random_pooler` is deprecated. "
+    "Use the functions in `autora.experimentalist.random_` instead."
+)
 
 
 def random_pool(

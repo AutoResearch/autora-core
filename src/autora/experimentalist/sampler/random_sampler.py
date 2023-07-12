@@ -1,7 +1,14 @@
+import logging
 import random
 from typing import Iterable, Sequence, Union
 
 from autora.utils.deprecation import deprecated_alias
+
+_logger = logging.getLogger(__name__)
+_logger.warning(
+    "`autora.experimentalist.sampler.random_sampler` is deprecated. "
+    "Use the functions in `autora.experimentalist.random_` instead."
+)
 
 
 def random_sample(conditions: Union[Iterable, Sequence], num_samples: int = 1):

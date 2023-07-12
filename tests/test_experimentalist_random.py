@@ -5,7 +5,7 @@ import pytest
 
 from autora.experimentalist.pipeline import make_pipeline
 from autora.experimentalist.pooler.grid import grid_pool_from_ivs
-from autora.experimentalist.pooler.random_pooler import random_pool_from_ivs
+from autora.experimentalist.pooler.random_pooler import random_pool
 from autora.experimentalist.sampler.random_sampler import (
     random_sample_from_conditions_iterable,
 )
@@ -22,9 +22,7 @@ def test_random_pooler_experimentalist(metadata):
     """
     num_samples = 10
 
-    conditions = random_pool_from_ivs(
-        metadata.independent_variables, num_samples=num_samples
-    )
+    conditions = random_pool(metadata.independent_variables, num_samples=num_samples)
 
     conditions = np.array(list(conditions))
 

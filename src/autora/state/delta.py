@@ -363,11 +363,6 @@ def extend_pd_dataframe(a, b):
     return pd.concat((a, b), ignore_index=True)
 
 
-def append(a: List[T], b: T) -> List[T]:
-    # TODO: add DOCTESTS
-    return a + [b]
-
-
 @extend.register(np.ndarray)
 def extend_np_ndarray(a, b):
     """
@@ -388,6 +383,11 @@ def extend_dict(a, b):
         {'a': 'cats', 'b': 'dogs'}
     """
     return dict(a, **b)
+
+
+def append(a: List[T], b: T) -> List[T]:
+    # TODO: add DOCTESTS
+    return a + [b]
 
 
 def wrap_to_use_state(f):

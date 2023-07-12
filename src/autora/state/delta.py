@@ -260,7 +260,91 @@ class State:
         return self + Delta(**kwargs)
 
 
-def _get_value(f, other):
+def _get_value(f, other: Delta):
+    """
+    Given a `State`'s `dataclasses.field` f, get a value from `other`
+
+    Examples:
+        >>> from dataclasses import field, dataclass, fields
+        >>> @dataclass
+        ... class Example:
+        ...     a: int = field()  # base case
+        ...     b: List[int] = field(metadata={"aliases": {"ba": lambda b: [b]}})  # Single alias
+        ...     c: List[int] = field(metadata={"aliases": {
+        ...                                         "ca": lambda x: x,   # pass the value unchanged
+        ...                                         "cb": lambda x: [x]  # wrap the value in a list
+        ...        }})  # Multiple alias
+
+        For a field with no aliases, we retrieve values with the base name:
+        >>> f_a = fields(Example)[0]
+        >>> _get_value(f_a, Delta(a=1))
+        1
+
+        ... and only the base name:
+        >>> print(_get_value(f_a, Delta(b=2)))  # no match for b
+        None
+
+        Any other names are unimportant:
+        >>> _get_value(f_a, Delta(b=2, a=1))
+        1
+
+        For fields with an alias, we retrieve values with the base name:
+        >>> f_b = fields(Example)[1]
+        >>> _get_value(f_b, Delta(b=[2]))
+        [2]
+
+        ... or for the alias name, transformed by the alias lambda function:
+        >>> _get_value(f_b, Delta(ba=21))
+        [21]
+
+        We preferentially get the base name, and then any aliases:
+        >>> _get_value(f_b, Delta(b=2, ba=21))
+        2
+
+        ... , regardless of their order in the `Delta` object:
+        >>> _get_value(f_b, Delta(ba=21, b=2))
+        2
+
+        Other names are ignored:
+        >>> print(_get_value(f_b, Delta(a=1)))
+        None
+
+        and the order of other names is unimportant:
+        >>> _get_value(f_b, Delta(a=1, b=2))
+        2
+
+        For fields with multiple aliases, we retrieve values with the base name:
+        >>> f_c = fields(Example)[2]
+        >>> _get_value(f_c, Delta(c=[3]))
+        [3]
+
+        ... for any alias:
+        >>> _get_value(f_c, Delta(ca=31))
+        31
+
+        ... transformed by the alias lambda function :
+        >>> _get_value(f_c, Delta(cb=32))
+        [32]
+
+        ... and ignoring any other names:
+        >>> print(_get_value(f_c, Delta(a=1)))
+        None
+
+        ... preferentially in the order base name, 1st alias, 2nd alias, ... nth alias:
+        >>> _get_value(f_c, Delta(c=3, ca=31, cb=32))
+        3
+
+        >>> _get_value(f_c, Delta(ca=31, cb=32))
+        31
+
+        >>> _get_value(f_c, Delta(cb=32))
+        [32]
+
+        >>> print(_get_value(f_c, Delta()))
+        None
+
+    """
+
     key = f.name
 
     try:

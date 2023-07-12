@@ -1,4 +1,4 @@
-""""""
+"""Tools to make grids of experimental conditions."""
 from functools import singledispatch
 from itertools import product
 from typing import Sequence

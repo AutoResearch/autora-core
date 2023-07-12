@@ -10,5 +10,5 @@ You will need:
 you can import the random pooler via:
 
 ```python
-from autora.experimentalist.pooler.random_pooler import random_pool_from_ivs
+from autora.experimentalist.random_ import random_pool
 ```

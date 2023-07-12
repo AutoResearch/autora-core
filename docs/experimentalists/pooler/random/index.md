@@ -24,7 +24,7 @@ This means that there are 9 possible combinations for these variables (3x3), fro
 ### Example Code
 
 ```python
-from autora.experimentalist.pooler.random_pooler import random_pool_from_ivs
+from autora.experimentalist.random_ import random_pool
 
-pool = random_pool_from_ivs([1, 2, 3], [4, 5, 6], n=3)
+pool = random_pool([1, 2, 3], [4, 5, 6], n=3)
 ```

@@ -10,5 +10,7 @@ You will need:
 you can import the random sampler via:
 
 ```python
-from autora.experimentalist.sampler.random_sampler import random_sample_from_conditions_iterable
+from autora.experimentalist.random_ import random_sample
+
+pool = random_sample([1, 1, 2, 2, 3, 3], num_samples=2)
 ```

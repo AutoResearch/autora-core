@@ -1,14 +1,29 @@
 import random
+from functools import singledispatch
 from typing import Iterable, List, Tuple
 
 import numpy as np
 import pandas as pd
 
-from autora.state.delta import Result, wrap_to_use_state
+from autora.state.delta import Result, State, wrap_to_use_state
 from autora.utils.deprecation import deprecated_alias
 from autora.variable import IV, ValueType, VariableCollection
 
 
+@singledispatch
+def random_pool(s, **kwargs):
+    """Function to create a sequence of conditions randomly sampled from independent variables."""
+    raise NotImplementedError(
+        "%s (type=%s) is not implemented for random_pool" % (s, type(s))
+    )
+
+
+@random_pool.register(State)
+def _random_pool_on_state(s, **kwargs):
+    return wrap_to_use_state(random_pool_from_variables)(s, **kwargs)
+
+
+@random_pool.register(list)
 def random_pool_from_ivs(
     ivs: List[IV], num_samples: int = 1, duplicates: bool = True
 ) -> Iterable:
@@ -30,7 +45,7 @@ def random_pool_from_ivs(
         )
         l_iv_values.append(iv.allowed_values)
 
-    # Check to ensure infinite search won't occur if duplicates not allowed
+    # Check to ensure infinite search won't occur if replace not allowed
     if not duplicates:
         l_pool_len = [len(set(s)) for s in l_iv_values]
         n_combinations = np.product(l_pool_len)
@@ -54,11 +69,12 @@ def random_pool_from_ivs(
 random_pooler = deprecated_alias(random_pool_from_ivs, "random_pooler")
 
 
+@random_pool.register(VariableCollection)
 def random_pool_from_variables(
     variables: VariableCollection,
     num_samples=5,
     random_state=None,
-    duplicates: bool = True,
+    replace: bool = True,
 ) -> pd.DataFrame:
     """
 
@@ -66,7 +82,7 @@ def random_pool_from_variables(
         variables: the description of all the variables in the AER experiment.
         num_samples: the number of conditions to produce
         random_state: the seed value for the random number generator
-        duplicates: if True, allow repeated values
+        replace: if True, allow repeated values
 
     Returns: a Result / Delta object with the conditions as a pd.DataFrame in the `conditions` field
 
@@ -79,8 +95,8 @@ def random_pool_from_variables(
 
         With one independent variable "x", and some allowed_values we get some of those values
         back when running the experimentalist:
-        >>> random_pool_from_variables(
-        ...     variables=VariableCollection(
+        >>> random_pool(
+        ...     VariableCollection(
         ...         independent_variables=[Variable(name="x", allowed_values=range(10))
         ... ]), random_state=1)
         {'conditions':    x
@@ -92,8 +108,8 @@ def random_pool_from_variables(
 
 
         ... we get a sample of the range back when running the experimentalist:
-        >>> random_pool_from_variables(
-        ...     variables=VariableCollection(independent_variables=[
+        >>> random_pool(
+        ...     VariableCollection(independent_variables=[
         ...         Variable(name="x", value_range=(-5, 5))
         ... ]), random_state=1)["conditions"]
                   x
@@ -106,17 +122,16 @@ def random_pool_from_variables(
 
 
         The allowed_values or value_range must be specified:
-        >>> random_pool_from_variables(
-        ...     variables=VariableCollection(independent_variables=[Variable(name="x")]))
+        >>> random_pool(VariableCollection(independent_variables=[Variable(name="x")]))
         Traceback (most recent call last):
         ...
         ValueError: allowed_values or [value_range and type==REAL] needs to be set...
 
         With two independent variables, we get independent samples on both axes:
-        >>> random_pool_from_variables(variables=VariableCollection(independent_variables=[
+        >>> random_pool(VariableCollection(independent_variables=[
         ...         Variable(name="x1", allowed_values=range(1, 5)),
         ...         Variable(name="x2", allowed_values=range(1, 500)),
-        ... ]), num_samples=10, duplicates=True, random_state=1)["conditions"]
+        ... ]), num_samples=10, replace=True, random_state=1)["conditions"]
            x1   x2
         0   2  434
         1   3  212
@@ -130,8 +145,8 @@ def random_pool_from_variables(
         9   2   14
 
         If any of the variables have unspecified allowed_values, we get an error:
-        >>> random_pool_from_variables(
-        ...     variables=VariableCollection(independent_variables=[
+        >>> random_pool(
+        ...     VariableCollection(independent_variables=[
         ...         Variable(name="x1", allowed_values=[1, 2]),
         ...         Variable(name="x2"),
         ... ]))
@@ -142,7 +157,8 @@ def random_pool_from_variables(
 
         We can specify arrays of allowed values:
 
-        >>> random_pool_from_variables(variables=VariableCollection(independent_variables=[
+        >>> random_pool(
+        ...     VariableCollection(independent_variables=[
         ...         Variable(name="x", allowed_values=np.linspace(-10, 10, 101)),
         ...         Variable(name="y", allowed_values=[3, 4]),
         ...         Variable(name="z", allowed_values=np.linspace(20, 30, 11)),
@@ -162,7 +178,7 @@ def random_pool_from_variables(
     for iv in variables.independent_variables:
         if iv.allowed_values is not None:
             raw_conditions[iv.name] = rng.choice(
-                iv.allowed_values, size=num_samples, replace=duplicates
+                iv.allowed_values, size=num_samples, replace=replace
             )
         elif (iv.value_range is not None) and (iv.type == ValueType.REAL):
             raw_conditions[iv.name] = rng.uniform(*iv.value_range, size=num_samples)
@@ -175,6 +191,3 @@ def random_pool_from_variables(
 
     conditions = pd.DataFrame(raw_conditions)
     return Result(conditions=conditions)
-
-
-random_pool = wrap_to_use_state(random_pool_from_variables)

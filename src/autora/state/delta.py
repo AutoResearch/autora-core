@@ -190,20 +190,19 @@ class State:
             delta_behavior = self_field.metadata["delta"]
             self_value = getattr(self, self_field.name)
 
+            if (constructor := self_field.metadata.get("converter", None)) is not None:
+                coerced_other_value = constructor(other_value)
+            else:
+                coerced_other_value = other_value
+
             if delta_behavior == "extend":
-                extended_value = extend(self_value, other_value)
+                extended_value = extend(self_value, coerced_other_value)
                 updates[self_field_key] = extended_value
             elif delta_behavior == "append":
-                appended_value = append(self_value, other_value)
+                appended_value = append(self_value, coerced_other_value)
                 updates[self_field_key] = appended_value
             elif delta_behavior == "replace":
-                if (
-                    constructor := self_field.metadata.get("converter", None)
-                ) is not None:
-                    replaced_value = constructor(other_value)
-                else:
-                    replaced_value = other_value
-                updates[self_field_key] = replaced_value
+                updates[self_field_key] = coerced_other_value
             else:
                 raise NotImplementedError(
                     "delta_behaviour=`%s` not implemented" % (delta_behavior)

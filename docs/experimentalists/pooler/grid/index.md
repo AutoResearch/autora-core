@@ -22,12 +22,13 @@ This means that there are various combinations that these variables can form, th
 
 
 ### Example Code
+
 ```python
-from autora.experimentalist.pooler.grid import grid_pool
+from autora.experimentalist.pooler.grid import grid_pool_from_ivs
 from autora.variable import Variable
 
 iv_1 = Variable(allowed_values=[1, 2, 3])
 iv_2 = Variable(allowed_values=[4, 5, 6])
 
-pool = grid_pool([iv_1, iv_2])
+pool = grid_pool_from_ivs([iv_1, iv_2])
 ```

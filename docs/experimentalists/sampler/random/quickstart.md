@@ -10,5 +10,5 @@ You will need:
 you can import the random sampler via:
 
 ```python
-from autora.experimentalist.sampler.random_sampler import random_sample
+from autora.experimentalist.sampler.random_sampler import random_sample_from_conditions_iterable
 ```

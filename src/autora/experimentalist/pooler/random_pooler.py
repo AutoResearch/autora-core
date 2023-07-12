@@ -9,7 +9,7 @@ from autora.utils.deprecation import deprecated_alias
 from autora.variable import IV, ValueType, VariableCollection
 
 
-def random_pool(
+def random_pool_from_ivs(
     ivs: List[IV], num_samples: int = 1, duplicates: bool = True
 ) -> Iterable:
     """
@@ -51,7 +51,7 @@ def random_pool(
     return iter(l_samples)
 
 
-random_pooler = deprecated_alias(random_pool, "random_pooler")
+random_pooler = deprecated_alias(random_pool_from_ivs, "random_pooler")
 
 
 def random_pool_from_variables(
@@ -177,111 +177,4 @@ def random_pool_from_variables(
     return Result(conditions=conditions)
 
 
-random_pool_executor = wrap_to_use_state(random_pool_from_variables)
-random_pool_executor.__doc__ = """
-
-    Args:
-        variables:
-        fmt: the output type required
-
-    Returns:
-
-    Examples:
-        >>> from autora.state.delta import State
-        >>> from autora.variable import VariableCollection, Variable
-        >>> from dataclasses import dataclass, field
-        >>> import pandas as pd
-        >>> import numpy as np
-
-        We define a state object with the fields we need:
-        >>> @dataclass(frozen=True)
-        ... class S(State):
-        ...     variables: VariableCollection = field(default_factory=VariableCollection)
-        ...     conditions: pd.DataFrame = field(default_factory=pd.DataFrame,
-        ...                                      metadata={"delta": "replace"})
-
-        With one independent variable "x", and some allowed_values:
-        >>> s = S(
-        ...     variables=VariableCollection(independent_variables=[
-        ...         Variable(name="x", allowed_values=range(10))
-        ... ]))
-
-        ... we get some of those values back when running the experimentalist:
-        >>> random_pool_executor(s, random_state=1).conditions
-           x
-        0  4
-        1  5
-        2  7
-        3  9
-        4  0
-
-        With one independent variable "x", and a value_range:
-        >>> t = S(
-        ...     variables=VariableCollection(independent_variables=[
-        ...         Variable(name="x", value_range=(-5, 5))
-        ... ]))
-
-        ... we get a sample of the range back when running the experimentalist:
-        >>> random_pool_executor(t, random_state=1).conditions
-                  x
-        0  0.118216
-        1  4.504637
-        2 -3.558404
-        3  4.486494
-        4 -1.881685
-
-
-
-        The allowed_values or value_range must be specified:
-        >>> random_pool_executor(
-        ...     S(variables=VariableCollection(independent_variables=[Variable(name="x")])))
-        Traceback (most recent call last):
-        ...
-        ValueError: allowed_values or [value_range and type==REAL] needs to be set...
-
-        With two independent variables, we get independent samples on both axes:
-        >>> t = S(
-        ...     variables=VariableCollection(independent_variables=[
-        ...         Variable(name="x1", allowed_values=range(1, 5)),
-        ...         Variable(name="x2", allowed_values=range(1, 500)),
-        ... ]))
-        >>> random_pool_executor(t,
-        ...                            num_samples=10, duplicates=True, random_state=1).conditions
-           x1   x2
-        0   2  434
-        1   3  212
-        2   4  137
-        3   4  414
-        4   1  129
-        5   1  205
-        6   4  322
-        7   4  275
-        8   1   43
-        9   2   14
-
-        If any of the variables have unspecified allowed_values, we get an error:
-        >>> random_pool_executor(S(
-        ...     variables=VariableCollection(independent_variables=[
-        ...         Variable(name="x1", allowed_values=[1, 2]),
-        ...         Variable(name="x2"),
-        ... ])))
-        Traceback (most recent call last):
-        ...
-        ValueError: allowed_values or [value_range and type==REAL] needs to be set...
-
-
-        We can specify arrays of allowed values:
-        >>> u = S(
-        ...     variables=VariableCollection(independent_variables=[
-        ...         Variable(name="x", allowed_values=np.linspace(-10, 10, 101)),
-        ...         Variable(name="y", allowed_values=[3, 4]),
-        ...         Variable(name="z", allowed_values=np.linspace(20, 30, 11)),
-        ... ]))
-        >>> random_pool_executor(u, random_state=1).conditions
-             x  y     z
-        0 -0.6  3  29.0
-        1  0.2  4  24.0
-        2  5.2  4  23.0
-        3  9.0  3  29.0
-        4 -9.4  3  22.0
-"""
+random_pool = wrap_to_use_state(random_pool_from_variables)

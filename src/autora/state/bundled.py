@@ -9,13 +9,13 @@ from autora.variable import VariableCollection
 
 
 @dataclass(frozen=True)
-class BasicAERState(State):
+class StandardState(State):
     """
     Examples:
         The state can be initialized emtpy
         >>> from autora.state.delta import Delta
         >>> from autora.variable import VariableCollection, Variable
-        >>> s = BasicAERState()
+        >>> s = StandardState()
         >>> s
         BasicAERState(variables=None, conditions=None, experiment_data=None, models=[])
 

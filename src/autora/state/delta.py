@@ -140,6 +140,19 @@ def extend(a, b):
     raise NotImplementedError("`extend` not implemented for %s, %s" % (a, b))
 
 
+@extend.register(type(None))
+def extend_none(a, b):
+    """
+    Examples:
+        >>> extend(None, [])
+        []
+
+        >>> extend(None, [3])
+        [3]
+    """
+    return b
+
+
 @extend.register(list)
 def extend_list(a, b):
     """

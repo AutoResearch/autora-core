@@ -11,7 +11,7 @@ from autora.utils.deprecation import deprecated_alias
 
 @singledispatch
 def random_sample(s, **kwargs):
-    """Function to create a sequence of conditions randomly sampled from independent variables."""
+    """Function to create a sequence of conditions randomly sampled from conditions."""
     raise NotImplementedError(
         "random_sample doesn't have an implementation for %s (type=%s)" % (s, type(s))
     )

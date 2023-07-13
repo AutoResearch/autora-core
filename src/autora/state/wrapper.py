@@ -1,6 +1,8 @@
-"""Utilities to wrap common theorist, experimentalist and experiment runners as `f(State)`.
+"""Utilities to wrap common theorist, experimentalist and experiment runners as `f(State)`
 so that $n$ processes $f_i$ on states $S$ can be represented as
 $$f_n(...(f_1(f_0(S))))$$
+
+These are special cases of the [autora.state.delta.wrap_to_use_state][] function.
 """
 from __future__ import annotations
 

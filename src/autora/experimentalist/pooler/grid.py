@@ -1,7 +1,14 @@
+import logging
 from itertools import product
 from typing import List
 
 from autora.variable import IV
+
+_logger = logging.getLogger(__name__)
+_logger.warning(
+    "`autora.experimentalist.pooler.grid` is deprecated. "
+    "Use the functions in `autora.experimentalist.grid_` instead."
+)
 
 
 def grid_pool(ivs: List[IV]):

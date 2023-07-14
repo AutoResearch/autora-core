@@ -21,7 +21,7 @@ def random_pool(
     Creates combinations from lists of discrete values using random selection.
     Args:
         ivs: List of independent variables
-        n: Number of samples to sample
+        num_samples: Number of samples to sample
         duplicates: Boolean if duplicate value are allowed.
 
     """

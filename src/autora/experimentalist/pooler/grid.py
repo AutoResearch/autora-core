@@ -17,7 +17,7 @@ def grid_pool(ivs: List[IV]):
     l_iv_values = []
     for iv in ivs:
         assert iv.allowed_values is not None, (
-            f"gridsearch_pool only supports independent variables with discrete allowed values, "
+            f"grid_pool only supports independent variables with discrete allowed values, "
             f"but allowed_values is None on {iv=} "
         )
         l_iv_values.append(iv.allowed_values)

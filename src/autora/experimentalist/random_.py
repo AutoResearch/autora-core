@@ -286,9 +286,9 @@ def random_sample_on_conditions(
 
     Args:
         conditions: the conditions to sample from
-        num_samples:
-        random_state:
-        replace:
+        num_samples: the number of conditions to produce
+        random_state: the seed value for the random number generator
+        replace: if True, allow repeated values
 
     Returns: a Result object with a field `conditions` with a DataFrame of the sampled conditions
 

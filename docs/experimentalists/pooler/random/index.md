@@ -26,5 +26,5 @@ This means that there are 9 possible combinations for these variables (3x3), fro
 ```python
 from autora.experimentalist.random_ import random_pool
 
-pool = random_pool([1, 2, 3], [4, 5, 6], n=3)
+pool = random_pool([1, 2, 3], [4, 5, 6], num_samples=3)
 ```

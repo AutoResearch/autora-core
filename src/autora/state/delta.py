@@ -206,9 +206,9 @@ def wrap_to_use_state(f):
     It was inspired by the pytest "fixtures" mechanism.
 
     Args:
-        f:
+        f: target function to be wrapped such that it can recieve arguments from and contribute Deltas to `State` objects.
 
-    Returns:
+    Returns: a version of the target function that is compatible with `State` objects.
 
     Examples:
         >>> from autora.state.delta import State, Delta

@@ -28,8 +28,10 @@ def random_pool_on_state(
     """
 
     Args:
-        variables:
-        fmt: the output type required
+        s: a State object with the desired fields
+        num_samples: the number of conditions to produce
+        random_state: the seed value for the random number generator
+        replace: if True, allow repeated values
 
     Returns:
 

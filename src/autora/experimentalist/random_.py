@@ -143,7 +143,7 @@ def random_pool_on_variables(
     num_samples: int = 5,
     random_state: Optional[int] = None,
     replace: bool = True,
-) -> pd.DataFrame:
+) -> Result:
     """
 
     Args:
@@ -166,13 +166,13 @@ def random_pool_on_variables(
         >>> random_pool(
         ...     VariableCollection(
         ...         independent_variables=[Variable(name="x", allowed_values=range(10))
-        ... ]), random_state=1)
-        {'conditions':    x
+        ... ]), random_state=1)["conditions"]
+           x
         0  4
         1  5
         2  7
         3  9
-        4  0}
+        4  0
 
 
         ... we get a sample of the range back when running the experimentalist:

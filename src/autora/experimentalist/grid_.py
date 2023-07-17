@@ -24,19 +24,55 @@ def grid_pool_on_state(s: State) -> State:
 
 @grid_pool.register(list)
 @grid_pool.register(tuple)
-def grid_pool_from_ivs(ivs: Sequence[Variable]) -> product:
-    """Creates exhaustive pool from discrete values using a Cartesian product of sets"""
+def grid_pool_from_ivs(ivs: Sequence[Variable]) -> pd.DataFrame:
+    """
+    Creates exhaustive pool from discrete values using a Cartesian product of sets
+
+    Examples:
+        >>> grid_pool_from_ivs([Variable("x", allowed_values=[1,2])])
+           x
+        0  1
+        1  2
+
+        >>> grid_pool_from_ivs([Variable("x", allowed_values=[1,2]),
+        ...                     Variable("y", allowed_values=["a","b"])])
+           x  y
+        0  1  a
+        1  1  b
+        2  2  a
+        3  2  b
+
+        >>> grid_pool_from_ivs([Variable("x", allowed_values=[1,2]),
+        ...                     Variable("y", allowed_values=["a","b"]),
+        ...                     Variable("z", allowed_values=[3.0,4.0])])
+           x  y    z
+        0  1  a  3.0
+        1  1  a  4.0
+        2  1  b  3.0
+        3  1  b  4.0
+        4  2  a  3.0
+        5  2  a  4.0
+        6  2  b  3.0
+        7  2  b  4.0
+
+
+    """
     # Get allowed values for each IV
     l_iv_values = []
+    l_iv_names = []
     for iv in ivs:
         assert iv.allowed_values is not None, (
             f"gridsearch_pool only supports independent variables with discrete allowed values, "
             f"but allowed_values is None on {iv=} "
         )
         l_iv_values.append(iv.allowed_values)
+        l_iv_names.append(iv.name)
 
     # Return Cartesian product of all IV values
-    return product(*l_iv_values)
+    pool = product(*l_iv_values)
+    result = pd.DataFrame(pool, columns=l_iv_names)
+
+    return result
 
 
 @grid_pool.register(VariableCollection)
@@ -118,7 +154,5 @@ def grid_pool_from_variables(variables: VariableCollection) -> pd.DataFrame:
         [2222 rows x 3 columns]
 
     """
-    raw_conditions = grid_pool_from_ivs(variables.independent_variables)
-    iv_names = [v.name for v in variables.independent_variables]
-    conditions = pd.DataFrame(raw_conditions, columns=iv_names)
+    conditions = grid_pool_from_ivs(variables.independent_variables)
     return Result(conditions=conditions)

@@ -24,6 +24,29 @@ def grid_pool(s, **___):
 
 @grid_pool.register(State)
 def grid_pool_on_state(s: State) -> State:
+    """
+
+    Args:
+        s: a State object with a `variables` field.
+
+    Returns: a State object updated with the new conditions.
+
+    Examples:
+        >>> from autora.state.bundled import StandardState
+        >>> s = StandardState(variables=VariableCollection(
+        ...     independent_variables=[
+        ...         Variable(name="x1", allowed_values=[1, 2]),
+        ...         Variable(name="x2", allowed_values=[3, 4])]))
+        >>> grid_pool(s)  # doctest: +ELLIPSIS +NORMALIZE_WHITESPACE
+        StandardState(..., conditions=
+           x1  x2
+        0   1   3
+        1   1   4
+        2   2   3
+        3   2   4, ...)
+
+    """
+
     return wrap_to_use_state(grid_pool_from_variables)(s)
 
 

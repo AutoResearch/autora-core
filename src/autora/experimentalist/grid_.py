@@ -12,7 +12,7 @@ from autora.variable import Variable, VariableCollection
 @singledispatch
 def grid_pool(s, **___):
     """
-    Function to create a sequence of conditions sampled from a grid of independent variables.
+    Create an exhaustive pool of conditions.
 
     Depending on the type of the first argument, this will return a different result-type.
 
@@ -25,11 +25,12 @@ def grid_pool(s, **___):
 @grid_pool.register(State)
 def grid_pool_on_state(s: State) -> State:
     """
+    Create an exhaustive pool of conditions.
 
     Args:
         s: a State object with a `variables` field.
 
-    Returns: a State object updated with the new conditions.
+    Returns: a State object updated with the new conditions
 
     Examples:
         >>> from autora.state.bundled import StandardState
@@ -54,7 +55,7 @@ def grid_pool_on_state(s: State) -> State:
 @grid_pool.register(tuple)
 def grid_pool_on_ivs(ivs: Sequence[Variable]) -> pd.DataFrame:
     """
-    Creates exhaustive pool from discrete values using a Cartesian product of sets
+    Create an exhaustive pool of conditions.
 
     Args:
         ivs: Variable objects, each of which has an attribute `allowed_values`

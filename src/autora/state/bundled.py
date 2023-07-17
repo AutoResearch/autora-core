@@ -105,9 +105,9 @@ class StandardState(State):
 
         `experiment_data` other than `pd.DataFrame` will be coerced into a `DataFrame` if possible.
         >>> import numpy as np
-        >>> dc3 = Delta(
+        >>> ded4 = Delta(
         ...     experiment_data=np.core.records.fromrecords([(1, "a"), (2, "b")], names=["x", "y"]))
-        >>> (s + dc3).experiment_data
+        >>> (s + ded4).experiment_data
            x  y
         0  1  a
         1  2  b

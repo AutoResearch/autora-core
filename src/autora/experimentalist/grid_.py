@@ -57,7 +57,7 @@ def grid_pool_from_variables(variables: VariableCollection) -> pd.DataFrame:
         >>> import numpy as np
 
         With one independent variable "x", and some allowed values, we get exactly those values
-        back when running the executor:
+        back when running the experimentalist:
         >>> grid_pool(VariableCollection(
         ...     independent_variables=[Variable(name="x", allowed_values=[1, 2, 3])]
         ... ))

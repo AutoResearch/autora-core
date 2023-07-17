@@ -92,8 +92,7 @@ def random_pool_on_state(
         ...         Variable(name="x1", allowed_values=range(1, 5)),
         ...         Variable(name="x2", allowed_values=range(1, 500)),
         ... ]))
-        >>> random_pool(t,
-        ...                            num_samples=10, replace=True, random_state=1).conditions
+        >>> random_pool(t, num_samples=10, replace=True, random_state=1).conditions
            x1   x2
         0   2  434
         1   3  212

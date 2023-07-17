@@ -1,5 +1,4 @@
 """Tools to make randomly sampled experimental conditions."""
-import random
 from functools import singledispatch
 from typing import Optional, Union
 
@@ -271,32 +270,6 @@ def random_sample(s, **kwargs):
 @random_sample.register(State)
 def random_sample_on_state(s: State, **kwargs) -> State:
     return wrap_to_use_state(random_sample_on_conditions)(s, **kwargs)
-
-
-@random_sample.register(list)
-@random_sample.register(tuple)
-def random_sample_on_list(
-    conditions: Union[list, tuple],
-    num_samples: int = 1,
-    random_state: Optional[int] = None,
-    replace: bool = False,
-) -> list:
-    """
-    Examples:
-        >>> random_sample([1, 1, 2, 2, 3, 3], num_samples=2, random_state=1, replace=True)
-        [1, 3]
-
-        >>> random_sample((1, 1, 2, 2, 3, 3), num_samples=3, random_state=1, replace=True)
-        [1, 3, 3]
-
-
-    """
-
-    if random_state is not None:
-        random.seed(random_state)
-
-    assert replace is True, "random.choices only supports choice with replacement."
-    return random.choices(conditions, k=num_samples)
 
 
 @random_sample.register(pd.DataFrame)

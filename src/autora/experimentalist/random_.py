@@ -325,13 +325,13 @@ def random_sample_on_conditions(
         >>> import pandas as pd
         >>> random.seed(1)
         >>> random_sample(
-        ...     pd.DataFrame({"x": range(100, 200)}), num_samples=5, random_state=180)
-        {'conditions':       x
+        ...     pd.DataFrame({"x": range(100, 200)}), num_samples=5, random_state=180)["conditions"]
+              x
         67  167
         71  171
         64  164
         63  163
-        96  196}
+        96  196
 
     """
     return Result(

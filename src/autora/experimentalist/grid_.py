@@ -133,11 +133,11 @@ def grid_pool_on_variables(variables: VariableCollection) -> Result:
         back when running the executor:
         >>> grid_pool(VariableCollection(
         ...     independent_variables=[Variable(name="x", allowed_values=[1, 2, 3])]
-        ... ))
-        {'conditions':    x
+        ... ))["conditions"]
+           x
         0  1
         1  2
-        2  3}
+        2  3
 
         The allowed_values must be specified:
         >>> grid_pool(VariableCollection(independent_variables=[Variable(name="x")]))

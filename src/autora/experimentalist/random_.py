@@ -321,7 +321,8 @@ def random_sample_on_conditions(
         random_state: the seed value for the random number generator
         replace: if True, allow repeated values
 
-    Returns: a Result object with a field `conditions` with a DataFrame of the sampled conditions
+    Returns: a Result object with a field `conditions` containing a DataFrame of the sampled
+    conditions
 
     Examples:
         From a pd.DataFrame:

@@ -11,7 +11,11 @@ from autora.variable import ValueType, VariableCollection
 
 @singledispatch
 def random_pool(s, **kwargs):
-    """Function to create a sequence of conditions randomly sampled from independent variables."""
+    """
+    Create a sequence of conditions randomly sampled from independent variables.
+
+    Depending on the type of the first argument, this will return a different result-type.
+    """
     raise NotImplementedError(
         "random_pool doesn't have an implementation for %s (type=%s)" % (s, type(s))
     )
@@ -25,6 +29,7 @@ def random_pool_on_state(
     replace: bool = True,
 ) -> State:
     """
+    Create a sequence of conditions randomly sampled from independent variables.
 
     Args:
         s: a State object with the desired fields
@@ -32,7 +37,7 @@ def random_pool_on_state(
         random_state: the seed value for the random number generator
         replace: if True, allow repeated values
 
-    Returns:
+    Returns: a State object updated with the new conditions
 
     Examples:
         >>> from autora.state.delta import State
@@ -145,6 +150,7 @@ def random_pool_on_variables(
     replace: bool = True,
 ) -> Result:
     """
+    Create a sequence of conditions randomly sampled from independent variables.
 
     Args:
         variables: the description of all the variables in the AER experiment.
@@ -175,7 +181,8 @@ def random_pool_on_variables(
         4  0
 
 
-        ... With one independent variable "x", and a value_range we get a sample of the range back when running the experimentalist:
+        ... with one independent variable "x", and a value_range,
+        we get a sample of the range back when running the experimentalist:
         >>> random_pool(
         ...     VariableCollection(independent_variables=[
         ...         Variable(name="x", value_range=(-5, 5))
@@ -263,7 +270,11 @@ def random_pool_on_variables(
 
 @singledispatch
 def random_sample(s, **kwargs):
-    """Function to create a sequence of conditions randomly sampled from conditions."""
+    """
+    Take a random sample from some input conditions.
+
+    Depending on the type of the first argument, this will return a different result-type.
+    """
     raise NotImplementedError(
         "random_sample doesn't have an implementation for %s (type=%s)" % (s, type(s))
     )
@@ -271,6 +282,24 @@ def random_sample(s, **kwargs):
 
 @random_sample.register(State)
 def random_sample_on_state(s: State, **kwargs) -> State:
+    """
+    Take a random sample from some input conditions.
+
+    Args:
+        s: a State object with a `variables` field.
+
+    Returns: a State object updated with the new conditions
+
+    Examples:
+        >>> from autora.state.bundled import StandardState
+        >>> s = StandardState(conditions=pd.DataFrame({"x": range(100, 200)}))
+        >>> random_sample(s, random_state=1, replace=False, num_samples=3).conditions
+              x
+        80  180
+        84  184
+        33  133
+
+    """
     return wrap_to_use_state(random_sample_on_conditions)(s, **kwargs)
 
 
@@ -284,7 +313,7 @@ def random_sample_on_conditions(
     replace: bool = False,
 ) -> Result:
     """
-    Take a random sample from some conditions.
+    Take a random sample from some input conditions.
 
     Args:
         conditions: the conditions to sample from
@@ -297,7 +326,6 @@ def random_sample_on_conditions(
     Examples:
         From a pd.DataFrame:
         >>> import pandas as pd
-        >>> random.seed(1)
         >>> random_sample(
         ...     pd.DataFrame({"x": range(100, 200)}), num_samples=5, random_state=180)["conditions"]
               x

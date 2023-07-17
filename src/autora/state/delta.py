@@ -179,7 +179,7 @@ class State:
 
         >>> @dataclass(frozen=True)
         ... class FieldAliasState(State):
-        ...    things: List[str] = field(
+        ...     things: List[str] = field(
         ...     default_factory=list,
         ...     metadata={"delta": "extend",
         ...               "aliases": {"thing": lambda m: [m]}}

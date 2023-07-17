@@ -10,8 +10,13 @@ from autora.variable import Variable, VariableCollection
 
 
 @singledispatch
-def grid_pool(s, **kwargs):
-    """Function to create a sequence of conditions sampled from a grid of independent variables."""
+def grid_pool(s, **___):
+    """
+    Function to create a sequence of conditions sampled from a grid of independent variables.
+
+    Depending on the type of the first argument, this will return a different result-type.
+
+    """
     raise NotImplementedError(
         "grid_pool doesn't have an implementation for %s (type=%s)" % (s, type(s))
     )

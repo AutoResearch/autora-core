@@ -63,8 +63,6 @@ def grid_pool_on_ivs(ivs: Sequence[Variable]) -> pd.DataFrame:
 
     Returns: A pd.DataFrame with the exhaustive pool of allowed values
 
-
-
     Examples:
         >>> grid_pool([Variable("x", allowed_values=[1,2])])
            x

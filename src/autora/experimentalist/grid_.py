@@ -47,12 +47,12 @@ def grid_pool_on_state(s: State) -> State:
 
     """
 
-    return wrap_to_use_state(grid_pool_from_variables)(s)
+    return wrap_to_use_state(grid_pool_on_variables)(s)
 
 
 @grid_pool.register(list)
 @grid_pool.register(tuple)
-def grid_pool_from_ivs(ivs: Sequence[Variable]) -> pd.DataFrame:
+def grid_pool_on_ivs(ivs: Sequence[Variable]) -> pd.DataFrame:
     """
     Creates exhaustive pool from discrete values using a Cartesian product of sets
 
@@ -112,7 +112,7 @@ def grid_pool_from_ivs(ivs: Sequence[Variable]) -> pd.DataFrame:
 
 
 @grid_pool.register(VariableCollection)
-def grid_pool_from_variables(variables: VariableCollection) -> Result:
+def grid_pool_on_variables(variables: VariableCollection) -> Result:
     """Creates exhaustive pool of conditions given a definition of variables with allowed_values.
 
     Args:
@@ -191,5 +191,5 @@ def grid_pool_from_variables(variables: VariableCollection) -> Result:
         [2222 rows x 3 columns]
 
     """
-    conditions = grid_pool_from_ivs(variables.independent_variables)
+    conditions = grid_pool_on_ivs(variables.independent_variables)
     return Result(conditions=conditions)

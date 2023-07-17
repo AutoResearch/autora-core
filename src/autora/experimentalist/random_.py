@@ -177,7 +177,7 @@ def random_pool_on_variables(
         4  0}
 
 
-        ... we get a sample of the range back when running the experimentalist:
+        ... With one independent variable "x", and a value_range we get a sample of the range back when running the experimentalist:
         >>> random_pool(
         ...     VariableCollection(independent_variables=[
         ...         Variable(name="x", value_range=(-5, 5))

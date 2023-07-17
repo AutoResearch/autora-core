@@ -56,23 +56,31 @@ def grid_pool_from_ivs(ivs: Sequence[Variable]) -> pd.DataFrame:
     """
     Creates exhaustive pool from discrete values using a Cartesian product of sets
 
+    Args:
+        ivs: Variable objects, each of which has an attribute `allowed_values`
+            containing a sequence of values.
+
+    Returns: A pd.DataFrame with the exhaustive pool of allowed values
+
+
+
     Examples:
-        >>> grid_pool_from_ivs([Variable("x", allowed_values=[1,2])])
+        >>> grid_pool([Variable("x", allowed_values=[1,2])])
            x
         0  1
         1  2
 
-        >>> grid_pool_from_ivs([Variable("x", allowed_values=[1,2]),
-        ...                     Variable("y", allowed_values=["a","b"])])
+        >>> grid_pool([Variable("x", allowed_values=[1,2]),
+        ...            Variable("y", allowed_values=["a","b"])])
            x  y
         0  1  a
         1  1  b
         2  2  a
         3  2  b
 
-        >>> grid_pool_from_ivs([Variable("x", allowed_values=[1,2]),
-        ...                     Variable("y", allowed_values=["a","b"]),
-        ...                     Variable("z", allowed_values=[3.0,4.0])])
+        >>> grid_pool([Variable("x", allowed_values=[1,2]),
+        ...            Variable("y", allowed_values=["a","b"]),
+        ...            Variable("z", allowed_values=[3.0,4.0])])
            x  y    z
         0  1  a  3.0
         1  1  a  4.0

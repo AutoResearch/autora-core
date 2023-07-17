@@ -112,12 +112,13 @@ def grid_pool_from_ivs(ivs: Sequence[Variable]) -> pd.DataFrame:
 
 
 @grid_pool.register(VariableCollection)
-def grid_pool_from_variables(variables: VariableCollection) -> pd.DataFrame:
+def grid_pool_from_variables(variables: VariableCollection) -> Result:
     """Creates exhaustive pool of conditions given a definition of variables with allowed_values.
 
     Args:
         variables: a VariableCollection with `independent_variables` – a sequence of Variable
-        objects, each of which has an attribute `allowed_values` containing a sequence of values.
+            objects, each of which has an attribute `allowed_values` containing a sequence of
+            values.
 
     Returns: a Result / Delta object with the conditions as a pd.DataFrame in the `conditions` field
 

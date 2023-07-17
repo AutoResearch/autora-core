@@ -98,7 +98,7 @@ def grid_pool_on_ivs(ivs: Sequence[Variable]) -> pd.DataFrame:
     l_iv_names = []
     for iv in ivs:
         assert iv.allowed_values is not None, (
-            f"gridsearch_pool only supports independent variables with discrete allowed values, "
+            f"grid_pool only supports independent variables with discrete allowed values, "
             f"but allowed_values is None on {iv=} "
         )
         l_iv_values.append(iv.allowed_values)
@@ -130,7 +130,7 @@ def grid_pool_on_variables(variables: VariableCollection) -> Result:
         >>> import numpy as np
 
         With one independent variable "x", and some allowed values, we get exactly those values
-        back when running the executor:
+        back when running the experimentalist:
         >>> grid_pool(VariableCollection(
         ...     independent_variables=[Variable(name="x", allowed_values=[1, 2, 3])]
         ... ))["conditions"]
@@ -143,7 +143,7 @@ def grid_pool_on_variables(variables: VariableCollection) -> Result:
         >>> grid_pool(VariableCollection(independent_variables=[Variable(name="x")]))
         Traceback (most recent call last):
         ...
-        AssertionError: gridsearch_pool only supports independent variables with discrete...
+        AssertionError: grid_pool only supports independent variables with discrete...
 
         With two independent variables, we get the cartesian product:
         >>> grid_pool(
@@ -165,7 +165,7 @@ def grid_pool_on_variables(variables: VariableCollection) -> Result:
         ... ]))
         Traceback (most recent call last):
         ...
-        AssertionError: gridsearch_pool only supports independent variables with discrete...
+        AssertionError: grid_pool only supports independent variables with discrete...
 
 
         We can specify arrays of allowed values:

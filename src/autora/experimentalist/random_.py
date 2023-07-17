@@ -27,8 +27,10 @@ def random_pool_on_state(
     """
 
     Args:
-        variables:
-        fmt: the output type required
+        s: a State object with the desired fields
+        num_samples: the number of conditions to produce
+        random_state: the seed value for the random number generator
+        replace: if True, allow repeated values
 
     Returns:
 
@@ -173,7 +175,7 @@ def random_pool_on_variables(
         4  0
 
 
-        ... we get a sample of the range back when running the experimentalist:
+        ... With one independent variable "x", and a value_range we get a sample of the range back when running the experimentalist:
         >>> random_pool(
         ...     VariableCollection(independent_variables=[
         ...         Variable(name="x", value_range=(-5, 5))

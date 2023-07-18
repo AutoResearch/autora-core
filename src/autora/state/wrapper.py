@@ -29,6 +29,27 @@ def state_fn_from_estimator(estimator: BaseEstimator) -> Executor:
 
     Supports passing additional `**kwargs` which are used to update the estimator's params
     before fitting.
+
+    Examples:
+        Initialize a function which operates on the state, `state_fn` and runs a LinearRegression.
+        >>> from sklearn.linear_model import LinearRegression
+        >>> state_fn = state_fn_from_estimator(LinearRegression())
+
+        Define the state on which to operate (here an instance of the `StandardState`):
+        >>> from autora.state.bundled import StandardState
+        >>> from autora.variable import Variable, VariableCollection
+        >>> import pandas as pd
+        >>> s = StandardState(
+        ...     variables=VariableCollection(
+        ...         independent_variables=[Variable("x")],
+        ...         dependent_variables=[Variable("y")]),
+        ...     experiment_data=pd.DataFrame({"x": [1,2,3], "y":[3,6,9]})
+        ... )
+
+        Run the function, which fits the model and adds the result to the `StandardState`
+        >>> state_fn(s).model.coef_
+        array([[3.]])
+
     """
 
     @wrap_to_use_state

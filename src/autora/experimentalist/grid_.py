@@ -23,7 +23,7 @@ def grid_pool(s, **___):
 
 
 @grid_pool.register(State)
-def grid_pool_on_state(s: State) -> State:
+def grid_pool_on_state(s: State, **kwargs) -> State:
     """
     Create an exhaustive pool of conditions.
 
@@ -48,7 +48,7 @@ def grid_pool_on_state(s: State) -> State:
 
     """
 
-    return wrap_to_use_state(grid_pool_on_variables)(s)
+    return wrap_to_use_state(grid_pool_on_variables)(s, **kwargs)
 
 
 @grid_pool.register(list)

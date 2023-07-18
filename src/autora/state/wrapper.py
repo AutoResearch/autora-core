@@ -23,7 +23,7 @@ XY = TypeVar("XY")
 Executor = Callable[[State], State]
 
 
-def theorist_from_estimator(estimator: BaseEstimator) -> Executor:
+def state_fn_from_estimator(estimator: BaseEstimator) -> Executor:
     """
     Convert a scikit-learn compatible estimator into a function on a `State` object.
 

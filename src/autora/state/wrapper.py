@@ -58,7 +58,7 @@ def state_fn_from_x_to_y_fn(f: Callable[[X], Y]) -> Executor:
     return experiment_runner
 
 
-def experiment_runner_from_x_to_xy_function(f: Callable[[X], XY]) -> Executor:
+def state_fn_from_x_to_xy_fn(f: Callable[[X], XY]) -> Executor:
     """Wrapper for experiment_runner of the form $f(x) \rarrow (x,y)$, where `f`
     returns both $x$ and $y$ values in a complete dataframe."""
 

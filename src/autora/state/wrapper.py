@@ -44,7 +44,7 @@ def state_fn_from_estimator(estimator: BaseEstimator) -> Executor:
     return theorist
 
 
-def experiment_runner_from_x_to_y_function(f: Callable[[X], Y]) -> Executor:
+def state_fn_from_x_to_y_fn(f: Callable[[X], Y]) -> Executor:
     """Wrapper for experiment_runner of the form $f(x) \rarrow y$, where `f` returns just the $y$
     values"""
 

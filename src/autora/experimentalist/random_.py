@@ -1,5 +1,4 @@
 """Tools to make randomly sampled experimental conditions."""
-from functools import singledispatch
 from typing import Optional, Union
 
 import numpy as np
@@ -9,24 +8,12 @@ from autora.state.delta import Result, State, wrap_to_use_state
 from autora.variable import ValueType, VariableCollection
 
 
-@singledispatch
-def random_pool(s, **kwargs):
-    """
-    Create a sequence of conditions randomly sampled from independent variables.
-
-    Depending on the type of the first argument, this will return a different result-type.
-    """
-    raise NotImplementedError(
-        "random_pool doesn't have an implementation for %s (type=%s)" % (s, type(s))
-    )
-
-
-@random_pool.register(State)
 def random_pool_on_state(
     s: State,
     num_samples: int = 5,
     random_state: Optional[int] = None,
     replace: bool = True,
+    **kwargs,
 ) -> State:
     """
     Create a sequence of conditions randomly sampled from independent variables.
@@ -60,7 +47,7 @@ def random_pool_on_state(
         ... ]))
 
         ... we get some of those values back when running the experimentalist:
-        >>> random_pool(s, random_state=1).conditions
+        >>> random_pool_on_state(s, random_state=1).conditions
            x
         0  4
         1  5
@@ -75,7 +62,7 @@ def random_pool_on_state(
         ... ]))
 
         ... we get a sample of the range back when running the experimentalist:
-        >>> random_pool(t, random_state=1).conditions
+        >>> random_pool_on_state(t, random_state=1).conditions
                   x
         0  0.118216
         1  4.504637
@@ -86,7 +73,7 @@ def random_pool_on_state(
 
 
         The allowed_values or value_range must be specified:
-        >>> random_pool(
+        >>> random_pool_on_state(
         ...     S(variables=VariableCollection(independent_variables=[Variable(name="x")])))
         Traceback (most recent call last):
         ...
@@ -98,7 +85,7 @@ def random_pool_on_state(
         ...         Variable(name="x1", allowed_values=range(1, 5)),
         ...         Variable(name="x2", allowed_values=range(1, 500)),
         ... ]))
-        >>> random_pool(t, num_samples=10, replace=True, random_state=1).conditions
+        >>> random_pool_on_state(t, num_samples=10, replace=True, random_state=1).conditions
            x1   x2
         0   2  434
         1   3  212
@@ -112,7 +99,7 @@ def random_pool_on_state(
         9   2   14
 
         If any of the variables have unspecified allowed_values, we get an error:
-        >>> random_pool(S(
+        >>> random_pool_on_state(S(
         ...     variables=VariableCollection(independent_variables=[
         ...         Variable(name="x1", allowed_values=[1, 2]),
         ...         Variable(name="x2"),
@@ -129,7 +116,7 @@ def random_pool_on_state(
         ...         Variable(name="y", allowed_values=[3, 4]),
         ...         Variable(name="z", allowed_values=np.linspace(20, 30, 11)),
         ... ]))
-        >>> random_pool(u, random_state=1).conditions
+        >>> random_pool_on_state(u, random_state=1).conditions
              x  y     z
         0 -0.6  3  29.0
         1  0.2  4  24.0
@@ -137,13 +124,12 @@ def random_pool_on_state(
         3  9.0  3  29.0
         4 -9.4  3  22.0
     """
-    return wrap_to_use_state(random_pool_on_variables)(
-        s, num_samples=num_samples, random_state=random_state, replace=replace
+    return wrap_to_use_state(random_pool)(
+        s, num_samples=num_samples, random_state=random_state, replace=replace, **kwargs
     )
 
 
-@random_pool.register(VariableCollection)
-def random_pool_on_variables(
+def random_pool(
     variables: VariableCollection,
     num_samples: int = 5,
     random_state: Optional[int] = None,
@@ -268,19 +254,6 @@ def random_pool_on_variables(
     return Result(conditions=conditions)
 
 
-@singledispatch
-def random_sample(s, **kwargs):
-    """
-    Take a random sample from some input conditions.
-
-    Depending on the type of the first argument, this will return a different result-type.
-    """
-    raise NotImplementedError(
-        "random_sample doesn't have an implementation for %s (type=%s)" % (s, type(s))
-    )
-
-
-@random_sample.register(State)
 def random_sample_on_state(s: State, **kwargs) -> State:
     """
     Take a random sample from some input conditions.
@@ -293,20 +266,17 @@ def random_sample_on_state(s: State, **kwargs) -> State:
     Examples:
         >>> from autora.state.bundled import StandardState
         >>> s = StandardState(conditions=pd.DataFrame({"x": range(100, 200)}))
-        >>> random_sample(s, random_state=1, replace=False, num_samples=3).conditions
+        >>> random_sample_on_state(s, random_state=1, replace=False, num_samples=3).conditions
               x
         80  180
         84  184
         33  133
 
     """
-    return wrap_to_use_state(random_sample_on_conditions)(s, **kwargs)
+    return wrap_to_use_state(random_sample)(s, **kwargs)
 
 
-@random_sample.register(pd.DataFrame)
-@random_sample.register(np.ndarray)
-@random_sample.register(np.recarray)
-def random_sample_on_conditions(
+def random_sample(
     conditions: Union[pd.DataFrame, np.ndarray, np.recarray],
     num_samples: int = 1,
     random_state: Optional[int] = None,

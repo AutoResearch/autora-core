@@ -206,7 +206,7 @@ def wrap_to_use_state(f):
     It was inspired by the pytest "fixtures" mechanism.
 
     Args:
-        f: a function with arguments that could be fields on a `State` 
+        f: a function with arguments that could be fields on a `State`
             and that returns a `Delta`.
 
     Returns: a version of `f` which takes and returns `State` objects.

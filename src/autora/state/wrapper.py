@@ -71,7 +71,7 @@ def state_fn_from_x_to_xy_fn(f: Callable[[X], XY]) -> Executor:
     return experiment_runner
 
 
-def state_fn_from_experimentalist_pipeline(pipeline: Pipeline) -> Executor:
+def state_fn_from_pipeline(pipeline: Pipeline) -> Executor:
     """Wrapper for experimentalists of the form $f() \rarrow x$, where `f`
     returns both $x$ and $y$ values in a complete dataframe."""
 

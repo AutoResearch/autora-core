@@ -120,12 +120,12 @@ def state_fn_from_x_to_xy_fn_df(f: Callable[[X], XY]) -> Executor:
 
         The function can be defined on a DataFrame, allowing the explicit inclusion of
         metadata like column names.
-        >>> def x_to_xy_fn_df(c: pd.DataFrame) -> pd.Series:
+        >>> def x_to_xy_fn(c: pd.DataFrame) -> pd.Series:
         ...     result = c.assign(y=lambda df: 2 * df.x + 1)
         ...     return result
 
         We apply the wrapped function to `s` and look at the returned experiment_data:
-        >>> state_fn_from_x_to_xy_fn_df(x_to_xy_fn_df)(s).experiment_data
+        >>> state_fn_from_x_to_xy_fn_df(x_to_xy_fn)(s).experiment_data
            x  y
         0  1  3
         1  2  5

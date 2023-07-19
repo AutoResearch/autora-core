@@ -111,9 +111,42 @@ def state_fn_from_x_to_y_fn_df(f: Callable[[X], Y]) -> Executor:
     return experiment_runner
 
 
-def state_fn_from_x_to_xy_fn(f: Callable[[X], XY]) -> Executor:
+def state_fn_from_x_to_xy_fn_df(f: Callable[[X], XY]) -> Executor:
     """Wrapper for experiment_runner of the form $f(x) \rarrow (x,y)$, where `f`
-    returns both $x$ and $y$ values in a complete dataframe."""
+    returns both $x$ and $y$ values in a complete dataframe.
+
+    Examples:
+        The conditions are some x-values in a StandardState object:
+        >>> from autora.state.bundled import StandardState
+        >>> s = StandardState(conditions=pd.DataFrame({"x": [1, 2, 3]}))
+
+        The function can be defined on a DataFrame, allowing the explicit inclusion of
+        metadata like column names.
+        >>> def x_to_xy_fn_df(c: pd.DataFrame) -> pd.Series:
+        ...     result = c.assign(y=lambda df: 2 * df.x + 1)
+        ...     return result
+
+        We apply the wrapped function to `s` and look at the returned experiment_data:
+        >>> state_fn_from_x_to_xy_fn_df(x_to_xy_fn_df)(s).experiment_data
+           x  y
+        0  1  3
+        1  2  5
+        2  3  7
+
+        We can also define functions of several variables:
+        >>> def xs_to_xy_fn(c: pd.DataFrame) -> pd.Series:
+        ...     result = c.assign(y=c.x0 + c.x1)
+        ...     return result
+
+        With the relevant variables as conditions:
+        >>> t = StandardState(conditions=pd.DataFrame({"x0": [1, 2, 3], "x1": [10, 20, 30]}))
+        >>> state_fn_from_x_to_xy_fn_df(xs_to_xy_fn)(t).experiment_data
+           x0  x1   y
+        0   1  10  11
+        1   2  20  22
+        2   3  30  33
+
+    """
 
     @wrap_to_use_state
     def experiment_runner(conditions: pd.DataFrame, **kwargs):

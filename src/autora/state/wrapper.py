@@ -65,9 +65,41 @@ def state_fn_from_estimator(estimator: BaseEstimator) -> Executor:
     return theorist
 
 
-def state_fn_from_x_to_y_fn(f: Callable[[X], Y]) -> Executor:
+def state_fn_from_x_to_y_fn_df(f: Callable[[X], Y]) -> Executor:
     """Wrapper for experiment_runner of the form $f(x) \rarrow y$, where `f` returns just the $y$
-    values"""
+    values, with inputs and outputs as a DataFrame or Series with correct column names.
+
+    Examples:
+        The conditions are some x-values in a StandardState object:
+        >>> from autora.state.bundled import StandardState
+        >>> s = StandardState(conditions=pd.DataFrame({"x": [1, 2, 3]}))
+
+        The function can be defined on a DataFrame (allowing the explicit inclusion of
+        metadata like column names).
+        >>> def x_to_y_fn(c: pd.DataFrame) -> pd.Series:
+        ...     result = pd.Series(2 * c["x"] + 1, name="y")
+        ...     return result
+
+        We apply the wrapped function to `s` and look at the returned experiment_data:
+        >>> state_fn_from_x_to_y_fn_df(x_to_y_fn)(s).experiment_data
+           x  y
+        0  1  3
+        1  2  5
+        2  3  7
+
+        We can also define functions of several variables:
+        >>> def xs_to_y_fn(c: pd.DataFrame) -> pd.Series:
+        ...     result = pd.Series(c["x0"] + c["x1"], name="y")
+        ...     return result
+
+        With the relevant variables as conditions:
+        >>> t = StandardState(conditions=pd.DataFrame({"x0": [1, 2, 3], "x1": [10, 20, 30]}))
+        >>> state_fn_from_x_to_y_fn_df(xs_to_y_fn)(t).experiment_data
+           x0  x1   y
+        0   1  10  11
+        1   2  20  22
+        2   3  30  33
+    """
 
     @wrap_to_use_state
     def experiment_runner(conditions: pd.DataFrame, **kwargs):

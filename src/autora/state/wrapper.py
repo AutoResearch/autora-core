@@ -6,13 +6,11 @@ These are special cases of the [autora.state.delta.wrap_to_use_state][] function
 """
 from __future__ import annotations
 
-from typing import Callable, Iterable, TypeVar
+from typing import Callable, TypeVar
 
-import numpy as np
 import pandas as pd
 from sklearn.base import BaseEstimator
 
-from autora.experimentalist.pipeline import Pipeline
 from autora.state.delta import Delta, State, wrap_to_use_state
 from autora.variable import VariableCollection
 
@@ -155,21 +153,3 @@ def state_fn_from_x_to_xy_fn_df(f: Callable[[X], XY]) -> Executor:
         return Delta(experiment_data=experiment_data)
 
     return experiment_runner
-
-
-def state_fn_from_pipeline(pipeline: Pipeline) -> Executor:
-    """Wrapper for experimentalists of the form $f() \rarrow x$, where `f`
-    returns both $x$ and $y$ values in a complete dataframe."""
-
-    @wrap_to_use_state
-    def experimentalist(params):
-        conditions = pipeline(**params)
-        if isinstance(conditions, (pd.DataFrame, np.ndarray, np.recarray)):
-            conditions_ = conditions
-        elif isinstance(conditions, Iterable):
-            conditions_ = np.array(list(conditions))
-        else:
-            raise NotImplementedError("type `%s` is not supported" % (type(conditions)))
-        return Delta(conditions=conditions_)
-
-    return experimentalist

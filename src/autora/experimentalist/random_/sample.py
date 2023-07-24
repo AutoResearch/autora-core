@@ -103,3 +103,14 @@ def _base(
     return pd.DataFrame.sample(
         conditions, random_state=random_state, n=num_samples, replace=replace
     )
+
+
+# Option 2:
+on_state = _state
+to_result = _result
+raw = _base
+
+
+# Option 3:
+run = _state
+run_on_state = _state

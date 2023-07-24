@@ -215,3 +215,22 @@ def _base(variables: VariableCollection) -> pd.DataFrame:
     conditions = pd.DataFrame(pool, columns=l_iv_names)
 
     return conditions
+
+
+# Option 1:
+
+grid_pool_s = _state
+grid_pool_state = _state
+grid_pool_t = _state
+grid_pool_task = _state
+grid_pool_wf = _state
+
+# Option 2:
+on_state = _state
+to_result = _result
+raw = _base
+
+
+# Option 3:
+run = _state
+run_on_state = _state

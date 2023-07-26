@@ -7,7 +7,7 @@ import logging
 from collections import UserDict
 from dataclasses import dataclass, fields, replace
 from functools import singledispatch, wraps
-from typing import Generic, List, TypeVar
+from typing import Callable, Generic, List, Optional, Sequence, TypeVar
 
 import numpy as np
 import pandas as pd
@@ -495,7 +495,7 @@ def append(a: List[T], b: T) -> List[T]:
     return a + [b]
 
 
-def wrap_to_use_state(f):
+def inputs_from_state(f):
     """Decorator to make target `f` into a function on a `State` and `**kwargs`.
 
     This wrapper makes it easier to pass arguments to a function from a State.
@@ -508,7 +508,6 @@ def wrap_to_use_state(f):
     Returns:
 
     Examples:
-        >>> from autora.state.delta import State, Delta
         >>> from dataclasses import dataclass, field
         >>> import pandas as pd
         >>> from typing import List, Optional
@@ -521,7 +520,7 @@ def wrap_to_use_state(f):
         We indicate the inputs required by the parameter names.
         The output must be a `Delta` object.
         >>> from autora.state.delta import Delta
-        >>> @wrap_to_use_state
+        >>> @inputs_from_state
         ... def experimentalist(conditions):
         ...     new_conditions = [c + 10 for c in conditions]
         ...     return Delta(conditions=new_conditions)
@@ -536,7 +535,7 @@ def wrap_to_use_state(f):
         >>> from sklearn.base import BaseEstimator
         >>> from sklearn.linear_model import LinearRegression
 
-        >>> @wrap_to_use_state
+        >>> @inputs_from_state
         ... def theorist(experiment_data: pd.DataFrame, variables: VariableCollection, **kwargs):
         ...     ivs = [v.name for v in variables.independent_variables]
         ...     dvs = [v.name for v in variables.dependent_variables]
@@ -572,7 +571,7 @@ def wrap_to_use_state(f):
 
         Any parameters not provided by the state must be provided by default values or by the
         caller. If the default is specified:
-        >>> @wrap_to_use_state
+        >>> @inputs_from_state
         ... def experimentalist(conditions, offset=25):
         ...     new_conditions = [c + offset for c in conditions]
         ...     return Delta(conditions=new_conditions)
@@ -582,7 +581,7 @@ def wrap_to_use_state(f):
         S(conditions=[26, 27, 28, 29])
 
         If a default isn't specified:
-        >>> @wrap_to_use_state
+        >>> @inputs_from_state
         ... def experimentalist(conditions, offset):
         ...     new_conditions = [c + offset for c in conditions]
         ...     return Delta(conditions=new_conditions)
@@ -618,26 +617,26 @@ def wrap_to_use_state(f):
     return _f
 
 
-def _map_outputs_to_delta(*output: str):
+def outputs_to_delta(*output: str):
     """
-    Decorator maker to wrap outputs from a function as Deltas.
+    Decorator factory to wrap outputs from a function as Deltas.
 
     Examples:
-        >>> @_map_outputs_to_delta("conditions")
+        >>> @outputs_to_delta("conditions")
         ... def add_five(x):
         ...     return [xi + 5 for xi in x]
 
         >>> add_five([1, 2, 3])
         {'conditions': [6, 7, 8]}
 
-        >>> @_map_outputs_to_delta("c")
+        >>> @outputs_to_delta("c")
         ... def add_six(conditions):
         ...     return [c + 5 for c in conditions]
 
         >>> add_six([1, 2, 3])
         {'c': [6, 7, 8]}
 
-        >>> @_map_outputs_to_delta("+1", "-1")
+        >>> @outputs_to_delta("+1", "-1")
         ... def plus_minus_1(x):
         ...     a = [xi + 1 for xi in x]
         ...     b = [xi - 1 for xi in x]
@@ -649,7 +648,7 @@ def _map_outputs_to_delta(*output: str):
 
         If the wrong number of values are specified for the return, then there might be errors.
         If multiple outputs are expected, but only a single output is returned, we get a warning:
-        >>> @_map_outputs_to_delta("1", "2")
+        >>> @outputs_to_delta("1", "2")
         ... def returns_single_result_when_more_expected():
         ...     return "a"
         >>> returns_single_result_when_more_expected()  # doctest: +NORMALIZE_WHITESPACE +ELLIPSIS
@@ -659,7 +658,7 @@ def _map_outputs_to_delta(*output: str):
         has to return multiple values to match `('1', '2')`. Got `a` instead.
 
         If multiple outputs are expected, but the wrong number are returned, we get a warning:
-        >>> @_map_outputs_to_delta("1", "2", "3")
+        >>> @outputs_to_delta("1", "2", "3")
         ... def returns_wrong_number_of_results():
         ...     return "a", "b"
         >>> returns_wrong_number_of_results()  # doctest: +NORMALIZE_WHITESPACE +ELLIPSIS
@@ -670,36 +669,39 @@ def _map_outputs_to_delta(*output: str):
 
         However, if a single output is expected, and multiple are returned, these are treated as
         a single object and no error occurs:
-        >>> @_map_outputs_to_delta("foo")
+        >>> @outputs_to_delta("foo")
         ... def returns_a_tuple():
         ...     return "a", "b", "c"
         >>> returns_a_tuple()
         {'foo': ('a', 'b', 'c')}
 
-        >>> @_map_outputs_to_delta()
+        If we fail to specify output names, an error is returned immediately.
+        >>> @outputs_to_delta()
         ... def decorator_missing_arguments():
         ...     return "a", "b", "c"
-        >>> decorator_missing_arguments()
         Traceback (most recent call last):
         ...
         ValueError: `output` names must be specified.
+
     """
 
-    def _wrapper(f):
+    def decorator(f):
 
         if len(output) == 0:
             raise ValueError("`output` names must be specified.")
 
         elif len(output) == 1:
 
-            def _f(*args, **kwargs):
+            @wraps(f)
+            def inner(*args, **kwargs):
                 result = f(*args, **kwargs)
                 delta = Delta(**{output[0]: result})
                 return delta
 
         else:
 
-            def _f(*args, **kwargs):
+            @wraps(f)
+            def inner(*args, **kwargs):
                 result = f(*args, **kwargs)
                 assert isinstance(result, tuple), (
                     "function `%s` has to return multiple values "
@@ -715,6 +717,69 @@ def _map_outputs_to_delta(*output: str):
                 delta = Delta(**dict(zip(output, result)))
                 return delta
 
-        return _f
+        return inner
 
-    return _wrapper
+    return decorator
+
+
+def on_state(
+    function: Optional[Callable] = None, output: Optional[Sequence[str]] = None
+):
+    """Decorator (factory) to make target `function` into a function on a `State` and `**kwargs`.
+
+    This combines the functionality of `outputs_to_delta` and `inputs_from_state`
+
+    Args:
+        function: the function to be wrapped
+        output: list specifying State field names for the return values of `function`
+
+    Returns:
+
+    Examples:
+        >>> from dataclasses import dataclass, field
+        >>> import pandas as pd
+        >>> from typing import List, Optional
+
+        The `State` it operates on needs to have the metadata described in the state module:
+        >>> @dataclass(frozen=True)
+        ... class S(State):
+        ...     conditions: List[int] = field(metadata={"delta": "replace"})
+
+        We indicate the inputs required by the parameter names.
+        >>> def add_ten(conditions):
+        ...     return [c + 10 for c in conditions]
+        >>> experimentalist = on_state(function=add_ten, output=["conditions"])
+
+        >>> experimentalist(S(conditions=[1,2,3,4]))
+        S(conditions=[11, 12, 13, 14])
+
+        You can also wrap functions which return a Delta object natively, by omitting the `output`
+        argument:
+        >>> @on_state()
+        ... def add_five(conditions):
+        ...     return Delta(conditions=[c + 5 for c in conditions])
+
+        >>> add_five(S(conditions=[1, 2, 3, 4]))
+        S(conditions=[6, 7, 8, 9])
+
+        You can also use the @on_state(output=[]) as a decorator:
+        >>> @on_state(output=["conditions"])
+        ... def add_six(conditions):
+        ...     return [c + 6 for c in conditions]
+
+        >>> add_six(S(conditions=[1, 2, 3, 4]))
+        S(conditions=[7, 8, 9, 10])
+
+    """
+
+    def decorator(f):
+        f_ = f
+        if output is not None:
+            f_ = outputs_to_delta(*output)(f_)
+        f_ = inputs_from_state(f_)
+        return f_
+
+    if function is None:
+        return decorator
+    else:
+        return decorator(function)

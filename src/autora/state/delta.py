@@ -616,3 +616,57 @@ def wrap_to_use_state(f):
         return new_state
 
     return _f
+
+
+def _map_outputs_to_delta(*output: str):
+    """
+    Decorator maker to wrap outputs from a function as Deltas.
+
+    Examples:
+        >>> @_map_outputs_to_delta("conditions")
+        ... def add_five(x):
+        ...     xprime = [xi + 5 for xi in x]
+        ...     return xprime
+
+        >>> add_five([1, 2, 3])
+        {'conditions': [6, 7, 8]}
+
+        >>> @_map_outputs_to_delta("c")
+        ... def add_six(conditions):
+        ...     new_conditions = [c + 5 for c in conditions]
+        ...     return new_conditions
+
+        >>> add_six([1, 2, 3])
+        {'c': [6, 7, 8]}
+
+        >>> @_map_outputs_to_delta("+1", "-1")
+        ... def plus_minus_1(x):
+        ...     a = [xi + 1 for xi in x]
+        ...     b = [xi - 1 for xi in x]
+        ...     return a, b
+
+        >>> plus_minus_1([1, 2, 3])
+        {'+1': [2, 3, 4], '-1': [0, 1, 2]}
+    """
+
+    def _wrapper(f):
+
+        if len(output) == 1:
+
+            def _f(*args, **kwargs):
+                result = f(*args, **kwargs)
+                delta = Delta(**{output[0]: result})
+                return delta
+
+        else:
+
+            def _f(*args, **kwargs):
+                result = f(*args, **kwargs)
+                assert isinstance(result, tuple)
+                assert len(output) == len(result)
+                delta = Delta(**dict(zip(output, result)))
+                return delta
+
+        return _f
+
+    return _wrapper

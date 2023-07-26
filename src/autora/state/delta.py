@@ -625,16 +625,14 @@ def _map_outputs_to_delta(*output: str):
     Examples:
         >>> @_map_outputs_to_delta("conditions")
         ... def add_five(x):
-        ...     xprime = [xi + 5 for xi in x]
-        ...     return xprime
+        ...     return [xi + 5 for xi in x]
 
         >>> add_five([1, 2, 3])
         {'conditions': [6, 7, 8]}
 
         >>> @_map_outputs_to_delta("c")
         ... def add_six(conditions):
-        ...     new_conditions = [c + 5 for c in conditions]
-        ...     return new_conditions
+        ...     return [c + 5 for c in conditions]
 
         >>> add_six([1, 2, 3])
         {'c': [6, 7, 8]}
@@ -647,11 +645,52 @@ def _map_outputs_to_delta(*output: str):
 
         >>> plus_minus_1([1, 2, 3])
         {'+1': [2, 3, 4], '-1': [0, 1, 2]}
+
+
+        If the wrong number of values are specified for the return, then there might be errors.
+        If multiple outputs are expected, but only a single output is returned, we get a warning:
+        >>> @_map_outputs_to_delta("1", "2")
+        ... def returns_single_result_when_more_expected():
+        ...     return "a"
+        >>> returns_single_result_when_more_expected()  # doctest: +NORMALIZE_WHITESPACE +ELLIPSIS
+        Traceback (most recent call last):
+        ...
+        AssertionError: function `<function returns_single_result_when_more_expected at 0x...>`
+        has to return multiple values to match `('1', '2')`. Got `a` instead.
+
+        If multiple outputs are expected, but the wrong number are returned, we get a warning:
+        >>> @_map_outputs_to_delta("1", "2", "3")
+        ... def returns_wrong_number_of_results():
+        ...     return "a", "b"
+        >>> returns_wrong_number_of_results()  # doctest: +NORMALIZE_WHITESPACE +ELLIPSIS
+        Traceback (most recent call last):
+        ...
+        AssertionError: function `<function returns_wrong_number_of_results at 0x...>`
+        has to return exactly `3` values to match `('1', '2', '3')`. Got `('a', 'b')` instead.
+
+        However, if a single output is expected, and multiple are returned, these are treated as
+        a single object and no error occurs:
+        >>> @_map_outputs_to_delta("foo")
+        ... def returns_a_tuple():
+        ...     return "a", "b", "c"
+        >>> returns_a_tuple()
+        {'foo': ('a', 'b', 'c')}
+
+        >>> @_map_outputs_to_delta()
+        ... def decorator_missing_arguments():
+        ...     return "a", "b", "c"
+        >>> decorator_missing_arguments()
+        Traceback (most recent call last):
+        ...
+        ValueError: `output` names must be specified.
     """
 
     def _wrapper(f):
 
-        if len(output) == 1:
+        if len(output) == 0:
+            raise ValueError("`output` names must be specified.")
+
+        elif len(output) == 1:
 
             def _f(*args, **kwargs):
                 result = f(*args, **kwargs)
@@ -662,8 +701,17 @@ def _map_outputs_to_delta(*output: str):
 
             def _f(*args, **kwargs):
                 result = f(*args, **kwargs)
-                assert isinstance(result, tuple)
-                assert len(output) == len(result)
+                assert isinstance(result, tuple), (
+                    "function `%s` has to return multiple values "
+                    "to match `%s`. Got `%s` instead." % (f, output, result)
+                )
+                assert len(output) == len(result), (
+                    "function `%s` has to return "
+                    "exactly `%s` values "
+                    "to match `%s`. "
+                    "Got `%s` instead."
+                    "" % (f, len(output), output, result)
+                )
                 delta = Delta(**dict(zip(output, result)))
                 return delta
 

@@ -114,3 +114,6 @@ raw = _base
 # Option 3:
 run = _state
 run_on_state = _state
+
+# Option 4: suggestion SMusslick
+sample = _state

@@ -1,11 +1,10 @@
-from dataclasses import dataclass, field
 from typing import Optional
 
 import numpy as np
 import pandas as pd
 
 from autora.state.delta import Result, State, wrap_to_use_state
-from autora.variable import ValueType, Variable, VariableCollection
+from autora.variable import ValueType, VariableCollection
 
 
 def _state(
@@ -289,3 +288,7 @@ raw = _base
 # Option 3:
 run = _state
 run_on_state = _state
+
+# Option 4: suggestion SMusslick
+pool = _state  # shorter alias
+random_pool = _state  # longer alias

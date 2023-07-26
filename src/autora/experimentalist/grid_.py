@@ -234,3 +234,10 @@ raw = _base
 # Option 3:
 run = _state
 run_on_state = _state
+
+
+# Option 4: suggestion SMusslick
+pool = _state
+
+# Option 5: user has to wrap everything by convention
+grid_pool = _base

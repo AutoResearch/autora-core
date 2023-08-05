@@ -7,7 +7,7 @@ authors = [
 dynamic = ["version"]
 
 readme = "docs/index.md"
-license = { text = "MIT License" }
+license = {file = "LICENSE"}
 
 dependencies = [
     "autora-core>=3.3.0",

@@ -10,5 +10,6 @@ You will need:
 you can import the random pooler via:
 
 ```python
+
 from autora.experimentalist.random_ import random_pool
 ```

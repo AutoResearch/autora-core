@@ -4,6 +4,7 @@ from __future__ import annotations
 import dataclasses
 import inspect
 import logging
+import warnings
 from collections import UserDict
 from dataclasses import dataclass, fields, replace
 from functools import singledispatch, wraps
@@ -57,6 +58,13 @@ class State:
         A non-existent field will be ignored:
         >>> l + Delta(o="not a field")
         ListState(l=['a', 'b', 'c'], m=['x', 'y', 'z'])
+
+        ... but will trigger a warning:
+        >>> with warnings.catch_warnings(record=True) as w:
+        ...     _ = l + Delta(o="not a field")
+        ...     print(w[0].message) # doctest: +NORMALIZE_WHITESPACE
+        These fields: ['o'] could not be used to update ListState,
+        which has these fields & aliases: ['l', 'm']
 
         We can also use the `.update` method to do the same thing:
         >>> l.update(l=list("ghi"), m=list("rst"))
@@ -225,11 +233,13 @@ class State:
 
     def __add__(self, other: Delta):
         updates = dict()
+        other_fields_unused = list(other.keys())
         for self_field in fields(self):
 
-            other_value = _get_value(self_field, other)
+            other_value, key = _get_value(self_field, other)
             if other_value is None:
                 continue
+            other_fields_unused.remove(key)
 
             self_field_key = self_field.name
             self_value = getattr(self, self_field_key)
@@ -253,6 +263,17 @@ class State:
                     "delta_behaviour=`%s` not implemented" % (delta_behavior)
                 )
 
+        if len(other_fields_unused) > 0:
+            warnings.warn(
+                "These fields: %s could not be used to update %s, "
+                "which has these fields & aliases: %s"
+                % (
+                    other_fields_unused,
+                    type(self).__name__,
+                    _get_field_names_and_aliases(self),
+                ),
+            )
+
         new = replace(self, **updates)
         return new
 
@@ -262,7 +283,9 @@ class State:
 
 def _get_value(f, other: Delta):
     """
-    Given a `State`'s `dataclasses.field` f, get a value from `other`
+    Given a `State`'s `dataclasses.field` f, get a value from `other` and report its name.
+
+    Returns: a tuple (the value, the key associated with that value)
 
     Examples:
         >>> from dataclasses import field, dataclass, fields
@@ -278,94 +301,128 @@ def _get_value(f, other: Delta):
         For a field with no aliases, we retrieve values with the base name:
         >>> f_a = fields(Example)[0]
         >>> _get_value(f_a, Delta(a=1))
-        1
+        (1, 'a')
 
         ... and only the base name:
         >>> print(_get_value(f_a, Delta(b=2)))  # no match for b
-        None
+        (None, None)
 
         Any other names are unimportant:
         >>> _get_value(f_a, Delta(b=2, a=1))
-        1
+        (1, 'a')
 
         For fields with an alias, we retrieve values with the base name:
         >>> f_b = fields(Example)[1]
         >>> _get_value(f_b, Delta(b=[2]))
-        [2]
+        ([2], 'b')
 
         ... or for the alias name, transformed by the alias lambda function:
         >>> _get_value(f_b, Delta(ba=21))
-        [21]
+        ([21], 'ba')
 
         We preferentially get the base name, and then any aliases:
         >>> _get_value(f_b, Delta(b=2, ba=21))
-        2
+        (2, 'b')
 
         ... , regardless of their order in the `Delta` object:
         >>> _get_value(f_b, Delta(ba=21, b=2))
-        2
+        (2, 'b')
 
         Other names are ignored:
-        >>> print(_get_value(f_b, Delta(a=1)))
-        None
+        >>> _get_value(f_b, Delta(a=1))
+        (None, None)
 
         and the order of other names is unimportant:
         >>> _get_value(f_b, Delta(a=1, b=2))
-        2
+        (2, 'b')
 
         For fields with multiple aliases, we retrieve values with the base name:
         >>> f_c = fields(Example)[2]
         >>> _get_value(f_c, Delta(c=[3]))
-        [3]
+        ([3], 'c')
 
         ... for any alias:
         >>> _get_value(f_c, Delta(ca=31))
-        31
+        (31, 'ca')
 
         ... transformed by the alias lambda function :
         >>> _get_value(f_c, Delta(cb=32))
-        [32]
+        ([32], 'cb')
 
         ... and ignoring any other names:
         >>> print(_get_value(f_c, Delta(a=1)))
-        None
+        (None, None)
 
         ... preferentially in the order base name, 1st alias, 2nd alias, ... nth alias:
         >>> _get_value(f_c, Delta(c=3, ca=31, cb=32))
-        3
+        (3, 'c')
 
         >>> _get_value(f_c, Delta(ca=31, cb=32))
-        31
+        (31, 'ca')
 
         >>> _get_value(f_c, Delta(cb=32))
-        [32]
+        ([32], 'cb')
 
         >>> print(_get_value(f_c, Delta()))
-        None
+        (None, None)
+
 
     """
 
     key = f.name
+    aliases = f.metadata.get("aliases", {})
 
-    try:
+    value, used_key = None, None
+
+    if key in other.data.keys():
         value = other.data[key]
-        return value
-    except KeyError:
-        pass
+        used_key = key
+    elif aliases:  # ... is not an empty dict
+        for alias_key, wrapping_function in aliases.items():
+            if alias_key in other.data:
+                value = wrapping_function(other.data[alias_key])
+                used_key = alias_key
+                break  # we only evaluate the first match
 
-    try:
-        aliases = f.metadata["aliases"]
-    except KeyError:
-        return
+    return value, used_key
 
-    for alias_key, wrapping_function in aliases.items():
-        try:
-            value = wrapping_function(other.data[alias_key])
-            return value
-        except KeyError:
-            pass
 
-    return
+def _get_field_names_and_aliases(s: State):
+    """
+    Get a list of field names and their aliases from a State object
+
+    Args:
+        s: a State object
+
+    Returns: a list of field names and their aliases on `s`
+
+    Examples:
+        >>> from dataclasses import field
+        >>> @dataclass(frozen=True)
+        ... class SomeState(State):
+        ...    l: List = field(default_factory=list)
+        ...    m: List = field(default_factory=list)
+        >>> _get_field_names_and_aliases(SomeState())
+        ['l', 'm']
+
+        >>> @dataclass(frozen=True)
+        ... class SomeStateWithAliases(State):
+        ...    l: List = field(default_factory=list, metadata={"aliases": {"l1": None, "l2": None}})
+        ...    m: List = field(default_factory=list, metadata={"aliases": {"m1": None}})
+        >>> _get_field_names_and_aliases(SomeStateWithAliases())
+        ['l', 'l1', 'l2', 'm', 'm1']
+
+    """
+    result = []
+
+    for f in fields(s):
+        name = f.name
+        result.append(name)
+
+        aliases = f.metadata.get("aliases", {})
+        result.extend(aliases)
+
+    return result
 
 
 class Delta(UserDict, Generic[S]):

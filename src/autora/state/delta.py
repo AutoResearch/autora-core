@@ -572,22 +572,22 @@ def append(a: List[T], b: T) -> List[T]:
     Function to create a new list with an item appended to it.
 
     Examples:
-        Given a starting list `a`:
-        >>> a = [1, 2, 3]
+        Given a starting list `a_`:
+        >>> a_ = [1, 2, 3]
 
         ... we can append a value:
-        >>> append(a, 4)
+        >>> append(a_, 4)
         [1, 2, 3, 4]
 
-        `a` is unchanged
-        >>> a == [1, 2, 3]
+        `a_` is unchanged
+        >>> a_ == [1, 2, 3]
         True
 
         Why not just use `list.append`? `list.append` mutates `a` in place, which we can't allow
         in the AER cycle – parts of the cycle rely on purely functional code which doesn't
         (accidentally or intentionally) manipulate existing data.
-        >>> list.append(a, 4)  # not what we want
-        >>> a
+        >>> list.append(a_, 4)  # not what we want
+        >>> a_
         [1, 2, 3, 4]
     """
     return a + [b]

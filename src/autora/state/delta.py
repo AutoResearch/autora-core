@@ -560,9 +560,9 @@ def inputs_from_state(f):
     It was inspired by the pytest "fixtures" mechanism.
 
     Args:
-        f:
+        f: the function which takes any arguments
 
-    Returns:
+    Returns: the function modified to take a State object as input and return a State object
 
     Examples:
         >>> from dataclasses import dataclass, field

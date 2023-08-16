@@ -118,7 +118,6 @@ class State:
         CoerceStateList(o=None, p=['a', 'list'])
 
         With a converter, inputs are converted to the type output by the converter:
-        >>> import pandas as pd
         >>> @dataclass(frozen=True)
         ... class CoerceStateDataFrame(State):
         ...    q: pd.DataFrame = field(default_factory=pd.DataFrame,
@@ -182,7 +181,6 @@ class State:
 
         A converter can cast from a DataFrame to a np.ndarray (with a single datatype),
         for instance:
-        >>> import numpy as np
         >>> @dataclass(frozen=True)
         ... class CoerceStateArray(State):
         ...    r: Optional[np.ndarray] = field(default=None,
@@ -226,16 +224,16 @@ class State:
 
         Now you can access both `s.things` and `s.thing` as required by your code. The State only
         shows `things` in the string representation...
-        >>> s = FieldAliasStateWithProperty(things=["0"]) + Delta(thing="1")
-        >>> s
+        >>> u = FieldAliasStateWithProperty(things=["0"]) + Delta(thing="1")
+        >>> u
         FieldAliasStateWithProperty(things=['0', '1'])
 
         ... and exposes `things` as an attribute:
-        >>> s.things
+        >>> u.things
         ['0', '1']
 
         ... but also exposes `thing`, always returning the last value.
-        >>> s.thing
+        >>> u.thing
         '1'
 
     """

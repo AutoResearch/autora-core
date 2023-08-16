@@ -870,7 +870,7 @@ def on_state(
 
         The `State` it operates on needs to have the metadata described in the state module:
         >>> @dataclass(frozen=True)
-        ... class S(State):
+        ... class St(State):
         ...     conditions: List[int] = field(metadata={"delta": "replace"})
 
         We indicate the inputs required by the parameter names.
@@ -878,8 +878,8 @@ def on_state(
         ...     return [c + 10 for c in conditions]
         >>> experimentalist = on_state(function=add_ten, output=["conditions"])
 
-        >>> experimentalist(S(conditions=[1,2,3,4]))
-        S(conditions=[11, 12, 13, 14])
+        >>> experimentalist(St(conditions=[1,2,3,4]))
+        St(conditions=[11, 12, 13, 14])
 
         You can wrap functions which return a Delta object natively, by omitting the `output`
         argument:
@@ -887,8 +887,8 @@ def on_state(
         ... def add_five(conditions):
         ...     return Delta(conditions=[c + 5 for c in conditions])
 
-        >>> add_five(S(conditions=[1, 2, 3, 4]))
-        S(conditions=[6, 7, 8, 9])
+        >>> add_five(St(conditions=[1, 2, 3, 4]))
+        St(conditions=[6, 7, 8, 9])
 
         If you fail to declare outputs for a function which doesn't return a Delta:
         >>> @on_state()
@@ -896,20 +896,19 @@ def on_state(
         ...     return [c + 5 for c in conditions]
 
         ... an exception is raised:
-        >>> missing_output_param(S(conditions=[1, 2, 3, 4])
-        ...     ) # doctest: +ELLIPSIS +NORMALIZE_WHITESPACE
+        >>> missing_output_param(St(conditions=[1])) # doctest: +ELLIPSIS +NORMALIZE_WHITESPACE
         Traceback (most recent call last):
         ...
         AssertionError: Output of <function missing_output_param at 0x...> must be a `Delta`,
         `UserDict`, or `dict`.
 
-        You can use the @on_state(output=[]) as a decorator:
+        You can use the @on_state(output=[...]) as a decorator:
         >>> @on_state(output=["conditions"])
         ... def add_six(conditions):
         ...     return [c + 6 for c in conditions]
 
-        >>> add_six(S(conditions=[1, 2, 3, 4]))
-        S(conditions=[7, 8, 9, 10])
+        >>> add_six(St(conditions=[1, 2, 3, 4]))
+        St(conditions=[7, 8, 9, 10])
 
     """
 

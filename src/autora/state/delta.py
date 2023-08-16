@@ -267,7 +267,7 @@ class State:
                 updates[self_field_key] = coerced_other_value
             else:
                 raise NotImplementedError(
-                    "delta_behaviour=`%s` not implemented" % (delta_behavior)
+                    "delta_behaviour=`%s` not implemented" % delta_behavior
                 )
 
         if len(other_fields_unused) > 0:

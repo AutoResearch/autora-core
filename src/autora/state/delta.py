@@ -6,16 +6,25 @@ import inspect
 import logging
 import warnings
 from collections import UserDict
+from collections.abc import Mapping
 from dataclasses import dataclass, fields, replace
 from functools import singledispatch, wraps
-from typing import Callable, Generic, List, Optional, Sequence, TypeVar
+from typing import Callable, Generic, List, Optional, Protocol, Sequence, TypeVar, Union
 
 import numpy as np
 import pandas as pd
 
 _logger = logging.getLogger(__name__)
-S = TypeVar("S")
 T = TypeVar("T")
+C = TypeVar("C", covariant=True)
+
+
+class DeltaAddable(Protocol[C]):
+    def __add__(self: C, other: Union[Delta, Mapping]) -> C:
+        ...
+
+
+S = TypeVar("S", bound=DeltaAddable)
 
 
 @dataclass(frozen=True)
@@ -226,12 +235,9 @@ class State:
         >>> s.thing
         '1'
 
-
-
-
     """
 
-    def __add__(self, other: Delta):
+    def __add__(self, other: Union[Delta, Mapping]):
         updates = dict()
         other_fields_unused = list(other.keys())
         for self_field in fields(self):
@@ -281,7 +287,7 @@ class State:
         return self + Delta(**kwargs)
 
 
-def _get_value(f, other: Delta):
+def _get_value(f, other: Union[Delta, Mapping]):
     """
     Given a `State`'s `dataclasses.field` f, get a value from `other` and report its name.
 
@@ -366,6 +372,32 @@ def _get_value(f, other: Delta):
         >>> print(_get_value(f_c, Delta()))
         (None, None)
 
+        This works with dict objects:
+        >>> _get_value(f_a, dict(a=13))
+        (13, 'a')
+
+        ... with multiple keys:
+        >>> _get_value(f_b, dict(a=13, b=24, c=35))
+        (24, 'b')
+
+        ... and with aliases:
+        >>> _get_value(f_b, dict(ba=222))
+        ([222], 'ba')
+
+        This works with UserDicts:
+        >>> class MyDelta(UserDict):
+        ...     pass
+
+        >>> _get_value(f_a, MyDelta(a=14))
+        (14, 'a')
+
+        ... with multiple keys:
+        >>> _get_value(f_b, MyDelta(a=1, b=4, c=9))
+        (4, 'b')
+
+        ... and with aliases:
+        >>> _get_value(f_b, MyDelta(ba=234))
+        ([234], 'ba')
 
     """
 
@@ -701,6 +733,9 @@ def inputs_from_state(f):
         arguments_from_state = {k: getattr(state_, k) for k in from_state}
         arguments = dict(arguments_from_state, **kwargs)
         delta = f(**arguments)
+        assert isinstance(delta, Mapping), (
+            "Output of %s must be a `Delta`, `UserDict`, " "or `dict`." % f
+        )
         new_state = state_ + delta
         return new_state
 
@@ -843,7 +878,7 @@ def on_state(
         >>> experimentalist(S(conditions=[1,2,3,4]))
         S(conditions=[11, 12, 13, 14])
 
-        You can also wrap functions which return a Delta object natively, by omitting the `output`
+        You can wrap functions which return a Delta object natively, by omitting the `output`
         argument:
         >>> @on_state()
         ... def add_five(conditions):
@@ -852,7 +887,20 @@ def on_state(
         >>> add_five(S(conditions=[1, 2, 3, 4]))
         S(conditions=[6, 7, 8, 9])
 
-        You can also use the @on_state(output=[]) as a decorator:
+        If you fail to declare outputs for a function which doesn't return a Delta:
+        >>> @on_state()
+        ... def missing_output_param(conditions):
+        ...     return [c + 5 for c in conditions]
+
+        ... an exception is raised:
+        >>> missing_output_param(S(conditions=[1, 2, 3, 4])
+        ...     ) # doctest: +ELLIPSIS +NORMALIZE_WHITESPACE
+        Traceback (most recent call last):
+        ...
+        AssertionError: Output of <function missing_output_param at 0x...> must be a `Delta`,
+        `UserDict`, or `dict`.
+
+        You can use the @on_state(output=[]) as a decorator:
         >>> @on_state(output=["conditions"])
         ... def add_six(conditions):
         ...     return [c + 6 for c in conditions]

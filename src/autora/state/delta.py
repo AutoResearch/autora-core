@@ -1,13 +1,12 @@
 """Classes to represent cycle state $S$ as $S_n = S_{0} + \\sum_{i=1}^n \\Delta S_{i}$."""
 from __future__ import annotations
 
-import dataclasses
 import inspect
 import logging
 import warnings
 from collections import UserDict
 from collections.abc import Mapping
-from dataclasses import dataclass, fields, replace
+from dataclasses import dataclass, fields, is_dataclass, replace
 from functools import singledispatch, wraps
 from typing import Callable, Generic, List, Optional, Protocol, Sequence, TypeVar, Union
 
@@ -668,8 +667,8 @@ def inputs_from_state(f):
 
         >>> @inputs_from_state
         ... def theorist(experiment_data: pd.DataFrame, variables: VariableCollection, **kwargs):
-        ...     ivs = [v.name for v in variables.independent_variables]
-        ...     dvs = [v.name for v in variables.dependent_variables]
+        ...     ivs = [vi.name for vi in variables.independent_variables]
+        ...     dvs = [vi.name for vi in variables.dependent_variables]
         ...     X, y = experiment_data[ivs], experiment_data[dvs]
         ...     new_model = LinearRegression(fit_intercept=True).set_params(**kwargs).fit(X, y)
         ...     return Delta(model=new_model)
@@ -735,10 +734,8 @@ def inputs_from_state(f):
     def _f(state_: S, /, **kwargs) -> S:
         # Get the parameters needed which are available from the state_.
         # All others must be provided as kwargs or default values on f.
-        assert dataclasses.is_dataclass(state_)
-        from_state = parameters_.intersection(
-            {i.name for i in dataclasses.fields(state_)}
-        )
+        assert is_dataclass(state_)
+        from_state = parameters_.intersection({i.name for i in fields(state_)})
         arguments_from_state = {k: getattr(state_, k) for k in from_state}
         arguments = dict(arguments_from_state, **kwargs)
         delta = f(**arguments)

@@ -374,13 +374,13 @@ def _get_value(f, other: Delta):
 
     value, used_key = None, None
 
-    if key in other.data.keys():
-        value = other.data[key]
+    if key in other.keys():
+        value = other[key]
         used_key = key
     elif aliases:  # ... is not an empty dict
         for alias_key, wrapping_function in aliases.items():
-            if alias_key in other.data:
-                value = wrapping_function(other.data[alias_key])
+            if alias_key in other:
+                value = wrapping_function(other[alias_key])
                 used_key = alias_key
                 break  # we only evaluate the first match
 
@@ -575,8 +575,7 @@ def inputs_from_state(f):
         ...     conditions: List[int] = field(metadata={"delta": "replace"})
 
         We indicate the inputs required by the parameter names.
-        The output must be a `Delta` object.
-        >>> from autora.state.delta import Delta
+        The output must be (compatible with) a `Delta` object.
         >>> @inputs_from_state
         ... def experimentalist(conditions):
         ...     new_conditions = [c + 10 for c in conditions]
@@ -587,6 +586,40 @@ def inputs_from_state(f):
 
         >>> experimentalist(S(conditions=[101,102,103,104]))
         S(conditions=[111, 112, 113, 114])
+
+        If the output of the function is not a `Delta` object (or something compatible with its
+        interface), then an error is thrown.
+        >>> @inputs_from_state
+        ... def returns_bare_conditions(conditions):
+        ...     new_conditions = [c + 10 for c in conditions]
+        ...     return new_conditions
+
+        >>> returns_bare_conditions(S(conditions=[1])) # doctest: +ELLIPSIS +NORMALIZE_WHITESPACE
+        Traceback (most recent call last):
+        ...
+        AssertionError: Output of <function returns_bare_conditions at 0x...> must be a `Delta`,
+        `UserDict`, or `dict`.
+
+        A dictionary can be returned and used:
+        >>> @inputs_from_state
+        ... def returns_a_dictionary(conditions):
+        ...     new_conditions = [c + 10 for c in conditions]
+        ...     return {"conditions": new_conditions}
+        >>> returns_a_dictionary(S(conditions=[2]))
+        S(conditions=[12])
+
+        ... as can an object which subclasses UserDict (like `Delta`)
+        >>> class MyDelta(UserDict):
+        ...     pass
+        >>> @inputs_from_state
+        ... def returns_a_userdict(conditions):
+        ...     new_conditions = [c + 10 for c in conditions]
+        ...     return MyDelta(conditions=new_conditions)
+        >>> returns_a_userdict(S(conditions=[3]))
+        S(conditions=[13])
+
+        We recommend using the `Delta` object rather than a `UserDict` or `dict` as its
+        functionality may be expanded in future.
 
         >>> from autora.variable import VariableCollection, Variable
         >>> from sklearn.base import BaseEstimator

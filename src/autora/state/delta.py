@@ -285,6 +285,14 @@ class State:
         return new
 
     def update(self, **kwargs):
+        """
+        Return a new version of the State with values updated.
+
+        This is identical to adding a `Delta`.
+
+        If you need to replace values, ignoring the State value aggregation rules,
+        use `dataclasses.replace` instead.
+        """
         return self + Delta(**kwargs)
 
 

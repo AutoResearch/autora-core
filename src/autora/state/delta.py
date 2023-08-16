@@ -499,7 +499,7 @@ def extend(a, b):
 
 
 @extend.register(type(None))
-def extend_none(a, b):
+def extend_none(_, b):
     """
     Examples:
         >>> extend(None, [])

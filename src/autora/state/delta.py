@@ -15,11 +15,14 @@ import numpy as np
 import pandas as pd
 
 _logger = logging.getLogger(__name__)
+
 T = TypeVar("T")
 C = TypeVar("C", covariant=True)
 
 
 class DeltaAddable(Protocol[C]):
+    """A class which a Delta or other Mapping can be added to, returning the same class"""
+
     def __add__(self: C, other: Union[Delta, Mapping]) -> C:
         ...
 

@@ -2,7 +2,7 @@
 so that $n$ processes $f_i$ on states $S$ can be represented as
 $$f_n(...(f_1(f_0(S))))$$
 
-These are special cases of the [autora.state.delta.inputs_from_state][] function.
+These are special cases of the [autora.state.delta.on_state][] function.
 """
 from __future__ import annotations
 
@@ -11,7 +11,7 @@ from typing import Callable, TypeVar
 import pandas as pd
 from sklearn.base import BaseEstimator
 
-from autora.state.delta import Delta, State, inputs_from_state
+from autora.state.delta import Delta, State, on_state
 from autora.variable import VariableCollection
 
 S = TypeVar("S")
@@ -50,7 +50,7 @@ def state_fn_from_estimator(estimator: BaseEstimator) -> Executor:
 
     """
 
-    @inputs_from_state
+    @on_state()
     def theorist(
         experiment_data: pd.DataFrame, variables: VariableCollection, **kwargs
     ):
@@ -99,7 +99,7 @@ def state_fn_from_x_to_y_fn_df(f: Callable[[X], Y]) -> Executor:
         2   3  30  33
     """
 
-    @inputs_from_state
+    @on_state()
     def experiment_runner(conditions: pd.DataFrame, **kwargs):
         x = conditions
         y = f(x, **kwargs)
@@ -146,7 +146,7 @@ def state_fn_from_x_to_xy_fn_df(f: Callable[[X], XY]) -> Executor:
 
     """
 
-    @inputs_from_state
+    @on_state()
     def experiment_runner(conditions: pd.DataFrame, **kwargs):
         x = conditions
         experiment_data = f(x, **kwargs)

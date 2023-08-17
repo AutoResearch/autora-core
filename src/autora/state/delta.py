@@ -602,7 +602,7 @@ def inputs_from_state(f):
     Args:
         f: the function which takes any arguments
 
-    Returns: the function modified to take a State object as input and return a State object
+    Returns: the function modified to take a State object as input.
 
     Examples:
         >>> from dataclasses import dataclass, field
@@ -619,26 +619,13 @@ def inputs_from_state(f):
         >>> @inputs_from_state
         ... def experimentalist(conditions):
         ...     new_conditions = [c + 10 for c in conditions]
-        ...     return Delta(conditions=new_conditions)
-
-        >>> experimentalist(U(conditions=[1,2,3,4]))
-        U(conditions=[11, 12, 13, 14])
-
-        >>> experimentalist(U(conditions=[101,102,103,104]))
-        U(conditions=[111, 112, 113, 114])
-
-        If the output of the function is not a `Delta` object (or something compatible with its
-        interface), then an error is thrown.
-        >>> @inputs_from_state
-        ... def returns_bare_conditions(conditions):
-        ...     new_conditions = [c + 10 for c in conditions]
         ...     return new_conditions
 
-        >>> returns_bare_conditions(U(conditions=[1])) # doctest: +ELLIPSIS +NORMALIZE_WHITESPACE
-        Traceback (most recent call last):
-        ...
-        AssertionError: Output of <function returns_bare_conditions at 0x...> must be a `Delta`,
-        `UserDict`, or `dict`.
+        >>> experimentalist(U(conditions=[1,2,3,4]))
+        [11, 12, 13, 14]
+
+        >>> experimentalist(U(conditions=[101,102,103,104]))
+        [111, 112, 113, 114]
 
         A dictionary can be returned and used:
         >>> @inputs_from_state
@@ -646,20 +633,7 @@ def inputs_from_state(f):
         ...     new_conditions = [c + 10 for c in conditions]
         ...     return {"conditions": new_conditions}
         >>> returns_a_dictionary(U(conditions=[2]))
-        U(conditions=[12])
-
-        ... as can an object which subclasses UserDict (like `Delta`)
-        >>> class MyDelta(UserDict):
-        ...     pass
-        >>> @inputs_from_state
-        ... def returns_a_userdict(conditions):
-        ...     new_conditions = [c + 10 for c in conditions]
-        ...     return MyDelta(conditions=new_conditions)
-        >>> returns_a_userdict(U(conditions=[3]))
-        U(conditions=[13])
-
-        We recommend using the `Delta` object rather than a `UserDict` or `dict` as its
-        functionality may be expanded in future.
+        {'conditions': [12]}
 
         >>> from autora.variable import VariableCollection, Variable
         >>> from sklearn.base import BaseEstimator
@@ -670,8 +644,8 @@ def inputs_from_state(f):
         ...     ivs = [vi.name for vi in variables.independent_variables]
         ...     dvs = [vi.name for vi in variables.dependent_variables]
         ...     X, y = experiment_data[ivs], experiment_data[dvs]
-        ...     new_model = LinearRegression(fit_intercept=True).set_params(**kwargs).fit(X, y)
-        ...     return Delta(model=new_model)
+        ...     model = LinearRegression(fit_intercept=True).set_params(**kwargs).fit(X, y)
+        ...     return model
 
         >>> @dataclass(frozen=True)
         ... class V(State):
@@ -684,19 +658,19 @@ def inputs_from_state(f):
         ...                                  dependent_variables=[Variable("y")]),
         ...     experiment_data=pd.DataFrame({"x": [0,1,2,3,4], "y": [2,3,4,5,6]})
         ... )
-        >>> v_prime = theorist(v)
-        >>> v_prime.model.coef_, v_prime.model.intercept_
+        >>> model = theorist(v)
+        >>> model.coef_, model.intercept_
         (array([[1.]]), array([2.]))
 
         Arguments from the state can be overridden by passing them in as keyword arguments (kwargs):
         >>> theorist(v, experiment_data=pd.DataFrame({"x": [0,1,2,3], "y": [12,13,14,15]}))\\
-        ...     .model.intercept_
+        ...     .intercept_
         array([12.])
 
         ... and other arguments supported by the inner function can also be passed
         (if and only if the inner function allows for and handles `**kwargs` arguments alongside
         the values from the state).
-        >>> theorist(v, fit_intercept=False).model.intercept_
+        >>> theorist(v, fit_intercept=False).intercept_
         0.0
 
         Any parameters not provided by the state must be provided by default values or by the
@@ -704,17 +678,17 @@ def inputs_from_state(f):
         >>> @inputs_from_state
         ... def experimentalist(conditions, offset=25):
         ...     new_conditions = [c + offset for c in conditions]
-        ...     return Delta(conditions=new_conditions)
+        ...     return new_conditions
 
         ... then it need not be passed.
         >>> experimentalist(U(conditions=[1,2,3,4]))
-        U(conditions=[26, 27, 28, 29])
+        [26, 27, 28, 29]
 
         If a default isn't specified:
         >>> @inputs_from_state
         ... def experimentalist(conditions, offset):
         ...     new_conditions = [c + offset for c in conditions]
-        ...     return Delta(conditions=new_conditions)
+        ...     return new_conditions
 
         ... then calling the experimentalist without it will throw an error:
         >>> experimentalist(U(conditions=[1,2,3,4]))
@@ -724,7 +698,17 @@ def inputs_from_state(f):
 
         ... which can be fixed by passing the argument as a keyword to the wrapped function.
         >>> experimentalist(U(conditions=[1,2,3,4]), offset=2)
-        U(conditions=[3, 4, 5, 6])
+        [3, 4, 5, 6]
+
+        The state itself is passed through if the inner function requests the `state`:
+        >>> @inputs_from_state
+        ... def function_which_needs_whole_state(state, conditions):
+        ...     print("Doing something on: ", state)
+        ...     new_conditions = [c + 2 for c in conditions]
+        ...     return new_conditions
+        >>> function_which_needs_whole_state(U(conditions=[1,2,3,4]))
+        Doing something on:  U(conditions=[1, 2, 3, 4])
+        [3, 4, 5, 6]
 
     """
     # Get the set of parameter names from function f's signature
@@ -737,13 +721,11 @@ def inputs_from_state(f):
         assert is_dataclass(state_)
         from_state = parameters_.intersection({i.name for i in fields(state_)})
         arguments_from_state = {k: getattr(state_, k) for k in from_state}
+        if "state" in parameters_:
+            arguments_from_state["state"] = state_
         arguments = dict(arguments_from_state, **kwargs)
-        delta = f(**arguments)
-        assert isinstance(delta, Mapping), (
-            "Output of %s must be a `Delta`, `UserDict`, " "or `dict`." % f
-        )
-        new_state = state_ + delta
-        return new_state
+        result = f(**arguments)
+        return result
 
     return _f
 
@@ -853,6 +835,170 @@ def outputs_to_delta(*output: str):
     return decorator
 
 
+def delta_to_state(f):
+    """Decorator to make `f` which takes a `State` and returns a `Delta` return an updated `State`.
+
+    This wrapper handles adding a returned Delta to an input State object.
+
+    Args:
+        f: the function which returns a `Delta` object
+
+    Returns: the function modified to return a State object
+
+    Examples:
+        >>> from dataclasses import dataclass, field
+        >>> import pandas as pd
+        >>> from typing import List, Optional
+
+        The `State` it operates on needs to have the metadata described in the state module:
+        >>> @dataclass(frozen=True)
+        ... class U(State):
+        ...     conditions: List[int] = field(metadata={"delta": "replace"})
+
+        We indicate the inputs required by the parameter names.
+        The output must be (compatible with) a `Delta` object.
+        >>> @delta_to_state
+        ... @inputs_from_state
+        ... def experimentalist(conditions):
+        ...     new_conditions = [c + 10 for c in conditions]
+        ...     return Delta(conditions=new_conditions)
+
+        >>> experimentalist(U(conditions=[1,2,3,4]))
+        U(conditions=[11, 12, 13, 14])
+
+        >>> experimentalist(U(conditions=[101,102,103,104]))
+        U(conditions=[111, 112, 113, 114])
+
+        If the output of the function is not a `Delta` object (or something compatible with its
+        interface), then an error is thrown.
+        >>> @delta_to_state
+        ... @inputs_from_state
+        ... def returns_bare_conditions(conditions):
+        ...     new_conditions = [c + 10 for c in conditions]
+        ...     return new_conditions
+
+        >>> returns_bare_conditions(U(conditions=[1])) # doctest: +ELLIPSIS +NORMALIZE_WHITESPACE
+        Traceback (most recent call last):
+        ...
+        AssertionError: Output of <function returns_bare_conditions at 0x...> must be a `Delta`,
+        `UserDict`, or `dict`.
+
+        A dictionary can be returned and used:
+        >>> @delta_to_state
+        ... @inputs_from_state
+        ... def returns_a_dictionary(conditions):
+        ...     new_conditions = [c + 10 for c in conditions]
+        ...     return {"conditions": new_conditions}
+        >>> returns_a_dictionary(U(conditions=[2]))
+        U(conditions=[12])
+
+        ... as can an object which subclasses UserDict (like `Delta`)
+        >>> class MyDelta(UserDict):
+        ...     pass
+        >>> @delta_to_state
+        ... @inputs_from_state
+        ... def returns_a_userdict(conditions):
+        ...     new_conditions = [c + 10 for c in conditions]
+        ...     return MyDelta(conditions=new_conditions)
+        >>> returns_a_userdict(U(conditions=[3]))
+        U(conditions=[13])
+
+        We recommend using the `Delta` object rather than a `UserDict` or `dict` as its
+        functionality may be expanded in future.
+
+        >>> from autora.variable import VariableCollection, Variable
+        >>> from sklearn.base import BaseEstimator
+        >>> from sklearn.linear_model import LinearRegression
+
+        >>> @delta_to_state
+        ... @inputs_from_state
+        ... def theorist(experiment_data: pd.DataFrame, variables: VariableCollection, **kwargs):
+        ...     ivs = [vi.name for vi in variables.independent_variables]
+        ...     dvs = [vi.name for vi in variables.dependent_variables]
+        ...     X, y = experiment_data[ivs], experiment_data[dvs]
+        ...     new_model = LinearRegression(fit_intercept=True).set_params(**kwargs).fit(X, y)
+        ...     return Delta(model=new_model)
+
+        >>> @dataclass(frozen=True)
+        ... class V(State):
+        ...     variables: VariableCollection  # field(metadata={"delta":... }) omitted ∴ immutable
+        ...     experiment_data: pd.DataFrame = field(metadata={"delta": "extend"})
+        ...     model: Optional[BaseEstimator] = field(metadata={"delta": "replace"}, default=None)
+
+        >>> v = V(
+        ...     variables=VariableCollection(independent_variables=[Variable("x")],
+        ...                                  dependent_variables=[Variable("y")]),
+        ...     experiment_data=pd.DataFrame({"x": [0,1,2,3,4], "y": [2,3,4,5,6]})
+        ... )
+        >>> v_prime = theorist(v)
+        >>> v_prime.model.coef_, v_prime.model.intercept_
+        (array([[1.]]), array([2.]))
+
+        Arguments from the state can be overridden by passing them in as keyword arguments (kwargs):
+        >>> theorist(v, experiment_data=pd.DataFrame({"x": [0,1,2,3], "y": [12,13,14,15]}))\\
+        ...     .model.intercept_
+        array([12.])
+
+        ... and other arguments supported by the inner function can also be passed
+        (if and only if the inner function allows for and handles `**kwargs` arguments alongside
+        the values from the state).
+        >>> theorist(v, fit_intercept=False).model.intercept_
+        0.0
+
+        Any parameters not provided by the state must be provided by default values or by the
+        caller. If the default is specified:
+        >>> @delta_to_state
+        ... @inputs_from_state
+        ... def experimentalist(conditions, offset=25):
+        ...     new_conditions = [c + offset for c in conditions]
+        ...     return Delta(conditions=new_conditions)
+
+        ... then it need not be passed.
+        >>> experimentalist(U(conditions=[1,2,3,4]))
+        U(conditions=[26, 27, 28, 29])
+
+        If a default isn't specified:
+        >>> @delta_to_state
+        ... @inputs_from_state
+        ... def experimentalist(conditions, offset):
+        ...     new_conditions = [c + offset for c in conditions]
+        ...     return Delta(conditions=new_conditions)
+
+        ... then calling the experimentalist without it will throw an error:
+        >>> experimentalist(U(conditions=[1,2,3,4]))
+        Traceback (most recent call last):
+        ...
+        TypeError: experimentalist() missing 1 required positional argument: 'offset'
+
+        ... which can be fixed by passing the argument as a keyword to the wrapped function.
+        >>> experimentalist(U(conditions=[1,2,3,4]), offset=2)
+        U(conditions=[3, 4, 5, 6])
+
+        The state itself is passed through if the inner function requests the `state`:
+        >>> @delta_to_state
+        ... @inputs_from_state
+        ... def function_which_needs_whole_state(state, conditions):
+        ...     print("Doing something on: ", state)
+        ...     new_conditions = [c + 2 for c in conditions]
+        ...     return Delta(conditions=new_conditions)
+        >>> function_which_needs_whole_state(U(conditions=[1,2,3,4]))
+        Doing something on:  U(conditions=[1, 2, 3, 4])
+        U(conditions=[3, 4, 5, 6])
+
+    """
+
+    @wraps(f)
+    def _f(state_: S, **kwargs) -> S:
+        delta = f(state_, **kwargs)
+        assert isinstance(delta, Mapping), (
+            "Output of %s must be a `Delta`, `UserDict`, " "or `dict`." % f
+        )
+        new_state = state_ + delta
+        return new_state
+
+    return _f
+
+
 def on_state(
     function: Optional[Callable] = None, output: Optional[Sequence[str]] = None
 ):
@@ -920,6 +1066,7 @@ def on_state(
         if output is not None:
             f_ = outputs_to_delta(*output)(f_)
         f_ = inputs_from_state(f_)
+        f_ = delta_to_state(f_)
         return f_
 
     if function is None:

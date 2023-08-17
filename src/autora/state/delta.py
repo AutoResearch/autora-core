@@ -726,6 +726,16 @@ def inputs_from_state(f):
         >>> experimentalist(U(conditions=[1,2,3,4]), offset=2)
         U(conditions=[3, 4, 5, 6])
 
+        The state itself is passed through if the inner function requests the `state`:
+        >>> @inputs_from_state
+        ... def function_which_needs_whole_state(state, conditions):
+        ...     print("Doing something on: ", state)
+        ...     new_conditions = [c + 2 for c in conditions]
+        ...     return Delta(conditions=new_conditions)
+        >>> function_which_needs_whole_state(U(conditions=[1,2,3,4]))
+        Doing something on:  U(conditions=[1, 2, 3, 4])
+        U(conditions=[3, 4, 5, 6])
+
     """
     # Get the set of parameter names from function f's signature
     parameters_ = set(inspect.signature(f).parameters.keys())
@@ -737,6 +747,8 @@ def inputs_from_state(f):
         assert is_dataclass(state_)
         from_state = parameters_.intersection({i.name for i in fields(state_)})
         arguments_from_state = {k: getattr(state_, k) for k in from_state}
+        if "state" in parameters_:
+            arguments_from_state["state"] = state_
         arguments = dict(arguments_from_state, **kwargs)
         delta = f(**arguments)
         assert isinstance(delta, Mapping), (

@@ -23,6 +23,7 @@ dev = [
     "autora-core[build]",
     "autora-core[notebook]",
     "autora-core[docs]",
+    "autora-theorist-bms",
 ]
 test = [
     "pytest",

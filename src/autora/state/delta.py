@@ -10,6 +10,8 @@ from dataclasses import dataclass, fields, is_dataclass, replace
 from functools import singledispatch, wraps
 from typing import Callable, Generic, List, Optional, Protocol, Sequence, TypeVar, Union
 
+from autora.utils.conversion import align_dataframe_to_ivs
+
 import numpy as np
 import pandas as pd
 
@@ -710,6 +712,32 @@ def inputs_from_state(f):
         Doing something on:  U(conditions=[1, 2, 3, 4])
         [3, 4, 5, 6]
 
+        If the state has variables and conditions as fields the conditions that gets passed in an
+        experimentalist, get aligned to the variables:
+        >>> @dataclass(frozen=True)
+        ... class S(State):
+        ...     variables: VariableCollection  # field(metadata={"delta":... }) omitted ∴ immutable
+        ...     conditions: pd.DataFrame = field(metadata={"delta": "replace"}, default=None)
+        >>> s = S(
+        ...     variables=VariableCollection(independent_variables=[Variable("x"), Variable("y")],
+        ...                                  dependent_variables=[Variable("y")]),
+        ...     conditions=pd.DataFrame({"y": [1, 2, 3], "x": [3, 4, 5]})
+        ... )
+        >>> @inputs_from_state
+        ... def use_conditions(conditions):
+        ...     _c = np.array(conditions)
+        ...     _c[0] += 1
+        ...     _c[1] += 2
+        ...     res = pd.DataFrame(_c)
+        ...     res.columns = conditions.columns
+        ...     return res
+        >>> use_conditions(s)
+           x  y
+        0  4  2
+        1  6  4
+        2  5  3
+
+
     """
     # Get the set of parameter names from function f's signature
     parameters_ = set(inspect.signature(f).parameters.keys())
@@ -721,9 +749,22 @@ def inputs_from_state(f):
         assert is_dataclass(state_)
         from_state = parameters_.intersection({i.name for i in fields(state_)})
         arguments_from_state = {k: getattr(state_, k) for k in from_state}
+
+
+
         if "state" in parameters_:
             arguments_from_state["state"] = state_
         arguments = dict(arguments_from_state, **kwargs)
+
+        # If the conditions are in arguments, they are a pd.DataFrame,
+        # and variables are a field object, align the DataFrame to the variable declaration
+        if ("conditions" in arguments and isinstance(arguments["conditions"], pd.DataFrame) and
+            "variables" in [i.name for i in fields(state_)]):
+            arguments["conditions"] = (
+                align_dataframe_to_ivs(arguments["conditions"],
+                                       getattr(state_, "variables").independent_variables)
+            )
+
         result = f(**arguments)
         return result
 

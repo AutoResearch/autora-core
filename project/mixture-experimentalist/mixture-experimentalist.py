@@ -21,13 +21,13 @@ def adjust_distribution(p, temperature):
     return final_p
 
 
-def mixture_sample(condition_pool: Union[pd.DataFrame, np.ndarray], temperature: float,
+def mixture_sample(conditions: Union[pd.DataFrame, np.ndarray], temperature: float,
                    samplers: list, params: dict,
                    num_samples: Optional[int] = None) -> pd.DataFrame:
     """
 
     Args:
-        condition_pool: pool of experimental conditions to evaluate: pd.Dataframe
+        conditions: pool of experimental conditions to evaluate: pd.Dataframe
         temperature: how random is selection of conditions (cannot be 0; (0:1) - the choices are more deterministic than the choices made wrt
         samplers: tuple containing sampler functions, their names, and weights
         for sampler functions that return both positive and negative scores, user can provide a list with two weights: the first one will be applied to positive scores, the second one -- to the negative
@@ -39,7 +39,7 @@ def mixture_sample(condition_pool: Union[pd.DataFrame, np.ndarray], temperature:
         Sampled pool of experimental conditions with the scores attached to them
     """
 
-    condition_pool = pd.DataFrame(condition_pool)
+    condition_pool = pd.DataFrame(conditions)
 
     rankings = pd.DataFrame()
     mixture_scores = np.zeros(len(condition_pool))
@@ -47,9 +47,9 @@ def mixture_sample(condition_pool: Union[pd.DataFrame, np.ndarray], temperature:
     for (function, name, weight) in samplers:
         try:
             sampler_params = params[name]
-            pd_ranking = function(condition_pool=condition_pool, **sampler_params)
+            pd_ranking = function(conditions=condition_pool, **sampler_params)
         except:
-            pd_ranking = function(condition_pool=condition_pool)
+            pd_ranking = function(conditions=condition_pool)
         # sorting by index
         pd_ranking = pd_ranking.sort_index()
 
@@ -78,7 +78,7 @@ def mixture_sample(condition_pool: Union[pd.DataFrame, np.ndarray], temperature:
 
     condition_indices = np.random.choice(np.arange(len(condition_pool)), num_samples,
                                          p=weighted_mixture_scores_adjusted, replace=False)
-    conditions = condition_pool.iloc[condition_indices]
-    conditions["score"] = mixture_scores
+    conditions_ = condition_pool.iloc[condition_indices]
+    conditions_["score"] = mixture_scores
 
-    return conditions
+    return conditions_

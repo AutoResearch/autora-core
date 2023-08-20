@@ -1,4 +1,5 @@
 from dataclasses import dataclass, field
+from enum import Enum
 from typing import List, Optional
 
 import pandas as pd
@@ -6,6 +7,13 @@ from sklearn.base import BaseEstimator
 
 from autora.state import State
 from autora.variable import VariableCollection
+
+
+class StandardStateVariables(Enum):
+    CONDITIONS = "conditions"
+    EXPERIMENT_DATA = "experiment_data"
+    MODELS = "models"
+    VARIABLES = "variables"
 
 
 @dataclass(frozen=True)

@@ -21,7 +21,7 @@ class StandardState(State):
     """
     Examples:
         The state can be initialized emtpy
-        >>> from autora.state.delta import Delta
+        >>> from autora.state import Delta
         >>> from autora.variable import VariableCollection, Variable
         >>> s = StandardState()
         >>> s

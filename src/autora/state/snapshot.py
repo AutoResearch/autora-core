@@ -5,7 +5,7 @@ from typing import Dict, List
 from numpy.typing import ArrayLike
 from sklearn.base import BaseEstimator
 
-from autora.state.delta import Delta
+from autora.state import Delta
 from autora.state.protocol import SupportsControllerStateFields
 from autora.variable import VariableCollection
 

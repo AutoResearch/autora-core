@@ -4,7 +4,7 @@ from typing import List, Optional
 import pandas as pd
 from sklearn.base import BaseEstimator
 
-from autora.state.delta import State
+from autora.state import State
 from autora.variable import VariableCollection
 
 

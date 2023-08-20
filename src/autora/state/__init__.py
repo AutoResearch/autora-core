@@ -7,18 +7,26 @@ import warnings
 from collections import UserDict
 from collections.abc import Mapping
 from dataclasses import dataclass, fields, is_dataclass, replace
+from enum import Enum
 from functools import singledispatch, wraps
 from typing import Callable, Generic, List, Optional, Protocol, Sequence, TypeVar, Union
 
-from autora.utils.conversion import align_dataframe_to_ivs
-
 import numpy as np
 import pandas as pd
+
+from autora.utils.conversion import align_dataframe_to_ivs
 
 _logger = logging.getLogger(__name__)
 
 T = TypeVar("T")
 C = TypeVar("C", covariant=True)
+
+
+class StateVariable(Enum):
+    CONDITIONS = "conditions"
+    EXPERIMENT_DATA = "experiment_data"
+    MODELS = "models"
+    VARIABLES = "variables"
 
 
 class DeltaAddable(Protocol[C]):
@@ -750,19 +758,20 @@ def inputs_from_state(f):
         from_state = parameters_.intersection({i.name for i in fields(state_)})
         arguments_from_state = {k: getattr(state_, k) for k in from_state}
 
-
-
         if "state" in parameters_:
             arguments_from_state["state"] = state_
         arguments = dict(arguments_from_state, **kwargs)
 
         # If the conditions are in arguments, they are a pd.DataFrame,
         # and variables are a field object, align the DataFrame to the variable declaration
-        if ("conditions" in arguments and isinstance(arguments["conditions"], pd.DataFrame) and
-            "variables" in [i.name for i in fields(state_)]):
-            arguments["conditions"] = (
-                align_dataframe_to_ivs(arguments["conditions"],
-                                       getattr(state_, "variables").independent_variables)
+        if (
+            "conditions" in arguments
+            and isinstance(arguments["conditions"], pd.DataFrame)
+            and "variables" in [i.name for i in fields(state_)]
+        ):
+            arguments["conditions"] = align_dataframe_to_ivs(
+                arguments["conditions"],
+                getattr(state_, "variables").independent_variables,
             )
 
         result = f(**arguments)

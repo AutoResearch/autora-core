@@ -136,7 +136,7 @@ class Snapshot(SupportsControllerStateFields):
                             observations=[], models=[])
 
             We can update the params using the `+` operator:
-            >>> from autora.state.delta import Delta
+            >>> from autora.state import Delta
             >>> s0 + Delta(params={'first': 'params'})  # doctest: +ELLIPSIS +NORMALIZE_WHITESPACE
             Snapshot(..., params={'first': 'params'}, ...)
 

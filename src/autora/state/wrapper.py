@@ -2,7 +2,7 @@
 so that $n$ processes $f_i$ on states $S$ can be represented as
 $$f_n(...(f_1(f_0(S))))$$
 
-These are special cases of the [autora.state.delta.on_state][] function.
+These are special cases of the [autora.state.on_state][] function.
 """
 from __future__ import annotations
 
@@ -34,7 +34,7 @@ def state_fn_from_estimator(estimator: BaseEstimator) -> Executor:
         >>> state_fn = state_fn_from_estimator(LinearRegression())
 
         Define the state on which to operate (here an instance of the `StandardState`):
-        >>> from autora.state.bundled import StandardState
+        >>> from autora.state.standard import StandardState
         >>> from autora.variable import Variable, VariableCollection
         >>> import pandas as pd
         >>> s = StandardState(
@@ -69,7 +69,7 @@ def state_fn_from_x_to_y_fn_df(f: Callable[[X], Y]) -> Executor:
 
     Examples:
         The conditions are some x-values in a StandardState object:
-        >>> from autora.state.bundled import StandardState
+        >>> from autora.state.standard import StandardState
         >>> s = StandardState(conditions=pd.DataFrame({"x": [1, 2, 3]}))
 
         The function can be defined on a DataFrame (allowing the explicit inclusion of
@@ -115,7 +115,7 @@ def state_fn_from_x_to_xy_fn_df(f: Callable[[X], XY]) -> Executor:
 
     Examples:
         The conditions are some x-values in a StandardState object:
-        >>> from autora.state.bundled import StandardState
+        >>> from autora.state.standard import StandardState
         >>> s = StandardState(conditions=pd.DataFrame({"x": [1, 2, 3]}))
 
         The function can be defined on a DataFrame, allowing the explicit inclusion of

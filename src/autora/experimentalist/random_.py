@@ -24,7 +24,7 @@ def pool(
     Returns: the generated conditions as a dataframe
 
     Examples:
-        >>> from autora.state.delta import State
+        >>> from autora.state import State
         >>> from autora.variable import VariableCollection, Variable
         >>> from dataclasses import dataclass, field
         >>> import pandas as pd

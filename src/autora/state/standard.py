@@ -1,4 +1,5 @@
 from dataclasses import dataclass, field
+from enum import Enum
 from typing import List, Optional
 
 import pandas as pd
@@ -8,12 +9,19 @@ from autora.state import State
 from autora.variable import VariableCollection
 
 
+class StandardStateVariables(Enum):
+    CONDITIONS = "conditions"
+    EXPERIMENT_DATA = "experiment_data"
+    MODELS = "models"
+    VARIABLES = "variables"
+
+
 @dataclass(frozen=True)
 class StandardState(State):
     """
     Examples:
         The state can be initialized emtpy
-        >>> from autora.state.delta import Delta
+        >>> from autora.state import Delta
         >>> from autora.variable import VariableCollection, Variable
         >>> s = StandardState()
         >>> s

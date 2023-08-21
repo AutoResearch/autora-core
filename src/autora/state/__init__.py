@@ -7,7 +7,6 @@ import warnings
 from collections import UserDict
 from collections.abc import Mapping
 from dataclasses import dataclass, fields, is_dataclass, replace
-from enum import Enum
 from functools import singledispatch, wraps
 from typing import Callable, Generic, List, Optional, Protocol, Sequence, TypeVar, Union
 
@@ -20,13 +19,6 @@ _logger = logging.getLogger(__name__)
 
 T = TypeVar("T")
 C = TypeVar("C", covariant=True)
-
-
-class StateVariable(Enum):
-    CONDITIONS = "conditions"
-    EXPERIMENT_DATA = "experiment_data"
-    MODELS = "models"
-    VARIABLES = "variables"
 
 
 class DeltaAddable(Protocol[C]):

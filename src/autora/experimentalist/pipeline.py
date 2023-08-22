@@ -191,7 +191,7 @@ def _merge_dicts(a: dict, b: dict):
         a: the "base" dictionary
         b: the "update" dictionary which takes precendence
 
-    Returns:
+    Returns: the combined dictionary
 
     Originally from https://stackoverflow.com/a/7205107, modified for AER to allow overwriting.
 

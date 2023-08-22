@@ -131,7 +131,7 @@ def pool(
 
 
 random_pool = pool
-random_pool.__doc__ = """Alias for `pool`"""
+"""Alias for `pool`"""
 
 
 def sample(
@@ -180,4 +180,4 @@ def sample(
 
 
 random_sample = sample
-random_sample.__doc__ = """Alias for `sample`"""
+"""Alias for `sample`"""

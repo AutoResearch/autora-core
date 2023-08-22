@@ -105,4 +105,4 @@ def pool(variables: VariableCollection) -> pd.DataFrame:
 
 
 grid_pool = pool
-grid_pool.__doc__ = """Alias for pool"""
+"""Alias for pool"""

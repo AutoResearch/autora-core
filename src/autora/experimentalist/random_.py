@@ -164,9 +164,18 @@ def sample(
         63  163
         96  196
 
+        From a list (returns a DataFrame):
+        >>> sample(range(1000), num_samples=5, random_state=180)
+               0
+        270  270
+        908  908
+        109  109
+        331  331
+        978  978
     """
+    conditions_ = pd.DataFrame(conditions)
     return pd.DataFrame.sample(
-        conditions, random_state=random_state, n=num_samples, replace=replace
+        conditions_, random_state=random_state, n=num_samples, replace=replace
     )
 
 

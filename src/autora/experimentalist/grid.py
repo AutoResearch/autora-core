@@ -3,40 +3,10 @@ from itertools import product
 
 import pandas as pd
 
-from autora.state.delta import Result, State, wrap_to_use_state
 from autora.variable import VariableCollection
 
 
-def grid_pool_on_state(s: State, **kwargs) -> State:
-    """
-    Create an exhaustive pool of conditions.
-
-    Args:
-        s: a State object with a `variables` field.
-
-    Returns: a State object updated with the new conditions
-
-    Examples:
-        >>> from autora.state.bundled import StandardState
-        >>> from autora.variable import Variable, VariableCollection
-        >>> s = StandardState(variables=VariableCollection(
-        ...     independent_variables=[
-        ...         Variable(name="x1", allowed_values=[1, 2]),
-        ...         Variable(name="x2", allowed_values=[3, 4])]))
-        >>> grid_pool_on_state(s)  # doctest: +ELLIPSIS +NORMALIZE_WHITESPACE
-        StandardState(..., conditions=
-           x1  x2
-        0   1   3
-        1   1   4
-        2   2   3
-        3   2   4, ...)
-
-    """
-
-    return wrap_to_use_state(grid_pool)(s, **kwargs)
-
-
-def grid_pool(variables: VariableCollection) -> Result:
+def pool(variables: VariableCollection) -> pd.DataFrame:
     """Creates exhaustive pool of conditions given a definition of variables with allowed_values.
 
     Args:
@@ -55,26 +25,26 @@ def grid_pool(variables: VariableCollection) -> Result:
 
         With one independent variable "x", and some allowed values, we get exactly those values
         back when running the experimentalist:
-        >>> grid_pool(VariableCollection(
+        >>> pool(VariableCollection(
         ...     independent_variables=[Variable(name="x", allowed_values=[1, 2, 3])]
-        ... ))["conditions"]
+        ... ))
            x
         0  1
         1  2
         2  3
 
         The allowed_values must be specified:
-        >>> grid_pool(VariableCollection(independent_variables=[Variable(name="x")]))
+        >>> pool(VariableCollection(independent_variables=[Variable(name="x")]))
         Traceback (most recent call last):
         ...
         AssertionError: grid_pool only supports independent variables with discrete...
 
         With two independent variables, we get the cartesian product:
-        >>> grid_pool(
+        >>> pool(
         ...     VariableCollection(independent_variables=[
         ...         Variable(name="x1", allowed_values=[1, 2]),
         ...         Variable(name="x2", allowed_values=[3, 4]),
-        ... ]))["conditions"]
+        ... ]))
            x1  x2
         0   1   3
         1   1   4
@@ -82,7 +52,7 @@ def grid_pool(variables: VariableCollection) -> Result:
         3   2   4
 
         If any of the variables have unspecified allowed_values, we get an error:
-        >>> grid_pool(
+        >>> pool(
         ...     VariableCollection(independent_variables=[
         ...         Variable(name="x1", allowed_values=[1, 2]),
         ...         Variable(name="x2"),
@@ -93,12 +63,12 @@ def grid_pool(variables: VariableCollection) -> Result:
 
 
         We can specify arrays of allowed values:
-        >>> grid_pool(
+        >>> pool(
         ...     VariableCollection(independent_variables=[
         ...         Variable(name="x", allowed_values=np.linspace(-10, 10, 101)),
         ...         Variable(name="y", allowed_values=[3, 4]),
         ...         Variable(name="z", allowed_values=np.linspace(20, 30, 11)),
-        ... ]))["conditions"]
+        ... ]))
                  x  y     z
         0    -10.0  3  20.0
         1    -10.0  3  21.0
@@ -131,4 +101,8 @@ def grid_pool(variables: VariableCollection) -> Result:
     pool = product(*l_iv_values)
     conditions = pd.DataFrame(pool, columns=l_iv_names)
 
-    return Result(conditions=conditions)
+    return conditions
+
+
+grid_pool = pool
+"""Alias for pool"""

@@ -279,7 +279,6 @@ def test_params_parser_one_level():
 
 
 def test_params_parser_recurse_one():
-
     params = {
         "filter_pipeline__step1__n_samples": 100,
     }
@@ -309,7 +308,6 @@ def test_params_parser_recurse_one_n_levels_alternative_divider():
 
 
 def test_params_parser_recurse():
-
     params = {
         "pool__ivs": "%%independent_variables%%",
         "filter_pipeline__step1__n_samples": 100,

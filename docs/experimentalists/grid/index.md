@@ -24,7 +24,7 @@ This means that there are various combinations that these variables can form, th
 ### Example Code
 
 ```python
-from autora.experimentalist.grid_ import grid_pool
+from autora.experimentalist.grid import grid_pool
 from autora.variable import Variable, VariableCollection
 
 iv_1 = Variable(allowed_values=[1, 2, 3])

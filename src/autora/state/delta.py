@@ -241,7 +241,6 @@ class State:
         updates = dict()
         other_fields_unused = list(other.keys())
         for self_field in fields(self):
-
             other_value, key = _get_value(self_field, other)
             if other_value is None:
                 continue
@@ -799,7 +798,6 @@ def outputs_to_delta(*output: str):
     """
 
     def decorator(f):
-
         if len(output) == 0:
             raise ValueError("`output` names must be specified.")
 

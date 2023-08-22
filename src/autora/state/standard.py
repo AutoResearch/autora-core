@@ -18,7 +18,7 @@ from autora.variable import VariableCollection
 X = TypeVar("X")
 Y = TypeVar("Y")
 XY = TypeVar("XY")
-Executor = Callable[[State], State]
+StateFunction = Callable[[State], State]
 
 
 @dataclass(frozen=True)
@@ -188,7 +188,7 @@ class StandardState(State):
             return None
 
 
-def state_fn_from_estimator(estimator: BaseEstimator) -> Executor:
+def state_fn_from_estimator(estimator: BaseEstimator) -> StateFunction:
     """
     Convert a scikit-learn compatible estimator into a function on a `State` object.
 
@@ -230,7 +230,7 @@ def state_fn_from_estimator(estimator: BaseEstimator) -> Executor:
     return theorist
 
 
-def state_fn_from_x_to_y_fn_df(f: Callable[[X], Y]) -> Executor:
+def state_fn_from_x_to_y_fn_df(f: Callable[[X], Y]) -> StateFunction:
     """Wrapper for experiment_runner of the form $f(x) \rarrow y$, where `f` returns just the $y$
     values, with inputs and outputs as a DataFrame or Series with correct column names.
 
@@ -276,7 +276,7 @@ def state_fn_from_x_to_y_fn_df(f: Callable[[X], Y]) -> Executor:
     return experiment_runner
 
 
-def state_fn_from_x_to_xy_fn_df(f: Callable[[X], XY]) -> Executor:
+def state_fn_from_x_to_xy_fn_df(f: Callable[[X], XY]) -> StateFunction:
     """Wrapper for experiment_runner of the form $f(x) \rarrow (x,y)$, where `f`
     returns both $x$ and $y$ values in a complete dataframe.
 

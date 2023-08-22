@@ -15,7 +15,6 @@ from sklearn.base import BaseEstimator
 from autora.state.delta import Delta, State, on_state
 from autora.variable import VariableCollection
 
-S = TypeVar("S")
 X = TypeVar("X")
 Y = TypeVar("Y")
 XY = TypeVar("XY")

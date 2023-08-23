@@ -269,10 +269,10 @@ class State:
                 coerced_other_value = other_value
 
             if delta_behavior == "extend":
-                extended_value = extend(self_value, coerced_other_value)
+                extended_value = _extend(self_value, coerced_other_value)
                 updates[self_field_key] = extended_value
             elif delta_behavior == "append":
-                appended_value = append(self_value, coerced_other_value)
+                appended_value = _append(self_value, coerced_other_value)
                 updates[self_field_key] = appended_value
             elif delta_behavior == "replace":
                 updates[self_field_key] = coerced_other_value
@@ -501,50 +501,56 @@ Result = Delta
 
 
 @singledispatch
-def extend(a, b):
+def _extend(a, b):
     """
     Function to extend supported datatypes.
 
     """
-    raise NotImplementedError("`extend` not implemented for %s, %s" % (a, b))
+    raise NotImplementedError("`_extend` not implemented for %s, %s" % (a, b))
 
 
-@extend.register(type(None))
+@_extend.register(type(None))
 def _extend_none(_, b):
     """
+    Implementation of `_extend` to support None-types.
+
     Examples:
-        >>> extend(None, [])
+        >>> _extend(None, [])
         []
 
-        >>> extend(None, [3])
+        >>> _extend(None, [3])
         [3]
     """
     return b
 
 
-@extend.register(list)
+@_extend.register(list)
 def _extend_list(a, b):
     """
+    Implementation of `_extend` to support Lists.
+
     Examples:
-        >>> extend([], [])
+        >>> _extend([], [])
         []
 
-        >>> extend([1,2], [3])
+        >>> _extend([1,2], [3])
         [1, 2, 3]
     """
     return a + b
 
 
-@extend.register(pd.DataFrame)
+@_extend.register(pd.DataFrame)
 def _extend_pd_dataframe(a, b):
     """
+    Implementation of `_extend` to support DataFrames.
+
     Examples:
-        >>> extend(pd.DataFrame({"a": []}), pd.DataFrame({"a": []}))
+        >>> _extend(pd.DataFrame({"a": []}), pd.DataFrame({"a": []}))
         Empty DataFrame
         Columns: [a]
         Index: []
 
-        >>> extend(pd.DataFrame({"a": [1,2,3]}), pd.DataFrame({"a": [4,5,6]}))
+        >>> _extend(pd.DataFrame({"a": [1,2,3]}), pd.DataFrame({"a": [4,5,6]}))
            a
         0  1
         1  2
@@ -556,11 +562,13 @@ def _extend_pd_dataframe(a, b):
     return pd.concat((a, b), ignore_index=True)
 
 
-@extend.register(np.ndarray)
+@_extend.register(np.ndarray)
 def _extend_np_ndarray(a, b):
     """
+    Implementation of `_extend` to support Numpy ndarrays.
+
     Examples:
-        >>> extend(np.array([(1,2,3), (4,5,6)]), np.array([(7,8,9)]))
+        >>> _extend(np.array([(1,2,3), (4,5,6)]), np.array([(7,8,9)]))
         array([[1, 2, 3],
                [4, 5, 6],
                [7, 8, 9]])
@@ -568,17 +576,19 @@ def _extend_np_ndarray(a, b):
     return np.row_stack([a, b])
 
 
-@extend.register(dict)
+@_extend.register(dict)
 def _extend_dict(a, b):
     """
+    Implementation of `_extend` to support Dictionaries.
+
     Examples:
-        >>> extend({"a": "cats"}, {"b": "dogs"})
+        >>> _extend({"a": "cats"}, {"b": "dogs"})
         {'a': 'cats', 'b': 'dogs'}
     """
     return dict(a, **b)
 
 
-def append(a: List[T], b: T) -> List[T]:
+def _append(a: List[T], b: T) -> List[T]:
     """
     Function to create a new list with an item appended to it.
 
@@ -587,7 +597,7 @@ def append(a: List[T], b: T) -> List[T]:
         >>> a_ = [1, 2, 3]
 
         ... we can append a value:
-        >>> append(a_, 4)
+        >>> _append(a_, 4)
         [1, 2, 3, 4]
 
         `a_` is unchanged

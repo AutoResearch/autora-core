@@ -17,7 +17,7 @@ def pool(variables: VariableCollection) -> pd.DataFrame:
     Returns: a Result / Delta object with the conditions as a pd.DataFrame in the `conditions` field
 
     Examples:
-        >>> from autora.state.delta import State
+        >>> from autora.state import State
         >>> from autora.variable import VariableCollection, Variable
         >>> from dataclasses import dataclass, field
         >>> import pandas as pd

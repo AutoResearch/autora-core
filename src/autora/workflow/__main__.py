@@ -1,36 +1,46 @@
+import importlib
 import logging
 import pathlib
-from typing import Any, Optional
 
 import dill
 import typer
 
-from .controller import Controller
+from autora.state import State
 
 _logger = logging.getLogger(__name__)
 
 
 def main(
+    fully_qualified_function_name: str = typer.Argument(
+        ...,
+        help="Function to load",
+    ),
     input_path: pathlib.Path = typer.Argument(
-        ..., help="Input path, a .dill file with the " "starting state of the manager"
+        None, help="Path to a .dill file with the initial state"
     ),
     output_path: pathlib.Path = typer.Argument(
-        ..., help="Output path, a .dill file with the " "ending state of the manager"
+        ..., help="Path to output the final state as a .dill file"
     ),
-    step_name: Optional[str] = typer.Argument(None, help="Name of step"),
     verbose: bool = typer.Option(False, help="Turns on info logging level."),
     debug: bool = typer.Option(False, help="Turns on debug logging level."),
 ):
     _logger.info("initializing")
     _configure_logger(debug, verbose)
-    controller_ = _load_manager(input_path)
 
-    controller_ = controller_.run_once(step_name=step_name)
+    starting_state = _load_state(input_path)
+    _logger.info(f"Starting State: {starting_state}")
 
-    _logger.info(f"last result: {controller_.state.history[-1]}")
+    module_name, function_name = fully_qualified_function_name.rsplit(".", 1)
+
+    module = importlib.import_module(module_name)
+    function = getattr(module, function_name)
+
+    ending_state = function(starting_state)
+
+    _logger.info(f"Ending State: {ending_state}")
 
     _logger.info("writing out results")
-    _dump_manager(controller_, output_path)
+    _dump_state(ending_state, output_path)
 
     return
 
@@ -44,17 +54,17 @@ def _configure_logger(debug, verbose):
         _logger.info("using INFO logging level")
 
 
-def _load_manager(path: pathlib.Path) -> Controller:
-    _logger.debug(f"_load_manager: loading from {path=}")
+def _load_state(path: pathlib.Path) -> State:
+    _logger.debug(f"_load_state: loading from {path=}")
     with open(path, "rb") as f:
-        controller_ = dill.load(f)
-    return controller_
+        state_ = dill.load(f)
+    return state_
 
 
-def _dump_manager(controller_: Any, path: pathlib.Path) -> None:
-    _logger.debug(f"_dump_manager: dumping to {path=}")
+def _dump_state(state_: State, path: pathlib.Path) -> None:
+    _logger.debug(f"_dump_state: dumping to {path=}")
     with open(path, "wb") as f:
-        dill.dump(controller_, f)
+        dill.dump(state_, f)
 
 
 if __name__ == "__main__":

@@ -4,7 +4,7 @@
     final cycle point = 3
     [[graph]]
         R1 = """
-        setup_python => initialize_controller => experimentalist
+        setup_python => initial_state => experimentalist
         """
         P1 = """
             experimentalist => experiment_runner => theorist
@@ -14,37 +14,42 @@
 [runtime]
     [[setup_python]]
         script = """
-            virtualenv "$CYLC_WORKFLOW_SHARE_DIR/env" -p python3.10
+            virtualenv "$CYLC_WORKFLOW_SHARE_DIR/env" -p python3.8
             source "$CYLC_WORKFLOW_SHARE_DIR/env/bin/activate"
             pip install --upgrade pip
             pip install -r "$CYLC_WORKFLOW_RUN_DIR/requirements.txt"
+            python -c "import dill
+            with open('$CYLC_WORKFLOW_SHARE_DIR/emtpy.dill', 'wb') as f: dill.dump(None, f)"
+
         """
-    [[initialize_controller]]
+    [[initial_state]]
     script = """
             $CYLC_WORKFLOW_SHARE_DIR/env/bin/python \
-                -m dump_initial_controller \
-                "$CYLC_WORKFLOW_SHARE_DIR/controller.dill"
+                -m autora.workflow \
+                components.initial_state \
+                "$CYLC_WORKFLOW_SHARE_DIR/emtpy.dill" \
+                "$CYLC_WORKFLOW_SHARE_DIR/start.dill"
         """
     [[experimentalist]]
         script = """
             $CYLC_WORKFLOW_SHARE_DIR/env/bin/python -m autora.workflow \
-                "$CYLC_WORKFLOW_SHARE_DIR/controller.dill" \
-                "$CYLC_WORKFLOW_SHARE_DIR/controller.dill" \
-                experimentalist
+                components.experimentalist \
+                "$CYLC_WORKFLOW_SHARE_DIR/start.dill" \
+                "$CYLC_WORKFLOW_SHARE_DIR/conditions.dill"
         """
     [[experiment_runner]]
         script = """
             $CYLC_WORKFLOW_SHARE_DIR/env/bin/python -m autora.workflow \
-                "$CYLC_WORKFLOW_SHARE_DIR/controller.dill" \
-                "$CYLC_WORKFLOW_SHARE_DIR/controller.dill" \
-                experiment_runner
+                components.experiment_runner \
+                "$CYLC_WORKFLOW_SHARE_DIR/conditions.dill" \
+                "$CYLC_WORKFLOW_SHARE_DIR/data.dill"
         """
     [[theorist]]
         script = """
             $CYLC_WORKFLOW_SHARE_DIR/env/bin/python -m autora.workflow \
-                "$CYLC_WORKFLOW_SHARE_DIR/controller.dill" \
-                "$CYLC_WORKFLOW_SHARE_DIR/controller.dill" \
-                theorist
+                components.theorist \
+                "$CYLC_WORKFLOW_SHARE_DIR/data.dill" \
+                "$CYLC_WORKFLOW_SHARE_DIR/theory.dill"
         """
 
 

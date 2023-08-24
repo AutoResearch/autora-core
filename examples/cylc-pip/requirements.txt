@@ -1,3 +1,6 @@
-autora>=3.0.0a9
+autora-core>=4.0.0b1
+/Users/jholla10/Developer/autora-workflow  # replace with autora-workflow when published
 cylc-flow==8.1.4
 cylc-uiserver==1.2.2
+dill
+scikit-learn

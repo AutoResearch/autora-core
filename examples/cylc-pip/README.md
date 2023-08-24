@@ -43,7 +43,7 @@ cylc install .
 
 We tell cylc to play the workflow:
 ```shell
-cylc play "with-cylc-pip"
+cylc play "cylc-pip"
 ```
 
 (As a shortcut for "validate, install and play", use `cylc vip .`)

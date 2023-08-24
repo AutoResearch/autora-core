@@ -11,10 +11,10 @@ You can import and invoke the pool like this:
 
 ```python
 from autora.variable import VariableCollection, Variable
-from autora.experimentalist.random_ import pool
+from autora.experimentalist.random import pool
 
 pool(
-    VariableCollection(independent_variables=[Variable(name="x", allowed_values=range(10))]), 
+    VariableCollection(independent_variables=[Variable(name="x", allowed_values=range(10))]),
     random_state=1
 )
 ```
@@ -22,7 +22,7 @@ pool(
 You can import the sampler like this:
 
 ```python
-from autora.experimentalist.random_ import sample
+from autora.experimentalist.random import sample
 
 sample([1, 1, 2, 2, 3, 3], num_samples=2)
 ```

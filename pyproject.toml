@@ -28,6 +28,9 @@ dev = [
 docs = [
     "autora-core[docs]==4.0.0b1"
 ]
+test = [
+    "autora-core[test]==4.0.0b1"
+]
 cylc = [
     "cylc-flow",
     "cylc-uiserver"

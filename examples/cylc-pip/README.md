@@ -20,6 +20,8 @@ To initialize the workflow, we define a file in the`lib/python` directory
 [`lib/python/components.py`](./lib/python/controller_setup.py), including all the required functions. These 
 functions will be called in turn by the `autora.workflow.__main__` script.
 
+The [`flow.cylc`](./flow.cylc) file defines the workflow.
+
 ## Execution
 
 We can call the `cylc` command line interface as follows, in a shell session:
@@ -48,7 +50,7 @@ cylc gui
 
 ... or the text user interface (TUI):
 ```shell
-cylc tui "with-cylc-pip"
+cylc tui "cylc-pip"
 ```
 
 ## Results

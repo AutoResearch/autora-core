@@ -1,14 +1,11 @@
 Run the sequence here using:
 
 ```shell
-python -c 'import dill
-with open("empty.dill", "wb") as f: dill.dump(None, f)'
+python -m autora.workflow components.initial_state --out-path start.dill
 
-python -m autora.workflow components.initial_state empty.dill start.dill
+python -m autora.workflow components.experimentalist --in-path start.dill --out-path conditions.dill --verbose
 
-python -m autora.workflow components.experimentalist start.dill conditions.dill --verbose
+python -m autora.workflow components.experiment_runner --in-path conditions.dill --out-path data.dill --verbose
 
-python -m autora.workflow components.experiment_runner conditions.dill data.dill --verbose
-
-python -m autora.workflow components.theorist data.dill theory.dill --verbose
+python -m autora.workflow components.theorist --in-path data.dill --out-path theory.dill --verbose
 ```

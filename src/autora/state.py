@@ -1319,7 +1319,7 @@ def estimator_on_state(estimator: BaseEstimator) -> StateFunction:
     return theorist
 
 
-def state_fn_from_x_to_xy_fn_df(f: Callable[[X], XY]) -> StateFunction:
+def experiment_runner_on_state(f: Callable[[X], XY]) -> StateFunction:
     """Wrapper for experiment_runner of the form $f(x) \rarrow (x,y)$, where `f`
     returns both $x$ and $y$ values in a complete dataframe.
 
@@ -1335,7 +1335,7 @@ def state_fn_from_x_to_xy_fn_df(f: Callable[[X], XY]) -> StateFunction:
         ...     return result
 
         We apply the wrapped function to `s` and look at the returned experiment_data:
-        >>> state_fn_from_x_to_xy_fn_df(x_to_xy_fn)(s).experiment_data
+        >>> experiment_runner_on_state(x_to_xy_fn)(s).experiment_data
            x  y
         0  1  3
         1  2  5
@@ -1348,7 +1348,7 @@ def state_fn_from_x_to_xy_fn_df(f: Callable[[X], XY]) -> StateFunction:
 
         With the relevant variables as conditions:
         >>> t = StandardState(conditions=pd.DataFrame({"x0": [1, 2, 3], "x1": [10, 20, 30]}))
-        >>> state_fn_from_x_to_xy_fn_df(xs_to_xy_fn)(t).experiment_data
+        >>> experiment_runner_on_state(xs_to_xy_fn)(t).experiment_data
            x0  x1   y
         0   1  10  11
         1   2  20  22

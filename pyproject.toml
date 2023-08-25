@@ -10,7 +10,7 @@ readme = "docs/index.md"
 license = {file = "LICENSE"}
 
 dependencies = [
-    "autora-core==4.0.0b1",
+    "autora-core==4.0.0b2",
     "scikit-learn",
     "matplotlib",
     "pandas",
@@ -21,15 +21,15 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = [
-    "autora-core[dev]==4.0.0b1",
+    "autora-core[dev]==4.0.0b2",
     "autora-workflow[docs]",
     "autora-workflow[test]",
 ]
 docs = [
-    "autora-core[docs]==4.0.0b1"
+    "autora-core[docs]==4.0.0b2"
 ]
 test = [
-    "autora-core[test]==4.0.0b1"
+    "autora-core[test]==4.0.0b2"
 ]
 cylc = [
     "cylc-flow",

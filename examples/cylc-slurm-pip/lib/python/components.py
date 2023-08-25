@@ -2,7 +2,7 @@ import pandas as pd
 from sklearn.linear_model import LinearRegression
 
 from autora.experimentalist.grid import grid_pool
-from autora.state import StandardState, on_state, state_fn_from_estimator
+from autora.state import StandardState, estimator_on_state, on_state
 from autora.variable import Variable, VariableCollection
 
 
@@ -27,4 +27,4 @@ experiment_runner = on_state(
     output=["experiment_data"],
 )
 
-theorist = state_fn_from_estimator(LinearRegression(fit_intercept=True))
+theorist = estimator_on_state(LinearRegression(fit_intercept=True))

@@ -16,29 +16,47 @@
 [runtime]
     [[setup_python]]
         script = """
-            mkdir -p $CYLC_WORKFLOW_SHARE_DIR/$CYLC_TASK_CYCLE_POINT
-            echo "setup_python" > $CYLC_WORKFLOW_SHARE_DIR/$CYLC_TASK_CYCLE_POINT/setup.txt
+            virtualenv "$CYLC_WORKFLOW_SHARE_DIR/env" -p python3.8
+            source "$CYLC_WORKFLOW_SHARE_DIR/env/bin/activate"
+            pip install --upgrade pip
+            pip install -r "$CYLC_WORKFLOW_RUN_DIR/requirements.txt"
         """
     [[initial_state]]
     script = """
-            mkdir -p $CYLC_WORKFLOW_SHARE_DIR/$CYLC_TASK_CYCLE_POINT
+            $CYLC_WORKFLOW_SHARE_DIR/env/bin/python \
+                -m autora.workflow \
+                components.initial_state \
+                --out-path "$CYLC_WORKFLOW_SHARE_DIR/$CYLC_TASK_CYCLE_POINT/result.dill" \
+                --debug
             echo "initial_state" > $CYLC_WORKFLOW_SHARE_DIR/$CYLC_TASK_CYCLE_POINT/result.txt
         """
     [[experimentalist]]
         script = """
-            mkdir -p $CYLC_WORKFLOW_SHARE_DIR/$CYLC_TASK_CYCLE_POINT
+            $CYLC_WORKFLOW_SHARE_DIR/env/bin/python -m autora.workflow \
+                components.experimentalist \
+                --in-path "$CYLC_WORKFLOW_SHARE_DIR/$((CYLC_TASK_CYCLE_POINT - 1))/result.dill" \
+                --out-path "$CYLC_WORKFLOW_SHARE_DIR/$CYLC_TASK_CYCLE_POINT/conditions.dill" \
+                --debug
             echo "in: $CYLC_WORKFLOW_SHARE_DIR/$((CYLC_TASK_CYCLE_POINT - 1))/result.txt" > \
                 $CYLC_WORKFLOW_SHARE_DIR/$CYLC_TASK_CYCLE_POINT/conditions.txt
         """
     [[experiment_runner]]
         script = """
-            mkdir -p $CYLC_WORKFLOW_SHARE_DIR/$CYLC_TASK_CYCLE_POINT
+            $CYLC_WORKFLOW_SHARE_DIR/env/bin/python -m autora.workflow \
+                components.experiment_runner \
+                --in-path "$CYLC_WORKFLOW_SHARE_DIR/$CYLC_TASK_CYCLE_POINT/conditions.dill" \
+                --out-path "$CYLC_WORKFLOW_SHARE_DIR/$CYLC_TASK_CYCLE_POINT/data.dill" \
+                --debug
             echo "in: $CYLC_WORKFLOW_SHARE_DIR/$CYLC_TASK_CYCLE_POINT/conditions.txt" > \
                 $CYLC_WORKFLOW_SHARE_DIR/$CYLC_TASK_CYCLE_POINT/data.txt
         """
     [[theorist]]
         script = """
-            mkdir -p $CYLC_WORKFLOW_SHARE_DIR/$CYLC_TASK_CYCLE_POINT
+            $CYLC_WORKFLOW_SHARE_DIR/env/bin/python -m autora.workflow \
+                components.theorist \
+                --in-path "$CYLC_WORKFLOW_SHARE_DIR/$CYLC_TASK_CYCLE_POINT/data.dill" \
+                --out-path "$CYLC_WORKFLOW_SHARE_DIR/$CYLC_TASK_CYCLE_POINT/result.dill" \
+                --debug
             echo "in: $CYLC_WORKFLOW_SHARE_DIR/$CYLC_TASK_CYCLE_POINT/data.txt" > \
                 $CYLC_WORKFLOW_SHARE_DIR/$CYLC_TASK_CYCLE_POINT/result.txt
         """

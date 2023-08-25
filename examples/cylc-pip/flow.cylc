@@ -28,7 +28,6 @@
                 components.initial_state \
                 --out-path "$CYLC_WORKFLOW_SHARE_DIR/$CYLC_TASK_CYCLE_POINT/result.dill" \
                 --debug
-            echo "initial_state" > $CYLC_WORKFLOW_SHARE_DIR/$CYLC_TASK_CYCLE_POINT/result.txt
         """
     [[experimentalist]]
         script = """
@@ -37,8 +36,6 @@
                 --in-path "$CYLC_WORKFLOW_SHARE_DIR/$((CYLC_TASK_CYCLE_POINT - 1))/result.dill" \
                 --out-path "$CYLC_WORKFLOW_SHARE_DIR/$CYLC_TASK_CYCLE_POINT/conditions.dill" \
                 --debug
-            echo "in: $CYLC_WORKFLOW_SHARE_DIR/$((CYLC_TASK_CYCLE_POINT - 1))/result.txt" > \
-                $CYLC_WORKFLOW_SHARE_DIR/$CYLC_TASK_CYCLE_POINT/conditions.txt
         """
     [[experiment_runner]]
         script = """
@@ -47,8 +44,6 @@
                 --in-path "$CYLC_WORKFLOW_SHARE_DIR/$CYLC_TASK_CYCLE_POINT/conditions.dill" \
                 --out-path "$CYLC_WORKFLOW_SHARE_DIR/$CYLC_TASK_CYCLE_POINT/data.dill" \
                 --debug
-            echo "in: $CYLC_WORKFLOW_SHARE_DIR/$CYLC_TASK_CYCLE_POINT/conditions.txt" > \
-                $CYLC_WORKFLOW_SHARE_DIR/$CYLC_TASK_CYCLE_POINT/data.txt
         """
     [[theorist]]
         script = """
@@ -57,8 +52,6 @@
                 --in-path "$CYLC_WORKFLOW_SHARE_DIR/$CYLC_TASK_CYCLE_POINT/data.dill" \
                 --out-path "$CYLC_WORKFLOW_SHARE_DIR/$CYLC_TASK_CYCLE_POINT/result.dill" \
                 --debug
-            echo "in: $CYLC_WORKFLOW_SHARE_DIR/$CYLC_TASK_CYCLE_POINT/data.txt" > \
-                $CYLC_WORKFLOW_SHARE_DIR/$CYLC_TASK_CYCLE_POINT/result.txt
         """
 
 

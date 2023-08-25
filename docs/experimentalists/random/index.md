@@ -22,8 +22,10 @@ This means that there are 9 possible combinations for these variables (3x3), fro
 | 3  | (3,4) | (3,5) | X   |
 
 ### Example Code
-```python
-from autora.experimentalist.pooler.random_pooler import random_pool
 
-pool = random_pool([1, 2, 3],[4, 5, 6], n=3)
+```python
+
+from autora.experimentalist.random import random_pool
+
+pool = random_pool([1, 2, 3], [4, 5, 6], num_samples=3)
 ```

@@ -16,11 +16,11 @@ def main(
     fully_qualified_function_name: Annotated[
         str, typer.Argument(help="Function to load")
     ],
-    input_path: Annotated[
+    in_path: Annotated[
         Optional[pathlib.Path],
         typer.Option(help="Path to a .dill file with the initial state"),
     ] = None,
-    output_path: Annotated[
+    out_path: Annotated[
         Optional[pathlib.Path],
         typer.Option(help="Path to output the final state as a .dill file"),
     ] = None,
@@ -28,12 +28,12 @@ def main(
     debug: Annotated[bool, typer.Option(help="Turns on debug logging level.")] = False,
 ):
     _configure_logger(debug, verbose)
-    starting_state = _load_state(input_path)
+    starting_state = _load_state(in_path)
     _logger.info(f"Starting State: {starting_state}")
     function = _load_function(fully_qualified_function_name)
     ending_state = function(starting_state)
     _logger.info(f"Ending State: {ending_state}")
-    _dump_state(ending_state, output_path)
+    _dump_state(ending_state, out_path)
 
     return
 

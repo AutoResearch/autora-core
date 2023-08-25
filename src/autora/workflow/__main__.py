@@ -70,6 +70,7 @@ def _load_function(fully_qualified_function_name: str):
 def _dump_state(state_: State, path: Optional[pathlib.Path]) -> None:
     if path is not None:
         _logger.debug(f"_dump_state: dumping to {path=}")
+        path.parent.mkdir(parents=True, exist_ok=True)
         with open(path, "wb") as f:
             dill.dump(state_, f)
     else:

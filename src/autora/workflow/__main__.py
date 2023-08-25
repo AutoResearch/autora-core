@@ -25,7 +25,7 @@ def main(
     verbose: Annotated[bool, typer.Option(help="Turns on info logging level.")] = False,
     debug: Annotated[bool, typer.Option(help="Turns on debug logging level.")] = False,
 ):
-    _logger.info("initializing")
+    _logger.info("Initializing")
     _configure_logger(debug, verbose)
 
     starting_state = _load_state(input_path)
@@ -40,7 +40,7 @@ def main(
 
     _logger.info(f"Ending State: {ending_state}")
 
-    _logger.info("writing out results")
+    _logger.info("Writing out results")
     _dump_state(ending_state, output_path)
 
     return

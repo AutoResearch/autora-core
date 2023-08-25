@@ -22,6 +22,7 @@
             pip install -r "$CYLC_WORKFLOW_RUN_DIR/requirements.txt"
         """
         platform = oscar
+        execution time limit = PT20M
 
     [[initial_state]]
     script = """
@@ -62,3 +63,7 @@
                 --debug
         """
         platform = oscar
+        execution time limit = PT1H
+        [[[directives]]]
+            --partition = gpu
+            --gres = gpu:1

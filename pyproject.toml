@@ -29,7 +29,8 @@ docs = [
     "autora-core[docs]==4.0.0b2"
 ]
 test = [
-    "autora-core[test]==4.0.0b2"
+    "autora-core[test]==4.0.0b2",
+    "hypothesis"
 ]
 cylc = [
     "cylc-flow",

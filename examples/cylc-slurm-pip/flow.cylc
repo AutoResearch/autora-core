@@ -1,59 +1,64 @@
 [scheduling]
     cycling mode = integer
-    initial cycle point = 1
-    final cycle point = 3
+    initial cycle point = 0
+    final cycle point = 5
     [[graph]]
-        R1 = """
-        setup_python => initialize_controller => experimentalist
+        R1/0 = """
+        setup_python => initial_state
         """
-        P1 = """
-            experimentalist => experiment_runner => theorist
-            theorist[-P1] => experimentalist
+        R1/1 = """
+            initial_state[^] => experimentalist => experiment_runner => theorist
+        """
+        2/P1 = """
+            theorist[-P1] => experimentalist => experiment_runner => theorist
         """
 
 [runtime]
     [[setup_python]]
         script = """
-            virtualenv "$CYLC_WORKFLOW_SHARE_DIR/env" -p python3.9
+            virtualenv "$CYLC_WORKFLOW_SHARE_DIR/env" -p python
             source "$CYLC_WORKFLOW_SHARE_DIR/env/bin/activate"
             pip install --upgrade pip
             pip install -r "$CYLC_WORKFLOW_RUN_DIR/requirements.txt"
         """
         platform = oscar
-    
-    [[initialize_controller]]
-        script = """
+
+    [[initial_state]]
+    script = """
             $CYLC_WORKFLOW_SHARE_DIR/env/bin/python \
-                -m dump_initial_controller \
-                "$CYLC_WORKFLOW_SHARE_DIR/controller.dill"
+                -m autora.workflow \
+                components.initial_state \
+                --out-path "$CYLC_WORKFLOW_SHARE_DIR/$CYLC_TASK_CYCLE_POINT/result.dill" \
+                --debug
         """
         platform = oscar
-    
+
     [[experimentalist]]
         script = """
             $CYLC_WORKFLOW_SHARE_DIR/env/bin/python -m autora.workflow \
-                "$CYLC_WORKFLOW_SHARE_DIR/controller.dill" \
-                "$CYLC_WORKFLOW_SHARE_DIR/controller.dill" \
-                experimentalist
+                components.experimentalist \
+                --in-path "$CYLC_WORKFLOW_SHARE_DIR/$((CYLC_TASK_CYCLE_POINT - 1))/result.dill" \
+                --out-path "$CYLC_WORKFLOW_SHARE_DIR/$CYLC_TASK_CYCLE_POINT/conditions.dill" \
+                --debug
         """
         platform = oscar
-    
+
     [[experiment_runner]]
         script = """
             $CYLC_WORKFLOW_SHARE_DIR/env/bin/python -m autora.workflow \
-                "$CYLC_WORKFLOW_SHARE_DIR/controller.dill" \
-                "$CYLC_WORKFLOW_SHARE_DIR/controller.dill" \
-                experiment_runner
+                components.experiment_runner \
+                --in-path "$CYLC_WORKFLOW_SHARE_DIR/$CYLC_TASK_CYCLE_POINT/conditions.dill" \
+                --out-path "$CYLC_WORKFLOW_SHARE_DIR/$CYLC_TASK_CYCLE_POINT/data.dill" \
+                --debug
         """
         platform = oscar
-    
+
     [[theorist]]
         script = """
             $CYLC_WORKFLOW_SHARE_DIR/env/bin/python -m autora.workflow \
-                "$CYLC_WORKFLOW_SHARE_DIR/controller.dill" \
-                "$CYLC_WORKFLOW_SHARE_DIR/controller.dill" \
-                theorist
+                components.theorist \
+                --in-path "$CYLC_WORKFLOW_SHARE_DIR/$CYLC_TASK_CYCLE_POINT/data.dill" \
+                --out-path "$CYLC_WORKFLOW_SHARE_DIR/$CYLC_TASK_CYCLE_POINT/result.dill" \
+                --debug
         """
         platform = oscar
-
-

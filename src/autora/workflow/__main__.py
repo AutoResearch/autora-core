@@ -4,6 +4,7 @@ import pathlib
 
 import dill
 import typer
+from typing_extensions import Annotated
 
 from autora.state import State
 
@@ -11,18 +12,18 @@ _logger = logging.getLogger(__name__)
 
 
 def main(
-    fully_qualified_function_name: str = typer.Argument(
-        ...,
-        help="Function to load",
-    ),
-    input_path: pathlib.Path = typer.Argument(
-        None, help="Path to a .dill file with the initial state"
-    ),
-    output_path: pathlib.Path = typer.Argument(
-        ..., help="Path to output the final state as a .dill file"
-    ),
-    verbose: bool = typer.Option(False, help="Turns on info logging level."),
-    debug: bool = typer.Option(False, help="Turns on debug logging level."),
+    fully_qualified_function_name: Annotated[
+        str, typer.Argument(help="Function to load")
+    ],
+    input_path: Annotated[
+        pathlib.Path, typer.Argument(help="Path to a .dill file with the initial state")
+    ],
+    output_path: Annotated[
+        pathlib.Path,
+        typer.Argument(help="Path to output the final state as a .dill file"),
+    ],
+    verbose: Annotated[bool, typer.Option(help="Turns on info logging level.")] = False,
+    debug: Annotated[bool, typer.Option(help="Turns on debug logging level.")] = False,
 ):
     _logger.info("initializing")
     _configure_logger(debug, verbose)

@@ -2,12 +2,8 @@ import pandas as pd
 from sklearn.linear_model import LinearRegression
 
 from autora.experimentalist.grid import grid_pool
-from autora.state import StandardState, State, on_state, state_fn_from_estimator
+from autora.state import StandardState, on_state, state_fn_from_estimator
 from autora.variable import Variable, VariableCollection
-
-
-def no_op(state: State):
-    return state
 
 
 def initial_state(_):

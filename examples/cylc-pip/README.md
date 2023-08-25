@@ -9,7 +9,7 @@ This example requires:
 - familiarity with and a working installation of `cylc` (e.g. by going through the
   [tutorial](https://cylc.github.io/cylc-doc/latest/html/tutorial/index.html))
 - `virtualenv`
-- `python3.10` (so you can run `virtualenv venv -p python3.10`)
+- `python3.8` (so you can run `virtualenv venv -p python3.8`)
 
 A new environment will be created during the setup phase of the `cylc` workflow run.
 
@@ -17,15 +17,8 @@ A new environment will be created during the setup phase of the `cylc` workflow 
 
 To initialize the workflow, we define a file in the`lib/python` directory 
 [(a cylc convention)](https://cylc.github.io/cylc-doc/stable/html/user-guide/writing-workflows/configuration.html#workflow-configuration-directories) with the code for the experiment: 
-[`lib/python/controller_setup.py`](./lib/python/controller_setup.py)
-
-The first step in the workflow will be to:
-- load the controller from the file
-- save its state to a `.dill` file in the share directory.
-
-This is done with the file [`lib/python/dump_initial_controller.py`](./lib/python/dump_initial_controller.py).
-
-The [`flow.cylc`](./flow.cylc) file defines the workflow.
+[`lib/python/components.py`](./lib/python/controller_setup.py), including all the required functions. These 
+functions will be called in turn by the `autora.workflow.__main__` script.
 
 ## Execution
 
@@ -60,34 +53,19 @@ cylc tui "with-cylc-pip"
 
 ## Results
 
-We can load and interrogate the resulting object as follows:
+We can load and interrogate the results as follows:
 
 ```python
 import os
 import dill
-import numpy as np
-from matplotlib import pyplot as plt
 
-from controller_setup import experiment_runner as ground_truth, noise_std
+from autora.state import State
 
-def plot_results(controller_):
-    last_model = controller_.state.filter_by(kind={"MODEL"}).history[-1].data
+def show_results(s: State):
+    print(s)
 
-    x = np.linspace(-10, 10, 100).reshape((-1, 1))
+with open(os.path.expanduser("~/cylc-run/cylc-pip/runN/share/controller.dill"),"rb") as file:
+    state = dill.load(file)
 
-    plt.plot(x, last_model.predict(x), label="model")
-
-    plt.plot(x, ground_truth(x, noise_std_=0.), label="ground_truth", c="orange")
-    plt.fill_between(x.flatten(), ground_truth(x, noise_std_=0.).flatten() + noise_std, ground_truth(x, noise_std_=0.).flatten() - noise_std,
-                     alpha=0.3, color="orange")
-
-    for i, observation in enumerate(controller_.state.filter_by(kind={"OBSERVATION"}).history):
-        xi, yi = observation.data[:,0], observation.data[:,1]
-        plt.scatter(xi, yi, label=f"observation {i=}")
-    plt.legend()
-
-with open(os.path.expanduser("~/cylc-run/with-cylc-pip/runN/share/controller.dill"),"rb") as file:
-    controller_result = dill.load(file)
-
-plot_results(controller_result)
+show_results(state)
 ```

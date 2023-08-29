@@ -597,7 +597,8 @@ def _extend_delta(a, b):
     Implementation of `_extend` to support Delta
 
     Examples:
-        >>> _extend(Delta(conditions=[1,2]), Delta(condition=[3,4])))
+        >>> _extend(Delta(conditions=[1,2]), Delta(conditions=[3,4]))
+        {'conditions': [1, 2, 3, 4]}
     """
     res = copy.deepcopy(a)
     for key in b:
@@ -605,7 +606,7 @@ def _extend_delta(a, b):
             res[key] = _extend(a[key], b[key])
         else:
             res[key] = b[key]
-    return res
+    return Delta(res)
 
 
 def _append(a: List[T], b: T) -> List[T]:

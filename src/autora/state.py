@@ -12,15 +12,16 @@ from enum import Enum
 from functools import singledispatch, wraps
 from typing import (
     Callable,
+    Dict,
     Generic,
     List,
     Mapping,
     Optional,
     Protocol,
     Sequence,
+    Tuple,
     TypeVar,
     Union,
-    Dict
 )
 
 import numpy as np
@@ -1384,8 +1385,9 @@ def experiment_runner_on_state(f: Callable[[X], XY]) -> StateFunction:
     return experiment_runner
 
 
-def combined_functions_on_state(functions: list[(str, Callable)],
-                                output: Optional[Sequence[str]] = None):
+def combined_functions_on_state(
+    functions: List[Tuple[str, Callable]], output: Optional[Sequence[str]] = None
+):
     """
     Decorator (factory) to make target list of `functions` into a function on a `State`.
     The resulting function uses a state field as input and combines the outputs of the
@@ -1438,7 +1440,7 @@ def combined_functions_on_state(functions: list[(str, Callable)],
 
     def f_(_state: State, params: Optional[Dict] = None):
         result_delta = None
-        for (name, function) in functions:
+        for name, function in functions:
             _f_input_from_state = inputs_from_state(function)
             if params is None:
                 _params = {}

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import copy
 import inspect
 import logging
 import warnings
@@ -11,12 +12,14 @@ from enum import Enum
 from functools import singledispatch, wraps
 from typing import (
     Callable,
+    Dict,
     Generic,
     List,
     Mapping,
     Optional,
     Protocol,
     Sequence,
+    Tuple,
     TypeVar,
     Union,
 )
@@ -586,6 +589,24 @@ def _extend_dict(a, b):
         {'a': 'cats', 'b': 'dogs'}
     """
     return dict(a, **b)
+
+
+@_extend.register(Delta)
+def _extend_delta(a, b):
+    """
+    Implementation of `_extend` to support Delta
+
+    Examples:
+        >>> _extend(Delta(conditions=[1,2]), Delta(conditions=[3,4]))
+        {'conditions': [1, 2, 3, 4]}
+    """
+    res = copy.deepcopy(a)
+    for key in b:
+        if key in a:
+            res[key] = _extend(a[key], b[key])
+        else:
+            res[key] = b[key]
+    return Delta(res)
 
 
 def _append(a: List[T], b: T) -> List[T]:
@@ -1363,3 +1384,77 @@ def experiment_runner_on_state(f: Callable[[X], XY]) -> StateFunction:
         return Delta(experiment_data=experiment_data)
 
     return experiment_runner
+
+
+def combined_functions_on_state(
+    functions: List[Tuple[str, Callable]], output: Optional[Sequence[str]] = None
+):
+    """
+    Decorator (factory) to make target list of `functions` into a function on a `State`.
+    The resulting function uses a state field as input and combines the outputs of the
+    `functions`.
+
+    Args:
+        function: the list of functions to be wrapped
+        output: list specifying State field names for the return values of `function`
+
+    Examples:
+        >>> @dataclass(frozen=True)
+        ... class U(State):
+        ...     conditions: List[int] = field(metadata={"delta": "replace"})
+        >>> identity = lambda conditions : conditions
+        >>> double_conditions = combined_functions_on_state(
+        ...     [('id_1', identity), ('id_2', identity)], output=['conditions'])
+        >>> s = U([1, 2])
+        >>> s_double = double_conditions(s)
+        >>> s
+        U(conditions=[1, 2])
+        >>> s_double
+        U(conditions=[1, 2, 1, 2])
+
+        # We can also pass parameters to the functions:
+        >>> def multiply(conditions, multiplier):
+        ...     return [el * multiplier for el in conditions]
+        >>> double_and_triple = combined_functions_on_state(
+        ...     [('doubler', multiply), ('tripler', multiply)], output=['conditions']
+        ... )
+        >>> s = U([1, 2])
+        >>> s_double_triple = double_and_triple(
+        ...     s, params={'doubler': {'multiplier': 2}, 'tripler': {'multiplier': 3}}
+        ... )
+        >>> s_double_triple
+        U(conditions=[2, 4, 3, 6])
+
+        # If the functions return a Delta object, we don't need to provide an output argument
+        >>> def decrement(conditions, dec):
+        ...     return Delta(conditions=[el-dec for el in conditions])
+        >>> def increment(conditions, inc):
+        ...     return Delta(conditions=[el+inc for el in conditions])
+        >>> dec_and_inc = combined_functions_on_state(
+        ...     [('decrement', decrement), ('increment', increment)])
+        >>> s_dec_and_inc = dec_and_inc(
+        ...     s, params={'decrement': {'dec': 10}, 'increment': {'inc': 2}})
+        >>> s_dec_and_inc
+        U(conditions=[-9, -8, 3, 4])
+
+    """
+
+    def f_(_state: State, params: Optional[Dict] = None):
+        result_delta = None
+        for name, function in functions:
+            _f_input_from_state = inputs_from_state(function)
+            if params is None:
+                _params = {}
+            else:
+                _params = params
+            if name in _params.keys():
+                _delta = _f_input_from_state(_state, **_params[name])
+            else:
+                _delta = _f_input_from_state(_state)
+            result_delta = _extend(result_delta, _delta)
+        return result_delta
+
+    if output:
+        f_ = outputs_to_delta(*output)(f_)
+    f_ = delta_to_state(f_)
+    return f_

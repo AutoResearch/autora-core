@@ -1425,7 +1425,7 @@ def combined_functions_on_state(
         >>> s_double_triple
         U(conditions=[2, 4, 3, 6])
 
-        # If the functions return a Delta object, we don't need to provide an outpur argument
+        # If the functions return a Delta object, we don't need to provide an output argument
         >>> def decrement(conditions, dec):
         ...     return Delta(conditions=[el-dec for el in conditions])
         >>> def increment(conditions, inc):

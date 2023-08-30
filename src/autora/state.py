@@ -1430,7 +1430,7 @@ def combined_functions_on_state(
         ...     return Delta(conditions=[el-dec for el in conditions])
         >>> def increment(conditions, inc):
         ...     return Delta(conditions=[el+inc for el in conditions])
-        >>> dec_and_ind = combined_functions_on_state(
+        >>> dec_and_inc = combined_functions_on_state(
         ...     [('decrement', decrement), ('increment', increment)])
         >>> s_dec_and_inc = dec_and_ind(
         ...     s, params={'decrement': {'dec': 10}, 'increment': {'inc': 2}})

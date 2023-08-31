@@ -49,7 +49,7 @@ class StateDict(UserDict):
     def __init__(self, data: Optional[Dict] = None):
         super().__init__(data)
 
-    def add_field(self, name, default=None, delta="replace", aliases=None):
+    def add_field(self, name, delta="replace", default=None, aliases=None):
         self.data[name] = default
         if "_metadata" not in self.data.keys():
             self.data["_metadata"] = {}

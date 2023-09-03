@@ -869,7 +869,6 @@ def inputs_from_state(f, input_mapping: Dict = {}):
     """
     # Get the set of parameter names from function f's signature
 
-
     reversed_mapping = {v: k for k, v in input_mapping.items()}
 
     parameters_ = set(inspect.signature(f).parameters.keys())
@@ -1181,7 +1180,9 @@ def delta_to_state(f):
 
 
 def on_state(
-    function: Optional[Callable] = None, input_mapping: Dict = {} ,output: Optional[Sequence[str]] = None
+    function: Optional[Callable] = None,
+    input_mapping: Dict = {},
+    output: Optional[Sequence[str]] = None,
 ):
     """Decorator (factory) to make target `function` into a function on a `State` and `**kwargs`.
 

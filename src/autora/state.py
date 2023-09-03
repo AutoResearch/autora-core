@@ -45,8 +45,95 @@ class DeltaAddable(Protocol[C]):
 S = TypeVar("S", bound=DeltaAddable)
 
 
+class StateDict(UserDict):
+    def __init__(self, data: Optional[Dict] = None):
+        super().__init__(data)
+
+    def add_field(self, name, delta="replace", default=None, aliases=None):
+        self.data[name] = default
+        if "_metadata" not in self.data.keys():
+            self.data["_metadata"] = {}
+        self.data["_metadata"][name] = {}
+        self.data["_metadata"][name]["default"] = default
+        self.data["_metadata"][name]["delta"] = delta
+        self.data["_metadata"][name]["aliases"] = aliases
+
+    def set_delta(self, name, delta):
+        if "_metadata" not in self.data.keys():
+            self.data["_metadata"] = {}
+        if name not in self.data["_metadata"].keys():
+            self.data["_metadata"][name] = {}
+            self.data["_metadata"][name]["default"] = None
+            self.data["_metadata"][name]["aliases"] = None
+        self.data["_metadata"][name]["delta"] = delta
+
+    def __setitem__(self, key, value):
+        if key != "_metadata" and (
+            "_metadata" not in self.data.keys()
+            or key not in self.data["_metadata"].keys()
+        ):
+            warnings.warn(
+                f"Adding field {key} without metadata. Using defaults."
+                "Use add_field to safely initialize a field"
+            )
+            self.add_field(key)
+        super().__setitem__(key, value)
+
+    def __getattr__(self, key):
+        if key in self.data:
+            return self.data[key]
+        raise AttributeError(f"'StateDict' object has no attribute '{key}'")
+
+    def __add__(self, other: Union[Delta, Mapping]):
+        updates = dict()
+        other_fields_unused = list(other.keys())
+        for self_key in self.data:  # Access the data dictionary within UserDict
+            other_value = other[self_key] if self_key in other else None
+            if other_value is None:
+                continue
+            other_fields_unused.remove(self_key)
+
+            self_field_key = self_key
+            self_value = self.data[
+                self_field_key
+            ]  # Access the value from the data dictionary
+            delta_behavior = self.data["_metadata"][self_field_key]["delta"]
+
+            if (
+                constructor := self.data["_metadata"][self_field_key].get(
+                    "converter", None
+                )
+            ) is not None:
+                coerced_other_value = constructor(other_value)
+            else:
+                coerced_other_value = other_value
+
+            if delta_behavior == "extend":
+                extended_value = _extend(self_value, coerced_other_value)
+                updates[self_field_key] = extended_value
+            elif delta_behavior == "append":
+                appended_value = _append(self_value, coerced_other_value)
+                updates[self_field_key] = appended_value
+            elif delta_behavior == "replace":
+                updates[self_field_key] = coerced_other_value
+            else:
+                raise NotImplementedError(
+                    "delta_behaviour=`%s` not implemented" % delta_behavior
+                )
+
+        new_data = self.data.copy()
+        new_data.update(updates)
+        new = self.__class__(
+            new_data
+        )  # Create a new instance of the same class with updated data
+        return new
+
+
+State = StateDict
+
+
 @dataclass(frozen=True)
-class State:
+class StateDataClass:
     """
     Base object for dataclasses which use the Delta mechanism.
 
@@ -57,7 +144,7 @@ class State:
         We define a dataclass where each field (which is going to be delta-ed) has additional
         metadata "delta" which describes its delta behaviour.
         >>> @dataclass(frozen=True)
-        ... class ListState(State):
+        ... class ListState(StateDataClass):
         ...    l: List = field(default_factory=list, metadata={"delta": "extend"})
         ...    m: List = field(default_factory=list, metadata={"delta": "replace"})
 
@@ -99,7 +186,7 @@ class State:
 
         We can also define fields which `append` the last result:
         >>> @dataclass(frozen=True)
-        ... class AppendState(State):
+        ... class AppendState(StateDataClass):
         ...    n: List = field(default_factory=list, metadata={"delta": "append"})
 
         >>> m = AppendState(n=list("ɑβɣ"))
@@ -113,7 +200,7 @@ class State:
         The metadata key "converter" is used to coerce types (inspired by
         [PEP 712](https://peps.python.org/pep-0712/)):
         >>> @dataclass(frozen=True)
-        ... class CoerceStateList(State):
+        ... class CoerceStateList(StateDataClass):
         ...    o: Optional[List] = field(default=None, metadata={"delta": "replace"})
         ...    p: List = field(default_factory=list, metadata={"delta": "replace",
         ...                                                    "converter": list})
@@ -134,7 +221,7 @@ class State:
 
         With a converter, inputs are converted to the type output by the converter:
         >>> @dataclass(frozen=True)
-        ... class CoerceStateDataFrame(State):
+        ... class CoerceStateDataFrame(StateDataClass):
         ...    q: pd.DataFrame = field(default_factory=pd.DataFrame,
         ...                            metadata={"delta": "replace",
         ...                                      "converter": pd.DataFrame})
@@ -183,7 +270,7 @@ class State:
 
         Without a converter:
         >>> @dataclass(frozen=True)
-        ... class CoerceStateDataFrameNoConverter(State):
+        ... class CoerceStateDataFrameNoConverter(StateDataClass):
         ...    r: pd.DataFrame = field(default_factory=pd.DataFrame, metadata={"delta": "replace"})
 
         ... there is no coercion – the object is passed unchanged
@@ -197,7 +284,7 @@ class State:
         A converter can cast from a DataFrame to a np.ndarray (with a single datatype),
         for instance:
         >>> @dataclass(frozen=True)
-        ... class CoerceStateArray(State):
+        ... class CoerceStateArray(StateDataClass):
         ...    r: Optional[np.ndarray] = field(default=None,
         ...                            metadata={"delta": "replace",
         ...                                      "converter": np.asarray})
@@ -211,7 +298,7 @@ class State:
         names.
 
         >>> @dataclass(frozen=True)
-        ... class FieldAliasState(State):
+        ... class FieldAliasState(StateDataClass):
         ...     things: List[str] = field(
         ...     default_factory=list,
         ...     metadata={"delta": "extend",
@@ -442,7 +529,7 @@ def _get_value(f, other: Union[Delta, Mapping]):
     return value, used_key
 
 
-def _get_field_names_and_aliases(s: State):
+def _get_field_names_and_aliases(s: StateDataClass):
     """
     Get a list of field names and their aliases from a State object
 
@@ -454,14 +541,14 @@ def _get_field_names_and_aliases(s: State):
     Examples:
         >>> from dataclasses import field
         >>> @dataclass(frozen=True)
-        ... class SomeState(State):
+        ... class SomeState(StateDataClass):
         ...    l: List = field(default_factory=list)
         ...    m: List = field(default_factory=list)
         >>> _get_field_names_and_aliases(SomeState())
         ['l', 'm']
 
         >>> @dataclass(frozen=True)
-        ... class SomeStateWithAliases(State):
+        ... class SomeStateWithAliases(StateDataClass):
         ...    l: List = field(default_factory=list, metadata={"aliases": {"l1": None, "l2": None}})
         ...    m: List = field(default_factory=list, metadata={"aliases": {"m1": None}})
         >>> _get_field_names_and_aliases(SomeStateWithAliases())
@@ -655,7 +742,7 @@ def inputs_from_state(f):
 
         The `State` it operates on needs to have the metadata described in the state module:
         >>> @dataclass(frozen=True)
-        ... class U(State):
+        ... class U(StateDataClass):
         ...     conditions: List[int] = field(metadata={"delta": "replace"})
 
         We indicate the inputs required by the parameter names.
@@ -692,7 +779,7 @@ def inputs_from_state(f):
         ...     return model
 
         >>> @dataclass(frozen=True)
-        ... class V(State):
+        ... class V(StateDataClass):
         ...     variables: VariableCollection  # field(metadata={"delta":... }) omitted ∴ immutable
         ...     experiment_data: pd.DataFrame = field(metadata={"delta": "extend"})
         ...     model: Optional[BaseEstimator] = field(metadata={"delta": "replace"}, default=None)
@@ -762,9 +849,13 @@ def inputs_from_state(f):
     def _f(state_: S, /, **kwargs) -> S:
         # Get the parameters needed which are available from the state_.
         # All others must be provided as kwargs or default values on f.
-        assert is_dataclass(state_)
-        from_state = parameters_.intersection({i.name for i in fields(state_)})
-        arguments_from_state = {k: getattr(state_, k) for k in from_state}
+        assert is_dataclass(state_) or isinstance(state_, UserDict)
+        if is_dataclass(state_):
+            from_state = parameters_.intersection({i.name for i in fields(state_)})
+            arguments_from_state = {k: getattr(state_, k) for k in from_state}
+        elif isinstance(state_, UserDict):
+            from_state = parameters_.intersection(set(state_.keys()))
+            arguments_from_state = {k: state_[k] for k in from_state}
         if "state" in parameters_:
             arguments_from_state["state"] = state_
         arguments = dict(arguments_from_state, **kwargs)
@@ -895,7 +986,7 @@ def delta_to_state(f):
 
         The `State` it operates on needs to have the metadata described in the state module:
         >>> @dataclass(frozen=True)
-        ... class U(State):
+        ... class U(StateDataClass):
         ...     conditions: List[int] = field(metadata={"delta": "replace"})
 
         We indicate the inputs required by the parameter names.
@@ -963,7 +1054,7 @@ def delta_to_state(f):
         ...     return Delta(model=new_model)
 
         >>> @dataclass(frozen=True)
-        ... class V(State):
+        ... class V(StateDataClass):
         ...     variables: VariableCollection  # field(metadata={"delta":... }) omitted ∴ immutable
         ...     experiment_data: pd.DataFrame = field(metadata={"delta": "extend"})
         ...     model: Optional[BaseEstimator] = field(metadata={"delta": "replace"}, default=None)
@@ -1062,7 +1153,7 @@ def on_state(
 
         The `State` it operates on needs to have the metadata described in the state module:
         >>> @dataclass(frozen=True)
-        ... class W(State):
+        ... class W(StateDataClass):
         ...     conditions: List[int] = field(metadata={"delta": "replace"})
 
         We indicate the inputs required by the parameter names.
@@ -1118,7 +1209,7 @@ def on_state(
         return decorator(function)
 
 
-StateFunction = Callable[[State], State]
+StateFunction = Callable[[StateDataClass], StateDataClass]
 
 
 class StandardStateVariables(Enum):
@@ -1129,24 +1220,24 @@ class StandardStateVariables(Enum):
 
 
 @dataclass(frozen=True)
-class StandardState(State):
+class StandardStateDataClass(StateDataClass):
     """
     Examples:
         The state can be initialized emtpy
         >>> from autora.variable import VariableCollection, Variable
-        >>> s = StandardState()
+        >>> s = StandardStateDataClass()
         >>> s
-        StandardState(variables=None, conditions=None, experiment_data=None, models=[])
+        StandardStateDataClass(variables=None, conditions=None, experiment_data=None, models=[])
 
         The `variables` can be updated using a `Delta`:
         >>> dv1 = Delta(variables=VariableCollection(independent_variables=[Variable("1")]))
-        >>> s + dv1
-        StandardState(variables=VariableCollection(independent_variables=[Variable(name='1',...)
+        >>> s + dv1 # doctest: +NORMALIZE_WHITESPACE +ELLIPSIS
+        StandardStateDataClass(variables=VariableCollection(independent_variables=[Variable(name='1',...)
 
         ... and are replaced by each `Delta`:
         >>> dv2 = Delta(variables=VariableCollection(independent_variables=[Variable("2")]))
-        >>> s + dv1 + dv2
-        StandardState(variables=VariableCollection(independent_variables=[Variable(name='2',...)
+        >>> s + dv1 + dv2 # doctest: +NORMALIZE_WHITESPACE +ELLIPSIS
+        StandardStateDataClass(variables=VariableCollection(independent_variables=[Variable(name='2',...)
 
         The `conditions` can be updated using a `Delta`:
         >>> dc1 = Delta(conditions=pd.DataFrame({"x": [1, 2, 3]}))
@@ -1181,7 +1272,8 @@ class StandardState(State):
         1  7
 
         Datatypes which are incompatible with a pd.DataFrame will throw an error:
-        >>> s + Delta(conditions="not compatible with pd.DataFrame")
+        >>> s + Delta(conditions="not compatible with pd.DataFrame") \
+# doctest: +NORMALIZE_WHITESPACE +ELLIPSIS
         Traceback (most recent call last):
         ...
         ValueError: ...
@@ -1232,7 +1324,8 @@ class StandardState(State):
         1  2  b
 
         `experiment_data` which are incompatible with a pd.DataFrame will throw an error:
-        >>> s + Delta(experiment_data="not compatible with pd.DataFrame")
+        >>> s + Delta(experiment_data="not compatible with pd.DataFrame") \
+# doctest: +NORMALIZE_WHITESPACE +ELLIPSIS
         Traceback (most recent call last):
         ...
         ValueError: ...
@@ -1293,6 +1386,36 @@ class StandardState(State):
             return None
 
 
+class StandardStateDict(StateDict):
+    def __init__(self, data: Optional[Dict] = None, **kwargs):
+        if data is None:
+            data = {
+                "_metadata": {
+                    "variables": {"default": None, "delta": "replace"},
+                    "conditions": {"default": None, "delta": "replace"},
+                    "experiment_data": {"default": None, "delta": "extend"},
+                    "models": {"default": None, "delta": "extend"},
+                },
+                "variables": None,
+                "conditions": None,
+                "experiment_data": None,
+                "models": None,
+            }
+        super().__init__(data)
+        for key in kwargs:
+            self.data[key] = kwargs[key]
+
+    @property
+    def model(self):
+        """Alias for the last model in the `models`."""
+        try:
+            return self.data["models"][-1]
+        except IndexError:
+            return None
+
+
+StandardState = StandardStateDict
+
 X = TypeVar("X")
 Y = TypeVar("Y")
 XY = TypeVar("XY")
@@ -1310,18 +1433,18 @@ def estimator_on_state(estimator: BaseEstimator) -> StateFunction:
         >>> from sklearn.linear_model import LinearRegression
         >>> state_fn = estimator_on_state(LinearRegression())
 
-        Define the state on which to operate (here an instance of the `StandardState`):
-        >>> from autora.state import StandardState
+        Define the state on which to operate (here an instance of the `StandardStateDataClass`):
+        >>> from autora.state import StandardStateDataClass
         >>> from autora.variable import Variable, VariableCollection
         >>> import pandas as pd
-        >>> s = StandardState(
+        >>> s = StandardStateDataClass(
         ...     variables=VariableCollection(
         ...         independent_variables=[Variable("x")],
         ...         dependent_variables=[Variable("y")]),
         ...     experiment_data=pd.DataFrame({"x": [1,2,3], "y":[3,6,9]})
         ... )
 
-        Run the function, which fits the model and adds the result to the `StandardState`
+        Run the function, which fits the model and adds the result to the `StandardStateDataClass`
         >>> state_fn(s).model.coef_
         array([[3.]])
 
@@ -1335,7 +1458,7 @@ def estimator_on_state(estimator: BaseEstimator) -> StateFunction:
         dvs = [v.name for v in variables.dependent_variables]
         X, y = experiment_data[ivs], experiment_data[dvs]
         new_model = estimator.set_params(**kwargs).fit(X, y)
-        return Delta(model=new_model)
+        return Delta(models=[new_model])
 
     return theorist
 
@@ -1345,9 +1468,9 @@ def experiment_runner_on_state(f: Callable[[X], XY]) -> StateFunction:
     returns both $x$ and $y$ values in a complete dataframe.
 
     Examples:
-        The conditions are some x-values in a StandardState object:
-        >>> from autora.state import StandardState
-        >>> s = StandardState(conditions=pd.DataFrame({"x": [1, 2, 3]}))
+        The conditions are some x-values in a StandardStateDataClass object:
+        >>> from autora.state import StandardStateDataClass
+        >>> s = StandardStateDataClass(conditions=pd.DataFrame({"x": [1, 2, 3]}))
 
         The function can be defined on a DataFrame, allowing the explicit inclusion of
         metadata like column names.
@@ -1368,7 +1491,8 @@ def experiment_runner_on_state(f: Callable[[X], XY]) -> StateFunction:
         ...     return result
 
         With the relevant variables as conditions:
-        >>> t = StandardState(conditions=pd.DataFrame({"x0": [1, 2, 3], "x1": [10, 20, 30]}))
+        >>> t = StandardStateDataClass( \
+conditions=pd.DataFrame({"x0": [1, 2, 3], "x1": [10, 20, 30]}))
         >>> experiment_runner_on_state(xs_to_xy_fn)(t).experiment_data
            x0  x1   y
         0   1  10  11
@@ -1395,12 +1519,12 @@ def combined_functions_on_state(
     `functions`.
 
     Args:
-        function: the list of functions to be wrapped
+        functions: the list of functions to be wrapped
         output: list specifying State field names for the return values of `function`
 
     Examples:
         >>> @dataclass(frozen=True)
-        ... class U(State):
+        ... class U(StateDataClass):
         ...     conditions: List[int] = field(metadata={"delta": "replace"})
         >>> identity = lambda conditions : conditions
         >>> double_conditions = combined_functions_on_state(
@@ -1439,7 +1563,7 @@ def combined_functions_on_state(
 
     """
 
-    def f_(_state: State, params: Optional[Dict] = None):
+    def f_(_state: StateDataClass, params: Optional[Dict] = None):
         result_delta = None
         for name, function in functions:
             _f_input_from_state = inputs_from_state(function)

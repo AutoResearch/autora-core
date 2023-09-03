@@ -732,7 +732,7 @@ def inputs_from_state(f, input_mapping: Dict = {}):
     Args:
         f: a function with arguments that could be fields on a `State`
             and that returns a `Delta`.
-        input:
+        input_mapping: a dict that maps the input arguments of the function to the state fields
 
     Returns: a version of `f` which takes and returns `State` objects.
 
@@ -1181,7 +1181,7 @@ def delta_to_state(f):
 
 
 def on_state(
-    function: Optional[Callable] = None, output: Optional[Sequence[str]] = None
+    function: Optional[Callable] = None, input_mapping: Dict = {} ,output: Optional[Sequence[str]] = None
 ):
     """Decorator (factory) to make target `function` into a function on a `State` and `**kwargs`.
 
@@ -1190,6 +1190,7 @@ def on_state(
     Args:
         function: the function to be wrapped
         output: list specifying State field names for the return values of `function`
+        input_mapping: a dict that maps the keywords of the functions to the state fields
 
     Returns:
 
@@ -1240,13 +1241,26 @@ def on_state(
         >>> add_six(W(conditions=[1, 2, 3, 4]))
         W(conditions=[7, 8, 9, 10])
 
+        You can also declare input to output mopping, if the keyword arguments of the functions
+        don't match the state fields:
+        >>> @on_state(input_mapping={'X': 'conditions'}, output=["conditions"])
+        ... def add_six(X):
+        ...     return [x + 6 for x in X]
+
+        >>> add_six(W(conditions=[1, 2, 3, 4]))
+        W(conditions=[7, 8, 9, 10])
+
+        This also works on the StandardState or other States that are defined as UserDicts:
+        >>> add_six(StandardState(conditions=[1, 2, 3,4])).conditions
+        [7, 8, 9, 10]
+
     """
 
     def decorator(f):
         f_ = f
         if output is not None:
             f_ = outputs_to_delta(*output)(f_)
-        f_ = inputs_from_state(f_)
+        f_ = inputs_from_state(f_, input_mapping)
         f_ = delta_to_state(f_)
         return f_
 

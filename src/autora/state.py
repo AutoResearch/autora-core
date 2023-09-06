@@ -759,7 +759,7 @@ def inputs_from_state(f, input_mapping: Dict = {}):
         >>> experimentalist(U(conditions=[101,102,103,104]))
         [111, 112, 113, 114]
 
-        If our function uses a different keyword argument then the state field, we can use
+        If our function uses a different keyword argument than the state field, we can use
         the input mapping:
         >>> def experimentalist_(X):
         ...     new_conditions = [x + 10 for x in X]

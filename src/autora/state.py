@@ -765,7 +765,7 @@ def inputs_from_state(f, input_mapping: Dict = {}):
         ...     new_conditions = [x + 10 for x in X]
         ...     return new_conditions
         >>> experimentalist_on_state = inputs_from_state(experimentalist_, {'X': 'conditions'})
-        >>> experimentalist(U(conditions=[1,2,3,4]))
+        >>> experimentalist_on_state(U(conditions=[1,2,3,4]))
         [11, 12, 13, 14]
 
         Both also work with the `State` as UserDict. Here, we use the StandardState

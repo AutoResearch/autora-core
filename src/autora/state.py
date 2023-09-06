@@ -1242,7 +1242,7 @@ def on_state(
         >>> add_six(W(conditions=[1, 2, 3, 4]))
         W(conditions=[7, 8, 9, 10])
 
-        You can also declare input to output mopping, if the keyword arguments of the functions
+        You can also declare an input-to-output mapping if the keyword arguments of the functions
         don't match the state fields:
         >>> @on_state(input_mapping={'X': 'conditions'}, output=["conditions"])
         ... def add_six(X):

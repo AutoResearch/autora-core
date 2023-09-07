@@ -123,7 +123,8 @@ class StateDict(UserDict):
 
         # If the type is already correct, the object is passed to the converter,
         # but should be returned unchanged:
-        >>> (s_coerce + Delta(q=pd.DataFrame([("a",1,"alpha"), ("b",2,"beta")], columns=list("xyz")))).q
+        >>> (s_coerce + Delta(q=pd.DataFrame([("a",1,"alpha"), ("b",2,"beta")],\
+columns=list("xyz")))).q
            x  y      z
         0  a  1  alpha
         1  b  2   beta
@@ -195,12 +196,14 @@ class StateDict(UserDict):
         >>> s_alias.thing
         '2'
 
-        """
+    """
 
     def __init__(self, data: Optional[Dict] = None):
         super().__init__(data)
 
-    def add_field(self, name, delta="replace", default=None, aliases=None, converter=None):
+    def add_field(
+        self, name, delta="replace", default=None, aliases=None, converter=None
+    ):
         self.data[name] = default
         if "_metadata" not in self.data.keys():
             self.data["_metadata"] = {}
@@ -241,16 +244,21 @@ class StateDict(UserDict):
         self.data[f"_alias_getter_{name}"] = lambda: getter(self)
 
     def __setitem__(self, key, value):
-        if key != "_metadata" and not key.startswith("_alias_getter") and (
-            "_metadata" not in self.data.keys()
-            or key not in self.data["_metadata"].keys()
+        if (
+            key != "_metadata"
+            and not key.startswith("_alias_getter")
+            and (
+                "_metadata" not in self.data.keys()
+                or key not in self.data["_metadata"].keys()
+            )
         ):
             self.add_field(key)
         super().__setitem__(key, value)
 
     def __getattr__(self, key):
-        if (f"_alias_getter_{key}" in self.data
-            and isinstance(self.data[f"_alias_getter_{key}"], Callable)):
+        if f"_alias_getter_{key}" in self.data and isinstance(
+            self.data[f"_alias_getter_{key}"], Callable
+        ):
             return self.data[f"_alias_getter_{key}"]()
         if key in self.data:
             return self.data[key]
@@ -260,7 +268,7 @@ class StateDict(UserDict):
         updates = dict()
         other_fields_unused = list(other.keys())
         for self_key in self.data:  # Access the data dictionary within UserDict
-            if self_key == '_metadata' or self_key.startswith('_alias_getter'):
+            if self_key == "_metadata" or self_key.startswith("_alias_getter"):
                 continue
             other_value, other_key = self._get_value(self_key, other)
             if other_value is None:
@@ -273,7 +281,9 @@ class StateDict(UserDict):
             ]  # Access the value from the data dictionary
             delta_behavior = self.data["_metadata"][self_field_key]["delta"]
 
-            if (constructor := self.data["_metadata"][self_field_key]["converter"]) is not None:
+            if (
+                constructor := self.data["_metadata"][self_field_key]["converter"]
+            ) is not None:
                 coerced_other_value = constructor(other_value)
             else:
                 coerced_other_value = other_value
@@ -404,7 +414,7 @@ class StateDict(UserDict):
 
         """
 
-        aliases = self.data['_metadata'][k].get("aliases", {})
+        aliases = self.data["_metadata"][k].get("aliases", {})
 
         value, used_key = None, None
 
@@ -1180,9 +1190,9 @@ def inputs_from_state(f, input_mapping: Dict = {}):
             from_state = parameters_.intersection({i.name for i in fields(state_)})
             arguments_from_state = {k: getattr(state_, k) for k in from_state}
             from_state_input_mapping = {
-                reversed_mapping.get(f.name, f.name): getattr(state_, f.name)
-                for f in fields(state_)
-                if reversed_mapping.get(f.name, f.name) in parameters_
+                reversed_mapping.get(field.name, field.name): getattr(state_, field.name)
+                for field in fields(state_)
+                if reversed_mapping.get(field.name, field.name) in parameters_
             }
             arguments_from_state.update(from_state_input_mapping)
         elif isinstance(state_, UserDict):
@@ -1545,8 +1555,11 @@ def on_state(
 
         This also works on the StandardState or other States that are defined as UserDicts:
         >>> add_six(StandardState(conditions=[1, 2, 3,4])).conditions
-        [7, 8, 9, 10]
-
+            0
+        0   7
+        1   8
+        2   9
+        3  10
     """
 
     def decorator(f):
@@ -1745,10 +1758,10 @@ class StandardStateDict(StateDict):
         if data is None:
             data = {
                 "_metadata": {
-                    "variables": {"default": None, "delta": "replace"},
-                    "conditions": {"default": None, "delta": "replace"},
-                    "experiment_data": {"default": None, "delta": "extend"},
-                    "models": {"default": None, "delta": "extend"},
+                    "variables": {"default": None, "delta": "replace", "converter":VariableCollection},
+                    "conditions": {"default": None, "delta": "replace", "converter":pd.DataFrame},
+                    "experiment_data": {"default": None, "delta": "extend", "converter":pd.DataFrame},
+                    "models": {"default": None, "delta": "extend", "converter":list},
                 },
                 "variables": None,
                 "conditions": None,

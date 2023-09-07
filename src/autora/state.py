@@ -200,7 +200,7 @@ class StateDict(UserDict):
     def __init__(self, data: Optional[Dict] = None):
         super().__init__(data)
 
-    def add_field(self, name, delta="replace", default=None, aliases=None):
+    def add_field(self, name, delta="replace", default=None, aliases=None, converter=None):
         self.data[name] = default
         if "_metadata" not in self.data.keys():
             self.data["_metadata"] = {}
@@ -208,6 +208,7 @@ class StateDict(UserDict):
         self.data["_metadata"][name]["default"] = default
         self.data["_metadata"][name]["delta"] = delta
         self.data["_metadata"][name]["aliases"] = aliases
+        self.data["_metadata"][name]["converter"] = converter
 
     def set_delta(self, name, delta):
         if "_metadata" not in self.data.keys():
@@ -218,19 +219,39 @@ class StateDict(UserDict):
             self.data["_metadata"][name]["aliases"] = None
         self.data["_metadata"][name]["delta"] = delta
 
+    def set_converter(self, name, converter):
+        if "_metadata" not in self.data.keys():
+            self.data["_metadata"] = {}
+        if name not in self.data["_metadata"].keys():
+            self.data["_metadata"][name] = {}
+            self.data["_metadata"][name]["default"] = None
+            self.data["_metadata"][name]["aliases"] = None
+        self.data["_metadata"][name]["converter"] = converter
+
+    def set_alias(self, name, setter, getter):
+        if "_metadata" not in self.data.keys():
+            self.data["_metadata"] = {}
+        if name not in self.data["_metadata"].keys():
+            self.data["_metadata"][name] = {}
+            self.data["_metadata"][name]["default"] = None
+            self.data["_metadata"][name]["aliases"] = setter
+        self.data[f"_alias_getter_{name}"] = lambda: getter(self)
+
+    def set_alias_getter(self, name, getter):
+        self.data[f"_alias_getter_{name}"] = lambda: getter(self)
+
     def __setitem__(self, key, value):
-        if key != "_metadata" and (
+        if key != "_metadata" and not key.startswith("_alias_getter") and (
             "_metadata" not in self.data.keys()
             or key not in self.data["_metadata"].keys()
         ):
-            warnings.warn(
-                f"Adding field {key} without metadata. Using defaults."
-                "Use add_field to safely initialize a field"
-            )
             self.add_field(key)
         super().__setitem__(key, value)
 
     def __getattr__(self, key):
+        if (f"_alias_getter_{key}" in self.data
+            and isinstance(self.data[f"_alias_getter_{key}"], Callable)):
+            return self.data[f"_alias_getter_{key}"]()
         if key in self.data:
             return self.data[key]
         raise AttributeError(f"'StateDict' object has no attribute '{key}'")
@@ -239,10 +260,12 @@ class StateDict(UserDict):
         updates = dict()
         other_fields_unused = list(other.keys())
         for self_key in self.data:  # Access the data dictionary within UserDict
-            other_value = other[self_key] if self_key in other else None
+            if self_key == '_metadata' or self_key.startswith('_alias_getter'):
+                continue
+            other_value, other_key = self._get_value(self_key, other)
             if other_value is None:
                 continue
-            other_fields_unused.remove(self_key)
+            other_fields_unused.remove(other_key)
 
             self_field_key = self_key
             self_value = self.data[
@@ -250,11 +273,7 @@ class StateDict(UserDict):
             ]  # Access the value from the data dictionary
             delta_behavior = self.data["_metadata"][self_field_key]["delta"]
 
-            if (
-                constructor := self.data["_metadata"][self_field_key].get(
-                    "converter", None
-                )
-            ) is not None:
+            if (constructor := self.data["_metadata"][self_field_key]["converter"]) is not None:
                 coerced_other_value = constructor(other_value)
             else:
                 coerced_other_value = other_value
@@ -278,6 +297,128 @@ class StateDict(UserDict):
             new_data
         )  # Create a new instance of the same class with updated data
         return new
+
+    def _get_value(self, k, other: Union[Delta, Mapping]):
+        """
+        Given a `StateDicts`'s `key` k, get a value from `other` and report its name.
+
+        Returns: a tuple (the value, the key associated with that value)
+
+        Examples:
+            >>> s = StateDict()
+            >>> s.add_field('a')
+            >>> s.add_field('b', aliases={"ba": lambda b: [b]})
+            >>> s.add_field('c', aliases={"ca": lambda x: x, "cb": lambda x: [x]})
+
+            For a field with no aliases, we retrieve values with the base name:
+            >>> s._get_value('a', Delta(a=1))
+            (1, 'a')
+
+            ... and only the base name:
+            >>> s._get_value('a', Delta(b=2))  # no match for b
+            (None, None)
+
+            Any other names._get_valueare unimportant:
+            >>> s._get_value('a', Delta(b=2, a=1))
+            (1, 'a')
+
+            For fields with an alias, we retrieve values with the base name:
+            >>> s._get_value('b', Delta(b=[2]))
+            ([2], 'b')
+
+            ... or for the alias name, transformed by the alias lambda function:
+            >>> s._get_value('b', Delta(ba=21))
+            ([21], 'ba')
+
+            We preferentially get the base name, and then any aliases:
+            >>> s._get_value('b', Delta(b=2, ba=21))
+            (2, 'b')
+
+            ... , regardless of their order in the `Delta` object:
+            >>> s._get_value('b', Delta(ba=21, b=2))
+            (2, 'b')
+
+            Other names are ignored:
+            >>> s._get_value('b', Delta(a=1))
+            (None, None)
+
+            and the order of other names is unimportant:
+            >>> s._get_value('b', Delta(a=1, b=2))
+            (2, 'b')
+
+            For fields with multiple aliases, we retrieve values with the base name:
+            >>> s._get_value('c', Delta(c=[3]))
+            ([3], 'c')
+
+            ... for any alias:
+            >>> s._get_value('c', Delta(ca=31))
+            (31, 'ca')
+
+            ... transformed by the alias lambda function :
+            >>> s._get_value('c', Delta(cb=32))
+            ([32], 'cb')
+
+            ... and ignoring any other names:
+            >>> s._get_value('c', Delta(a=1))
+            (None, None)
+
+            ... preferentially in the order base name, 1st alias, 2nd alias, ... nth alias:
+            >>> s._get_value('c', Delta(c=3, ca=31, cb=32))
+            (3, 'c')
+
+            >>> s._get_value('c', Delta(ca=31, cb=32))
+            (31, 'ca')
+
+            >>> s._get_value('c', Delta(cb=32))
+            ([32], 'cb')
+
+            >>> s._get_value('c', Delta())
+            (None, None)
+
+            This works with dict objects:
+            >>> s._get_value('a', dict(a=13))
+            (13, 'a')
+
+            ... with multiple keys:
+            >>> s._get_value('b', dict(a=13, b=24, c=35))
+            (24, 'b')
+
+            ... and with aliases:
+            >>> s._get_value('b', dict(ba=222))
+            ([222], 'ba')
+
+            This works with UserDicts:
+            >>> class MyDelta(UserDict):
+            ...     pass
+
+            >>> s._get_value('a', MyDelta(a=14))
+            (14, 'a')
+
+            ... with multiple keys:
+            >>> s._get_value('b', MyDelta(a=1, b=4, c=9))
+            (4, 'b')
+
+            ... and with aliases:
+            >>> s._get_value('b', MyDelta(ba=234))
+            ([234], 'ba')
+
+        """
+
+        aliases = self.data['_metadata'][k].get("aliases", {})
+
+        value, used_key = None, None
+
+        if k in other.keys():
+            value = other[k]
+            used_key = k
+        elif aliases:  # ... is not an empty dict
+            for alias_key, wrapping_function in aliases.items():
+                if alias_key in other:
+                    value = wrapping_function(other[alias_key])
+                    used_key = alias_key
+                    break  # we only evaluate the first match
+
+        return value, used_key
 
 
 State = StateDict

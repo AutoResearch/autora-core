@@ -1190,7 +1190,9 @@ def inputs_from_state(f, input_mapping: Dict = {}):
             from_state = parameters_.intersection({i.name for i in fields(state_)})
             arguments_from_state = {k: getattr(state_, k) for k in from_state}
             from_state_input_mapping = {
-                reversed_mapping.get(field.name, field.name): getattr(state_, field.name)
+                reversed_mapping.get(field.name, field.name): getattr(
+                    state_, field.name
+                )
                 for field in fields(state_)
                 if reversed_mapping.get(field.name, field.name) in parameters_
             }
@@ -1758,10 +1760,22 @@ class StandardStateDict(StateDict):
         if data is None:
             data = {
                 "_metadata": {
-                    "variables": {"default": None, "delta": "replace", "converter":VariableCollection},
-                    "conditions": {"default": None, "delta": "replace", "converter":pd.DataFrame},
-                    "experiment_data": {"default": None, "delta": "extend", "converter":pd.DataFrame},
-                    "models": {"default": None, "delta": "extend", "converter":list},
+                    "variables": {
+                        "default": None,
+                        "delta": "replace",
+                        "converter": VariableCollection,
+                    },
+                    "conditions": {
+                        "default": None,
+                        "delta": "replace",
+                        "converter": pd.DataFrame,
+                    },
+                    "experiment_data": {
+                        "default": None,
+                        "delta": "extend",
+                        "converter": pd.DataFrame,
+                    },
+                    "models": {"default": None, "delta": "extend", "converter": list},
                 },
                 "variables": None,
                 "conditions": None,

@@ -185,8 +185,9 @@ columns=list("xyz")))).q
         to said callable will be interpreted as the state itself.
         >>> s_alias.set_alias_getter("thing", lambda x: x["things"][-1])
 
-        At this point, you can access both `s.things` and `s.thing` as required by your code. The State only
-        shows `things` in the string representation. It exposes `things` as an attribute:
+        At this point, you can access both `s.things` and `s.thing` as required by your code.
+        The State only shows `things` in the string representation. It exposes `things` as an
+        attribute:
         >>> s_alias.things
         ['1', '2']
 

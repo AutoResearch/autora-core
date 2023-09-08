@@ -47,13 +47,13 @@ S = TypeVar("S", bound=DeltaAddable)
 
 class StateDict(UserDict):
     """
-    Base object for UserDict which use the Delta mechanism.
+    Base object for UserDict which uses the Delta mechanism.
 
     Examples:
         We first define an empty state
         >>> s_0 = StateDict()
 
-        Then we can add different fields with different delta behaviours
+        Then we can add different fields with different Delta behaviours
         >>> s_0.add_field("l", "extend", list("abc"))
         >>> s_0.add_field("m", "replace", list("xyz"))
         >>> s_0.l
@@ -61,17 +61,17 @@ class StateDict(UserDict):
         >>> s_0.m
         ['x', 'y', 'z']
 
-        # we can add deltas to it. 'l' will be extended:
+        We can add Deltas to it. Here, 'l' will be extended:
         >>> s_1 = s_0 + Delta(l=list("def"))
         >>> s_1.l
         ['a', 'b', 'c', 'd', 'e', 'f']
 
-        # ... wheras 'm' will be replaced:
+        ... whereas here, 'm' will be replaced:
         >>> s_2 = s_1 + Delta(m=list("uvw"))
         >>> s_2.m
         ['u', 'v', 'w']
 
-        # ... they can be chained:
+        We can also chain Deltas:
         >>> s_3 = s_2 + Delta(l=list("ghi")) + Delta(m=list("rst"))
         >>> s_3.l
         ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i']
@@ -79,7 +79,7 @@ class StateDict(UserDict):
         >>> s_3.m
         ['r', 's', 't']
 
-        # ... and we can upate multiple fields with one Delta:
+        ... or update multiple fields with one Delta:
         >>> s_4 = s_3 + Delta(l=list("jkl"), m=list("opq"))
         >>> s_4.l
         ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l']
@@ -87,7 +87,7 @@ class StateDict(UserDict):
         >>> s_4.m
         ['o', 'p', 'q']
 
-        # ... if we try to add a non existing field, nothing happens:
+        If we try to add a nonexistent field, nothing happens:
         >>> s_5 = s_4 + Delta(n="not a field")
         >>> 'n' in s_5
         False
@@ -103,8 +103,8 @@ class StateDict(UserDict):
         >>> s_6.n
         ['a', 'b', 'c', 'd']
 
-        # The metadata key "converter" is used to coerce types (inspired by
-        # [PEP 712](https://peps.python.org/pep-0712/)):
+        The metadata key "converter" is used to coerce types (inspired by
+        [PEP 712](https://peps.python.org/pep-0712/)):
         >>> s_coerce = StateDict()
         >>> s_coerce.add_field('o')
         >>> s_coerce.add_field('p', converter=list)
@@ -114,85 +114,83 @@ class StateDict(UserDict):
         >>> (s_coerce + Delta(p='not a list')).p
         ['n', 'o', 't', ' ', 'a', ' ', 'l', 'i', 's', 't']
 
-        # If the input data are of the correct type, they are returned unaltered:
+        If the input data are of the correct type, they are returned unaltered:
         >>> (s_coerce + Delta(p=["a", "list"])).p
         ['a', 'list']
 
-        # With a converter, inputs are converted to the type output by the converter:
+        With a converter, inputs are converted to the type that is output by the converter:
         >>> s_coerce.add_field("q", converter=pd.DataFrame)
 
-        # If the type is already correct, the object is passed to the converter,
-        # but should be returned unchanged:
+        If the type is already correct, the object is passed to the converter,
+        but should be returned unchanged:
         >>> (s_coerce + Delta(q=pd.DataFrame([("a",1,"alpha"), ("b",2,"beta")],\
 columns=list("xyz")))).q
            x  y      z
         0  a  1  alpha
         1  b  2   beta
 
-        # If the type is not correct, the object is converted if possible. For a dataframe,
-        # we can convert records:
+        If the type is not correct, the object is converted if possible. For a DataFrame,
+        we can convert records:
         >>> (s_coerce + Delta(q=[("a",1,"alpha"), ("b",2,"beta")])).q
            0  1      2
         0  a  1  alpha
         1  b  2   beta
 
-        # ... or an array:
+        ... or an array:
         >>> (s_coerce + Delta(q=np.linspace([1, 2], [10, 15], 3))).q
               0     1
         0   1.0   2.0
         1   5.5   8.5
         2  10.0  15.0
 
-        # ... or a dictionary:
+        ... or a dictionary:
         >>> (s_coerce + Delta(q={"a": [1,2,3], "b": [4,5,6]})).q
            a  b
         0  1  4
         1  2  5
         2  3  6
 
-        # ... or a list:
+        ... or a list:
         >>> (s_coerce + Delta(q=[11, 12, 13])).q
             0
         0  11
         1  12
         2  13
 
-        # ... but not, for instance, a string:
+        ... but not, for instance, a string:
         >>> (s_coerce + Delta(q="not compatible with pd.DataFrame")).q
         Traceback (most recent call last):
         ...
         ValueError: DataFrame constructor not properly called!
 
-        # We can define aliases which can transform between different potential field
-        # names.
+        We can define aliases for different potential field names:
         >>> s_alias = StateDict()
         >>> s_alias.add_field("things", "extend", aliases={"thing": lambda m: [m]})
 
 
-        # In the "normal" case, the Delta object is expected to include a list of data in the
-        # correct format which is used to extend the object:
+        In the "normal" case, the Delta object is expected to include a list of data in the
+        format which is used to extend the object:
         >>> s_alias = s_alias + Delta(things=["1", "2"])
         >>> s_alias.things
         ['1', '2']
 
-        # However, say the standard return from a step in AER is a single `thing`, rather than a
-        # sequence of them:
+        However, say the standard return from a step in AER is a single `thing`, rather than a
+        sequence:
         >>> (s_alias + Delta(thing="3")).things
         ['1', '2', '3']
 
-
-        # If a cycle function relies on the existence of the `s.thing` as a property of your state
-        # `s`, rather than accessing `s.things[-1]`, then you could additionally define a `getter`.
-        # If you define such getters, the second argument has to ba a callable and the input
-        # argument of the callable will be interpretade as the state itself.
+        If a cycle function relies on the existence of `s.thing` as a property of your state
+        `s`, rather than accessing `s.things[-1]`, you could additionally define a `getter`.
+        If you define such getters, the second argument must be a callable, in which case the input
+        to said callable will be interpreted as the state itself.
         >>> s_alias.set_alias_getter("thing", lambda x: x["things"][-1])
 
-        # Now you can access both `s.things` and `s.thing` as required by your code. The State only
-        # shows `things` in the string representation and exposes `things` as an attribute:
+        At this point, you can access both `s.things` and `s.thing` as required by your code. The State only
+        shows `things` in the string representation. It exposes `things` as an attribute:
         >>> s_alias.things
         ['1', '2']
 
-        # ... but also exposes `thing`, always returning the last value.
+        ... but also exposes `thing`, which always returns the last value.
         >>> s_alias.thing
         '2'
 
@@ -344,7 +342,7 @@ columns=list("xyz")))).q
             >>> s._get_value('b', Delta(b=2, ba=21))
             (2, 'b')
 
-            ... , regardless of their order in the `Delta` object:
+            ... regardless of their order in the `Delta` object:
             >>> s._get_value('b', Delta(ba=21, b=2))
             (2, 'b')
 

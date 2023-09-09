@@ -26,7 +26,7 @@ cycler==0.11.0
 debugpy==1.6.7.post1
 decorator==5.1.1
 defusedxml==0.7.1
-equation-tree==0.0.10
+equation-tree==0.0.19
 executing==1.2.0
 fastjsonschema==2.18.0
 filelock==3.12.3

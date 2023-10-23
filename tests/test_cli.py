@@ -12,8 +12,8 @@ from sklearn.linear_model import LinearRegression
 from autora.experimentalist.grid import grid_pool
 from autora.state import StandardState, State, estimator_on_state, on_state
 from autora.variable import Variable, VariableCollection
-from autora.workflow.__main__ import _load_state, main
-from autora.workflow.serializer import Supported
+from autora.workflow.__main__ import main
+from autora.workflow.serializer import Supported, _load_state
 
 _logger = logging.getLogger(__name__)
 

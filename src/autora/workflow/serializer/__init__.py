@@ -58,19 +58,19 @@ def _load_state(
     return state_
 
 
-def _dump_state(
+def dump_state(
     state_: State,
     path: Optional[pathlib.Path],
     dumper: Supported = Supported.dill,
 ) -> None:
     if path is not None:
         dump, file_mode = get_serializer_mode(dumper, "dump")
-        _logger.debug(f"_dump_state: dumping to {path=}")
+        _logger.debug(f"dump_state: dumping to {path=}")
         path.parent.mkdir(parents=True, exist_ok=True)
         with open(path, f"w{file_mode}") as f:
             dump(state_, f)
     else:
         dumps, _ = get_serializer_mode(dumper, "dumps")
-        _logger.debug(f"_dump_state: {path=} so writing to stdout")
+        _logger.debug(f"dump_state: {path=} so writing to stdout")
         print(dumps(state_))
     return

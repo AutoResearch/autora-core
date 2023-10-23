@@ -92,6 +92,7 @@ def test_nominal():
 
 
 @given(st.sampled_from(Supported), st.booleans(), st.booleans())
+@settings(verbosity=Verbosity.verbose, deadline=500)
 def test_serializers(serializer, verbose, debug):
     """Test a basic standard chain of CLI calls using a single serializer."""
 

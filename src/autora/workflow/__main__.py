@@ -33,6 +33,21 @@ _serializer_dict: Dict[str, _SerializerDef] = dict(
 )
 
 
+def _get_serializer_mode(
+    serializer: SerializersSupported, interface: Literal["load", "dump", "dumps"]
+) -> Tuple[Callable, str]:
+    serializer_def = _serializer_dict[serializer]
+    module = serializer_def.module
+    interface_function_name = getattr(serializer_def, interface)
+    _logger.debug(
+        f"_get_serializer_mode: loading {interface_function_name=} from" f" {module=}"
+    )
+    module = importlib.import_module(module)
+    function = getattr(module, interface_function_name)
+    file_mode = serializer_def.file_mode
+    return function, file_mode
+
+
 def main(
     fully_qualified_function_name: Annotated[
         str,
@@ -82,21 +97,6 @@ def _configure_logger(debug, verbose):
     if verbose:
         logging.basicConfig(level=logging.INFO)
         _logger.info("using INFO logging level")
-
-
-def _get_serializer_mode(
-    serializer: SerializersSupported, interface: Literal["load", "dump", "dumps"]
-) -> Tuple[Callable, str]:
-    serializer_def = _serializer_dict[serializer]
-    module = serializer_def.module
-    interface_function_name = getattr(serializer_def, interface)
-    _logger.debug(
-        f"_get_serializer_mode: loading {interface_function_name=} from" f" {module=}"
-    )
-    module = importlib.import_module(module)
-    function = getattr(module, interface_function_name)
-    file_mode = serializer_def.file_mode
-    return function, file_mode
 
 
 def load_state(

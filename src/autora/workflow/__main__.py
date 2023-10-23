@@ -14,6 +14,8 @@ _logger = logging.getLogger(__name__)
 
 
 class SerializersSupported(str, Enum):
+    """Listing of allowed serializers."""
+
     dill = "dill"
     pickle = "pickle"
     yaml = "yaml"
@@ -33,7 +35,10 @@ _serializer_dict: Dict[str, _SerializerDef] = dict(
 
 def main(
     fully_qualified_function_name: Annotated[
-        str, typer.Argument(help="Function to load")
+        str,
+        typer.Argument(
+            help="Fully qualified name of the function to load, like `module.function`"
+        ),
     ],
     in_path: Annotated[
         Optional[pathlib.Path],
@@ -42,7 +47,7 @@ def main(
     in_loader: Annotated[
         SerializersSupported,
         typer.Option(
-            help="deserializer to use to load the data",
+            help="(de)serializer to load the data",
         ),
     ] = SerializersSupported.dill,
     out_path: Annotated[
@@ -52,7 +57,7 @@ def main(
     out_dumper: Annotated[
         SerializersSupported,
         typer.Option(
-            help="serializer to use to save the data",
+            help="serializer to save the data",
         ),
     ] = SerializersSupported.dill,
     verbose: Annotated[bool, typer.Option(help="Turns on info logging level.")] = False,

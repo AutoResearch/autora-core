@@ -78,7 +78,9 @@ cylc tui "cylc-pip"
 We can load and interrogate the results as follows:
 
 ```python
-from autora.workflow.__main__ import load_state
+
+from autora.serializer import load_state
+
 state = load_state("~/cylc-run/with-cylc-pip/runN/share/result")
 print(state)
 ```

@@ -62,7 +62,9 @@ cylc gui
 We can load and interrogate the resulting object in Python as follows:
 
 ```python
-from autora.workflow.__main__ import load_state
+
+from autora.serializer import load_state
+
 state = load_state("~/cylc-run/with-cylc-slurm-pip/runN/share/result")
 print(state)
 ```

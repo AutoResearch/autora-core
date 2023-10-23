@@ -28,7 +28,7 @@
     script = """
             $CYLC_WORKFLOW_SHARE_DIR/env/bin/python \
                 -m autora.workflow \
-                components.initial_state \
+                runner.initial_state \
                 --out-path "$CYLC_WORKFLOW_SHARE_DIR/$CYLC_TASK_CYCLE_POINT/result"
         """
         platform = oscar
@@ -36,7 +36,7 @@
     [[experimentalist]]
         script = """
             $CYLC_WORKFLOW_SHARE_DIR/env/bin/python -m autora.workflow \
-                components.experimentalist \
+                runner.experimentalist \
                 --in-path "$CYLC_WORKFLOW_SHARE_DIR/$((CYLC_TASK_CYCLE_POINT - 1))/result" \
                 --out-path "$CYLC_WORKFLOW_SHARE_DIR/$CYLC_TASK_CYCLE_POINT/conditions"
         """
@@ -45,7 +45,7 @@
     [[experiment_runner]]
         script = """
             $CYLC_WORKFLOW_SHARE_DIR/env/bin/python -m autora.workflow \
-                components.experiment_runner \
+                runner.experiment_runner \
                 --in-path "$CYLC_WORKFLOW_SHARE_DIR/$CYLC_TASK_CYCLE_POINT/conditions" \
                 --out-path "$CYLC_WORKFLOW_SHARE_DIR/$CYLC_TASK_CYCLE_POINT/data"
         """
@@ -54,7 +54,7 @@
     [[theorist]]
         script = """
             $CYLC_WORKFLOW_SHARE_DIR/env/bin/python -m autora.workflow \
-                components.theorist \
+                runner.theorist \
                 --in-path "$CYLC_WORKFLOW_SHARE_DIR/$CYLC_TASK_CYCLE_POINT/data" \
                 --out-path "$CYLC_WORKFLOW_SHARE_DIR/$CYLC_TASK_CYCLE_POINT/result"
         """

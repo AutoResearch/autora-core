@@ -27,8 +27,14 @@ For Oscar at Brown University, we can use the following configuration in
 
 To initialize the workflow, we define a file in the`lib/python` directory 
 [(a cylc convention)](https://cylc.github.io/cylc-doc/stable/html/user-guide/writing-workflows/configuration.html#workflow-configuration-directories) with the code for the experiment: 
-[`lib/python/components.py`](./lib/python/controller_setup.py), including all the required functions. These 
-functions will be called in turn by the `autora.workflow.__main__` script.
+[`lib/python/runner.py`](./lib/python/runner.py), including all the required functions. 
+
+```python
+--8<-- "https://raw.githubusercontent.com/AutoResearch/autora-workflow/feat/allow-arbitrary-serializers/docs/cli/with-cylc-slurm-pip/lib/python/runner.py"
+```
+
+
+These functions will be called in turn by the `autora.workflow` script.
 
 The [`flow.cylc`](flow.cylc) file defines the workflow.
 

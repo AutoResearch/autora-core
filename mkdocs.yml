@@ -3,6 +3,9 @@ INHERIT: mkdocs/base.yml  # use the shared AutoRA configuration by default
 
 site_name: AutoRA Workflow
 
+markdown_extensions:
+  pymdownx.snippets: { url_download: True }
+
 nav:
 - Introduction: 'index.md'
 - Object-Oriented Approach:

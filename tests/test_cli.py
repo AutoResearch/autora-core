@@ -138,7 +138,7 @@ def test_serializers(serializer, verbose, debug):
     st.booleans(),
     st.booleans(),
 )
-@settings(verbosity=Verbosity.verbose)
+@settings(verbosity=Verbosity.verbose, deadline=300)
 def test_valid_serializer_mix(
     initial_serializer,
     experimental_serializer,

@@ -57,7 +57,14 @@ def validate_model(state: Optional[State]):
 
 
 def test_nominal():
-    """Test a basic standard chain of CLI calls using the default serializer."""
+    """Test a basic standard chain of CLI calls using the default serializer.
+
+    Equivalent to:
+    $ python -m autora.workflow test_cli.initial_state --out-path start
+    $ python -m autora.workflow test_cli.experimentalist --in-path start --out-path conditions
+    $ python -m autora.workflow test_cli.experiment_runner --in-path conditions --out-path data
+    $ python -m autora.workflow test_cli.theorist --in-path data --out-path theory
+    """
 
     with tempfile.TemporaryDirectory() as d:
         main(

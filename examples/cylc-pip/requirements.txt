@@ -1,4 +1,0 @@
-autora-core>=4.0.0b1
-autora-workflow>=v0.5.0a0
-cylc-flow==8.1.4
-cylc-uiserver==1.2.2

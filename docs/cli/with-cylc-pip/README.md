@@ -23,7 +23,7 @@ To initialize the workflow, we define a file in the`lib/python` directory
 [`lib/python/components.py`](./lib/python/controller_setup.py), including all the required functions. 
 
 ```python
---8<-- "https://raw.githubusercontent.com/AutoResearch/autora-workflow/main/examples/cylc-pip/lib/python/components.py"
+--8<-- "https://raw.githubusercontent.com/AutoResearch/autora-workflow/feat/allow-arbitrary-serializers/docs/cli/with-cylc-pip/lib/python/components.py"
 ```
 
 These functions will be called in turn by the `autora.workflow` script.
@@ -31,14 +31,14 @@ These functions will be called in turn by the `autora.workflow` script.
 The [`flow.cylc`](flow.cylc) file defines the workflow.
 
 ```ini
---8<-- "https://raw.githubusercontent.com/AutoResearch/autora-workflow/main/examples/cylc-pip/flow.cylc"
+--8<-- "https://raw.githubusercontent.com/AutoResearch/autora-workflow/feat/allow-arbitrary-serializers/docs/cli/with-cylc-pip/flow.cylc"
 ```
 
 Note that the first step – `setup_python` – initializes a new virtual environment for python, using the requirements 
 file. In this example, we require the following requirements, but yours will likely be different:
 
 ```ini
---8<-- "https://raw.githubusercontent.com/AutoResearch/autora-workflow/main/examples/cylc-pip/requirements.txt"
+--8<-- "https://raw.githubusercontent.com/AutoResearch/autora-workflow/feat/allow-arbitrary-serializers/docs/cli/with-cylc-pip/requirements.txt"
 ```
 
 

@@ -19,7 +19,7 @@ For Oscar at Brown University, we can use the following configuration in
 [`./global.cylc`](global.cylc)
 
 ```ini
---8<-- "https://raw.githubusercontent.com/AutoResearch/autora-workflow/main/examples/cylc-slurm-pip/global.cylc"
+--8<-- "https://raw.githubusercontent.com/AutoResearch/autora-workflow/feat/allow-arbitrary-serializers/docs/cli/with-cylc-slurm-pip/global.cylc"
 ```
 
 
@@ -33,7 +33,7 @@ functions will be called in turn by the `autora.workflow.__main__` script.
 The [`flow.cylc`](flow.cylc) file defines the workflow.
 
 ```ini
---8<-- "https://raw.githubusercontent.com/AutoResearch/autora-workflow/main/examples/cylc-slurm-pip/flow.cylc"
+--8<-- "https://raw.githubusercontent.com/AutoResearch/autora-workflow/feat/allow-arbitrary-serializers/docs/cli/with-cylc-slurm-pip/flow.cylc"
 ```
 
 

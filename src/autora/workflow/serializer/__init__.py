@@ -1,8 +1,11 @@
 import importlib
 import logging
+import pathlib
 from collections import namedtuple
 from enum import Enum
-from typing import Callable, Dict, Literal, Tuple
+from typing import Callable, Dict, Literal, Optional, Tuple, Union
+
+from autora.state import State
 
 _logger = logging.getLogger(__name__)
 
@@ -38,3 +41,36 @@ def get_serializer_mode(
     function = getattr(module, interface_function_name)
     file_mode = serializer_def.file_mode
     return function, file_mode
+
+
+def _load_state(
+    path: Optional[pathlib.Path],
+    loader: Supported = Supported.dill,
+) -> Union[State, None]:
+    if path is not None:
+        load, file_mode = get_serializer_mode(loader, "load")
+        _logger.debug(f"_load_state: loading from {path=}")
+        with open(path, f"r{file_mode}") as f:
+            state_ = load(f)
+    else:
+        _logger.debug(f"_load_state: {path=} -> returning None")
+        state_ = None
+    return state_
+
+
+def _dump_state(
+    state_: State,
+    path: Optional[pathlib.Path],
+    dumper: Supported = Supported.dill,
+) -> None:
+    if path is not None:
+        dump, file_mode = get_serializer_mode(dumper, "dump")
+        _logger.debug(f"_dump_state: dumping to {path=}")
+        path.parent.mkdir(parents=True, exist_ok=True)
+        with open(path, f"w{file_mode}") as f:
+            dump(state_, f)
+    else:
+        dumps, _ = get_serializer_mode(dumper, "dumps")
+        _logger.debug(f"_dump_state: {path=} so writing to stdout")
+        print(dumps(state_))
+    return

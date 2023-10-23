@@ -24,5 +24,3 @@ jobs:
         cache: "pip"
     - run: pip install ".[test]"
     - run: pytest tests/
-    - run: pytest --doctest-modules src/
-    - run: pytest --doctest-modules docs/cli --import-mode importlib

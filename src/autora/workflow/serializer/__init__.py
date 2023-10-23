@@ -1,9 +1,10 @@
 import importlib
+import logging
 from collections import namedtuple
 from enum import Enum
 from typing import Callable, Dict, Literal, Tuple
 
-from autora.workflow.__main__ import _logger
+_logger = logging.getLogger(__name__)
 
 
 class Supported(str, Enum):
@@ -31,7 +32,7 @@ def get_serializer_mode(
     module = serializer_def.module
     interface_function_name = getattr(serializer_def, interface)
     _logger.debug(
-        f"_get_serializer: loading {interface_function_name=} from" f" {module=}"
+        f"get_serializer_mode: loading {interface_function_name=} from" f" {module=}"
     )
     module = importlib.import_module(module)
     function = getattr(module, interface_function_name)

@@ -37,7 +37,7 @@ def main(
     ],
     in_path: Annotated[
         Optional[pathlib.Path],
-        typer.Option(help="Path to a .dill file with the initial state"),
+        typer.Option(help="Path to a file with the initial state"),
     ] = None,
     in_loader: Annotated[
         SerializersSupported,
@@ -47,7 +47,7 @@ def main(
     ] = SerializersSupported.dill,
     out_path: Annotated[
         Optional[pathlib.Path],
-        typer.Option(help="Path to output the final state as a .dill file"),
+        typer.Option(help="Path to output the final state"),
     ] = None,
     out_dumper: Annotated[
         SerializersSupported,

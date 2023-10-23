@@ -28,7 +28,8 @@ docs = [
 ]
 test = [
     "autora-core[test]>=4.0.0",
-    "hypothesis"
+    "hypothesis",
+    "serializers"
 ]
 cylc = [
     "cylc-flow",

@@ -74,3 +74,12 @@ def dump_state(
         _logger.debug(f"dump_state: {path=} so writing to stdout")
         print(dumps(state_))
     return
+
+
+def _load_function(fully_qualified_function_name: str):
+    _logger.debug(f"_load_function: Loading function {fully_qualified_function_name}")
+    module_name, function_name = fully_qualified_function_name.rsplit(".", 1)
+    module = importlib.import_module(module_name)
+    function = getattr(module, function_name)
+    _logger.debug(f"_load_function: Loaded function {function} from {module}")
+    return function

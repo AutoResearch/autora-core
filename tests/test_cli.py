@@ -12,8 +12,7 @@ from sklearn.linear_model import LinearRegression
 from autora.experimentalist.grid import grid_pool
 from autora.state import StandardState, State, estimator_on_state, on_state
 from autora.variable import Variable, VariableCollection
-from autora.workflow.__main__ import main
-from autora.workflow.serializer import Supported, load_state
+from autora.workflow.__main__ import SerializersSupported, load_state, main
 
 _logger = logging.getLogger(__name__)
 
@@ -91,7 +90,7 @@ def test_nominal():
         validate_model(final_state)
 
 
-@given(st.sampled_from(Supported), st.booleans(), st.booleans())
+@given(st.sampled_from(SerializersSupported), st.booleans(), st.booleans())
 @settings(verbosity=Verbosity.verbose, deadline=500)
 def test_serializers(serializer, verbose, debug):
     """Test a basic standard chain of CLI calls using a single serializer."""
@@ -132,10 +131,10 @@ def test_serializers(serializer, verbose, debug):
 
 
 @given(
-    st.sampled_from(Supported),
-    st.sampled_from(Supported),
-    st.sampled_from(Supported),
-    st.sampled_from(Supported),
+    st.sampled_from(SerializersSupported),
+    st.sampled_from(SerializersSupported),
+    st.sampled_from(SerializersSupported),
+    st.sampled_from(SerializersSupported),
     st.booleans(),
     st.booleans(),
 )

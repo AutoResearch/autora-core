@@ -6,6 +6,11 @@ def dump(data, file):
     return
 
 
+def dumps(data):
+    yaml.dumps(data, Dumper=yaml.Dumper)
+    return
+
+
 def load(file):
     result = yaml.load(file, Loader=yaml.Loader)
     return result

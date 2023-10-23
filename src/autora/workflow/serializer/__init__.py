@@ -43,17 +43,17 @@ def get_serializer_mode(
     return function, file_mode
 
 
-def _load_state(
+def load_state(
     path: Optional[pathlib.Path],
     loader: Supported = Supported.dill,
 ) -> Union[State, None]:
     if path is not None:
         load, file_mode = get_serializer_mode(loader, "load")
-        _logger.debug(f"_load_state: loading from {path=}")
+        _logger.debug(f"load_state: loading from {path=}")
         with open(path, f"r{file_mode}") as f:
             state_ = load(f)
     else:
-        _logger.debug(f"_load_state: {path=} -> returning None")
+        _logger.debug(f"load_state: {path=} -> returning None")
         state_ = None
     return state_
 

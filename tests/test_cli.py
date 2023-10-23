@@ -13,7 +13,7 @@ from autora.experimentalist.grid import grid_pool
 from autora.state import StandardState, State, estimator_on_state, on_state
 from autora.variable import Variable, VariableCollection
 from autora.workflow.__main__ import main
-from autora.workflow.serializer import Supported, _load_state
+from autora.workflow.serializer import Supported, load_state
 
 _logger = logging.getLogger(__name__)
 
@@ -87,7 +87,7 @@ def test_nominal():
             out_path=pathlib.Path(d, "theory"),
         )
 
-        final_state = _load_state(pathlib.Path(d, "theory"))
+        final_state = load_state(pathlib.Path(d, "theory"))
         validate_model(final_state)
 
 
@@ -125,7 +125,7 @@ def test_serializers(serializer, verbose, debug):
             **common_settings
         )
 
-        final_state: StandardState = _load_state(
+        final_state: StandardState = load_state(
             pathlib.Path(d, "theory"), loader=serializer
         )
         validate_model(final_state)
@@ -184,7 +184,7 @@ def test_valid_serializer_mix(
             **common_settings
         )
 
-        final_state: StandardState = _load_state(
+        final_state: StandardState = load_state(
             pathlib.Path(d, "theory"), loader=theorist_serializer
         )
         validate_model(final_state)

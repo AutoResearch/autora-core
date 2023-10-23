@@ -7,7 +7,7 @@ import typer
 from typing_extensions import Annotated
 
 from autora.workflow.serializer import Supported as SerializersSupported
-from autora.workflow.serializer import _load_state, dump_state
+from autora.workflow.serializer import dump_state, load_state
 
 _logger = logging.getLogger(__name__)
 
@@ -41,7 +41,7 @@ def main(
 ):
     """Run an arbitrary function (on an optional State object) and store the output."""
     _configure_logger(debug, verbose)
-    starting_state = _load_state(in_path, in_loader)
+    starting_state = load_state(in_path, in_loader)
     _logger.info(f"Starting State: {starting_state}")
     function = _load_function(fully_qualified_function_name)
     ending_state = function(starting_state)

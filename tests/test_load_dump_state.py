@@ -6,7 +6,7 @@ from hypothesis import Verbosity, given, settings
 from hypothesis import strategies as st
 
 from autora.state import StandardState
-from autora.workflow.serializer import Supported, _load_state, dump_state
+from autora.workflow.serializer import Supported, dump_state, load_state
 
 
 @given(
@@ -20,4 +20,4 @@ def test_load_inverts_dump(s, serializer):
         print(path, s)
 
         dump_state(s, path, dumper=serializer)
-        assert _load_state(path, loader=serializer) == s
+        assert load_state(path, loader=serializer) == s

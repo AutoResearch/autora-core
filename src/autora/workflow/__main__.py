@@ -6,7 +6,7 @@ import typer
 from typing_extensions import Annotated
 
 from autora.workflow.serializer import Supported as SerializersSupported
-from autora.workflow.serializer import _load_function, dump_state, load_state
+from autora.workflow.serializer import dump_state, load_function, load_state
 
 _logger = logging.getLogger(__name__)
 
@@ -42,7 +42,7 @@ def main(
     _configure_logger(debug, verbose)
     starting_state = load_state(in_path, in_loader)
     _logger.info(f"Starting State: {starting_state}")
-    function = _load_function(fully_qualified_function_name)
+    function = load_function(fully_qualified_function_name)
     ending_state = function(starting_state)
     _logger.info(f"Ending State: {ending_state}")
     dump_state(ending_state, out_path, out_dumper)

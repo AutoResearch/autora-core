@@ -20,7 +20,7 @@ A new environment will be created during the setup phase of the `cylc` workflow 
 
 To initialize the workflow, we define a file in the`lib/python` directory 
 [(a cylc convention)](https://cylc.github.io/cylc-doc/stable/html/user-guide/writing-workflows/configuration.html#workflow-configuration-directories) with the code for the experiment: 
-[`lib/python/components.py`](./lib/python/controller_setup.py), including all the required functions. 
+[`lib/python/components.py`](./lib/python/components.py), including all the required functions. 
 
 ```python
 --8<-- "https://raw.githubusercontent.com/AutoResearch/autora-workflow/feat/allow-arbitrary-serializers/docs/cli/with-cylc-pip/lib/python/components.py"

@@ -15,8 +15,6 @@ dependencies = [
     "matplotlib",
     "pandas",
     "typer[all]",
-    "dill",
-    "pyyaml",
 ]
 
 [project.optional-dependencies]
@@ -35,6 +33,10 @@ test = [
 cylc = [
     "cylc-flow",
     "cylc-uiserver"
+]
+serializers = [
+    "dill",
+    "pyyaml"
 ]
 
 [project.urls]

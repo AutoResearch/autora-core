@@ -6,6 +6,10 @@ site_name: AutoRA Workflow
 markdown_extensions:
   pymdownx.snippets: { url_download: True }
 
+theme:
+  features:
+    - content.code.copy
+
 nav:
 - Introduction: 'index.md'
 - Object-Oriented Approach:

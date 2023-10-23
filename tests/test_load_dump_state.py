@@ -6,12 +6,13 @@ from hypothesis import Verbosity, given, settings
 from hypothesis import strategies as st
 
 from autora.state import StandardState
-from autora.workflow.__main__ import _dump_state, _load_state, _Serializer
+from autora.workflow.__main__ import _dump_state, _load_state
+from autora.workflow.serializer import Supported
 
 
 @given(
     st.builds(StandardState, st.text(), st.text(), st.text(), st.lists(st.integers())),
-    st.sampled_from(_Serializer),
+    st.sampled_from(Supported),
 )
 @settings(verbosity=Verbosity.verbose)
 def test_load_inverts_dump(s, serializer):

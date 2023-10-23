@@ -1,34 +1,16 @@
 import importlib
 import logging
 import pathlib
-from collections import namedtuple
-from enum import Enum
-from typing import Callable, Dict, Literal, Optional, Tuple, Union
+from typing import Optional, Union
 
 import typer
 from typing_extensions import Annotated
 
 from autora.state import State
+from autora.workflow.serializer import Supported as SerializersSupported
+from autora.workflow.serializer import get_serializer_mode
 
 _logger = logging.getLogger(__name__)
-
-
-SerializerDef = namedtuple(
-    "SerializerDef", ["module", "load", "dump", "dumps", "file_mode"]
-)
-
-
-serializer_dict: Dict[str, SerializerDef] = dict(
-    pickle=SerializerDef("pickle", "load", "dump", "dumps", "b"),
-    yaml=SerializerDef("autora.workflow.serializer.yaml_", "load", "dump", "dumps", ""),
-    dill=SerializerDef("dill", "load", "dump", "dumps", "b"),
-)
-
-
-class _Serializer(str, Enum):
-    dill = "dill"
-    pickle = "pickle"
-    yaml = "yaml"
 
 
 def main(
@@ -44,17 +26,17 @@ def main(
         typer.Option(help="Path to output the final state as a .dill file"),
     ] = None,
     loader: Annotated[
-        _Serializer,
+        SerializersSupported,
         typer.Option(
             help="deserializer to use to load the data",
         ),
-    ] = _Serializer.dill,
+    ] = SerializersSupported.dill,
     dumper: Annotated[
-        _Serializer,
+        SerializersSupported,
         typer.Option(
             help="serializer to use to save the data",
         ),
-    ] = _Serializer.dill,
+    ] = SerializersSupported.dill,
     verbose: Annotated[bool, typer.Option(help="Turns on info logging level.")] = False,
     debug: Annotated[bool, typer.Option(help="Turns on debug logging level.")] = False,
 ):
@@ -78,26 +60,12 @@ def _configure_logger(debug, verbose):
         _logger.info("using INFO logging level")
 
 
-def _get_serializer_mode(
-    serializer: _Serializer, interface: Literal["load", "dump", "dumps"]
-) -> Tuple[Callable, str]:
-    serializer_def = serializer_dict[serializer]
-    module = serializer_def.module
-    interface_function_name = getattr(serializer_def, interface)
-    _logger.debug(
-        f"_get_serializer: loading {interface_function_name=} from" f" {module=}"
-    )
-    module = importlib.import_module(module)
-    function = getattr(module, interface_function_name)
-    file_mode = serializer_def.file_mode
-    return function, file_mode
-
-
 def _load_state(
-    path: Optional[pathlib.Path], loader: _Serializer = _Serializer.dill
+    path: Optional[pathlib.Path],
+    loader: SerializersSupported = SerializersSupported.dill,
 ) -> Union[State, None]:
     if path is not None:
-        load, file_mode = _get_serializer_mode(loader, "load")
+        load, file_mode = get_serializer_mode(loader, "load")
         _logger.debug(f"_load_state: loading from {path=}")
         with open(path, f"r{file_mode}") as f:
             state_ = load(f)
@@ -119,16 +87,16 @@ def _load_function(fully_qualified_function_name: str):
 def _dump_state(
     state_: State,
     path: Optional[pathlib.Path],
-    dumper: _Serializer = _Serializer.dill,
+    dumper: SerializersSupported = SerializersSupported.dill,
 ) -> None:
     if path is not None:
-        dump, file_mode = _get_serializer_mode(dumper, "dump")
+        dump, file_mode = get_serializer_mode(dumper, "dump")
         _logger.debug(f"_dump_state: dumping to {path=}")
         path.parent.mkdir(parents=True, exist_ok=True)
         with open(path, f"w{file_mode}") as f:
             dump(state_, f)
     else:
-        dumps, _ = _get_serializer_mode(dumper, "dumps")
+        dumps, _ = get_serializer_mode(dumper, "dumps")
         _logger.debug(f"_dump_state: {path=} so writing to stdout")
         print(dumps(state_))
     return

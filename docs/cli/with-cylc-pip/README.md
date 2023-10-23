@@ -1,6 +1,9 @@
-# Usage with Cylc workflow manager and pip
+# Usage with Cylc workflow manager
 
 The command line interface can be used with workflow managers like cylc in virtualenv environments.
+
+!!! note
+    This page covers basic usage of cylc. For usage with Slurm, see [with-cylc-slurm-pip](../with-cylc-slurm-pip) 
 
 ## Prerequisites
 
@@ -17,10 +20,27 @@ A new environment will be created during the setup phase of the `cylc` workflow 
 
 To initialize the workflow, we define a file in the`lib/python` directory 
 [(a cylc convention)](https://cylc.github.io/cylc-doc/stable/html/user-guide/writing-workflows/configuration.html#workflow-configuration-directories) with the code for the experiment: 
-[`lib/python/components.py`](./lib/python/controller_setup.py), including all the required functions. These 
-functions will be called in turn by the `autora.workflow.__main__` script.
+[`lib/python/components.py`](./lib/python/controller_setup.py), including all the required functions. 
 
-The [`flow.cylc`](./flow.cylc) file defines the workflow.
+```python
+--8<-- "https://raw.githubusercontent.com/AutoResearch/autora-workflow/main/examples/cylc-pip/lib/python/components.py"
+```
+
+These functions will be called in turn by the `autora.workflow` script.
+
+The [`flow.cylc`](flow.cylc) file defines the workflow.
+
+```ini
+--8<-- "https://raw.githubusercontent.com/AutoResearch/autora-workflow/main/examples/cylc-pip/flow.cylc"
+```
+
+Note that the first step – `setup_python` – initializes a new virtual environment for python, using the requirements 
+file. In this example, we require the following requirements, but yours will likely be different:
+
+```ini
+--8<-- "https://raw.githubusercontent.com/AutoResearch/autora-workflow/main/examples/cylc-pip/requirements.txt"
+```
+
 
 ## Execution
 
@@ -58,16 +78,7 @@ cylc tui "cylc-pip"
 We can load and interrogate the results as follows:
 
 ```python
-import os
-import dill
-
-from autora.state import State
-
-def show_results(s: State):
-    print(s)
-
-with open(os.path.expanduser("~/cylc-run/cylc-pip/runN/share/controller.dill"),"rb") as file:
-    state = dill.load(file)
-
-show_results(state)
+from autora.workflow.__main__ import load_state
+state = load_state("~/cylc-run/with-cylc-pip/runN/share/result")
+print(state)
 ```

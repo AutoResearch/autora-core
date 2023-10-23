@@ -58,7 +58,7 @@ def main(
     verbose: Annotated[bool, typer.Option(help="Turns on info logging level.")] = False,
     debug: Annotated[bool, typer.Option(help="Turns on debug logging level.")] = False,
 ):
-    """Run an arbitrary function (on an optional State object) and store the output."""
+    """Run an arbitrary function on an optional input State object and save the output."""
     _configure_logger(debug, verbose)
     starting_state = load_state(in_path, in_loader)
     _logger.info(f"Starting State: {starting_state}")
@@ -79,14 +79,14 @@ def _configure_logger(debug, verbose):
         _logger.info("using INFO logging level")
 
 
-def get_serializer_mode(
+def _get_serializer_mode(
     serializer: SerializersSupported, interface: Literal["load", "dump", "dumps"]
 ) -> Tuple[Callable, str]:
     serializer_def = _serializer_dict[serializer]
     module = serializer_def.module
     interface_function_name = getattr(serializer_def, interface)
     _logger.debug(
-        f"get_serializer_mode: loading {interface_function_name=} from" f" {module=}"
+        f"_get_serializer_mode: loading {interface_function_name=} from" f" {module=}"
     )
     module = importlib.import_module(module)
     function = getattr(module, interface_function_name)
@@ -98,8 +98,9 @@ def load_state(
     path: Optional[pathlib.Path],
     loader: SerializersSupported = SerializersSupported.dill,
 ) -> Union[State, None]:
+    """Load a State object from a path."""
     if path is not None:
-        load, file_mode = get_serializer_mode(loader, "load")
+        load, file_mode = _get_serializer_mode(loader, "load")
         _logger.debug(f"load_state: loading from {path=}")
         with open(path, f"r{file_mode}") as f:
             state_ = load(f)
@@ -110,6 +111,7 @@ def load_state(
 
 
 def load_function(fully_qualified_function_name: str):
+    """Load a function by its fully qualified name, `module.function_name`"""
     _logger.debug(f"load_function: Loading function {fully_qualified_function_name}")
     module_name, function_name = fully_qualified_function_name.rsplit(".", 1)
     module = importlib.import_module(module_name)
@@ -123,14 +125,15 @@ def dump_state(
     path: Optional[pathlib.Path],
     dumper: SerializersSupported = SerializersSupported.dill,
 ) -> None:
+    """Write a State object to a path."""
     if path is not None:
-        dump, file_mode = get_serializer_mode(dumper, "dump")
+        dump, file_mode = _get_serializer_mode(dumper, "dump")
         _logger.debug(f"dump_state: dumping to {path=}")
         path.parent.mkdir(parents=True, exist_ok=True)
         with open(path, f"w{file_mode}") as f:
             dump(state_, f)
     else:
-        dumps, _ = get_serializer_mode(dumper, "dumps")
+        dumps, _ = _get_serializer_mode(dumper, "dumps")
         _logger.debug(f"dump_state: {path=} so writing to stdout")
         print(dumps(state_))
     return

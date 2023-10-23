@@ -16,7 +16,7 @@ from autora.workflow.__main__ import SerializersSupported, dump_state, load_stat
 @settings(verbosity=Verbosity.verbose)
 def test_load_inverts_dump(s, serializer):
     with tempfile.TemporaryDirectory() as dir:
-        path = pathlib.Path(dir, f"{str(uuid.uuid4())}.{serializer}")
+        path = pathlib.Path(dir, f"{str(uuid.uuid4())}")
         print(path, s)
 
         dump_state(s, path, dumper=serializer)

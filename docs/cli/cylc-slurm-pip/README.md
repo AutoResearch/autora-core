@@ -19,7 +19,7 @@ For Oscar at Brown University, we can use the following configuration in
 [`./global.cylc`](global.cylc)
 
 ```ini
---8<-- "https://raw.githubusercontent.com/AutoResearch/autora-workflow/feat/allow-arbitrary-serializers/docs/cli/with-cylc-slurm-pip/global.cylc"
+--8<-- "https://raw.githubusercontent.com/AutoResearch/autora-workflow/feat/allow-arbitrary-serializers/docs/cli/cylc-slurm-pip/global.cylc"
 ```
 
 
@@ -30,7 +30,7 @@ To initialize the workflow, we define a file in the`lib/python` directory
 [`lib/python/runner.py`](./lib/python/runner.py), including all the required functions. 
 
 ```python
---8<-- "https://raw.githubusercontent.com/AutoResearch/autora-workflow/feat/allow-arbitrary-serializers/docs/cli/with-cylc-slurm-pip/lib/python/runner.py"
+--8<-- "https://raw.githubusercontent.com/AutoResearch/autora-workflow/feat/allow-arbitrary-serializers/docs/cli/cylc-slurm-pip/lib/python/runner.py"
 ```
 
 
@@ -39,7 +39,7 @@ These functions will be called in turn by the `autora.workflow` script.
 The [`flow.cylc`](flow.cylc) file defines the workflow.
 
 ```ini
---8<-- "https://raw.githubusercontent.com/AutoResearch/autora-workflow/feat/allow-arbitrary-serializers/docs/cli/with-cylc-slurm-pip/flow.cylc"
+--8<-- "https://raw.githubusercontent.com/AutoResearch/autora-workflow/feat/allow-arbitrary-serializers/docs/cli/cylc-slurm-pip/flow.cylc"
 ```
 
 
@@ -65,7 +65,7 @@ We can load and interrogate the resulting object in Python as follows:
 
 from autora.serializer import load_state
 
-state = load_state("~/cylc-run/with-cylc-slurm-pip/runN/share/result")
+state = load_state("~/cylc-run/cylc-slurm-pip/runN/share/result")
 print(state)
 ```
 

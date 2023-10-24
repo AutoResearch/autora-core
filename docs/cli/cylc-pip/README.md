@@ -3,7 +3,7 @@
 The command line interface can be used with workflow managers like cylc in virtualenv environments.
 
 !!! note
-    This page covers basic usage of cylc. For usage with Slurm, see [with-cylc-slurm-pip](../with-cylc-slurm-pip) 
+    This page covers basic usage of cylc. For usage with Slurm, see [cylc-slurm-pip](../cylc-slurm-pip) 
 
 ## Prerequisites
 

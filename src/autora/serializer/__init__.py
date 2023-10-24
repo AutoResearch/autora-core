@@ -13,19 +13,23 @@ _logger = logging.getLogger(__name__)
 class SerializersSupported(str, Enum):
     """Listing of allowed serializers."""
 
-    dill = "dill"
     pickle = "pickle"
+    dill = "dill"
     yaml = "yaml"
 
 
 _SerializerDef = namedtuple(
     "_SerializerDef", ["module", "load", "dump", "dumps", "file_mode"]
 )
-_serializer_dict: Dict[str, _SerializerDef] = dict(
-    pickle=_SerializerDef("pickle", "load", "dump", "dumps", "b"),
-    yaml=_SerializerDef("autora.serializer._yaml", "load", "dump", "dumps", ""),
-    dill=_SerializerDef("dill", "load", "dump", "dumps", "b"),
-)
+_serializer_dict: Dict[SerializersSupported, _SerializerDef] = {
+    SerializersSupported.pickle: _SerializerDef("pickle", "load", "dump", "dumps", "b"),
+    SerializersSupported.yaml: _SerializerDef(
+        "autora.serializer._yaml", "load", "dump", "dumps", ""
+    ),
+    SerializersSupported.dill: _SerializerDef("dill", "load", "dump", "dumps", "b"),
+}
+
+_default_serializer = SerializersSupported.pickle
 
 
 def _get_serializer_mode(
@@ -45,7 +49,7 @@ def _get_serializer_mode(
 
 def load_state(
     path: Optional[pathlib.Path],
-    loader: SerializersSupported = SerializersSupported.dill,
+    loader: SerializersSupported = _default_serializer,
 ) -> Union[State, None]:
     """Load a State object from a path."""
     if path is not None:
@@ -62,7 +66,7 @@ def load_state(
 def dump_state(
     state_: State,
     path: Optional[pathlib.Path],
-    dumper: SerializersSupported = SerializersSupported.dill,
+    dumper: SerializersSupported = _default_serializer,
 ) -> None:
     """Write a State object to a path."""
     if path is not None:

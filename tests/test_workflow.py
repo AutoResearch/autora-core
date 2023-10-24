@@ -56,33 +56,33 @@ def validate_model(state: Optional[State]):
     assert np.allclose(state.model.intercept_, [[0.5]])
 
 
-def test_nominal():
+def test_e2e_nominal():
     """Test a basic standard chain of CLI calls using the default serializer.
 
     Equivalent to:
-    $ python -m autora.workflow test_system.initial_state --out-path start
-    $ python -m autora.workflow test_system.experimentalist --in-path start --out-path conditions
-    $ python -m autora.workflow test_system.experiment_runner --in-path conditions --out-path data
-    $ python -m autora.workflow test_system.theorist --in-path data --out-path theory
+    $ python -m autora.workflow test_workflow.initial_state --out-path start
+    $ python -m autora.workflow test_workflow.experimentalist --in-path start --out-path conditions
+    $ python -m autora.workflow test_workflow.experiment_runner --in-path conditions --out-path data
+    $ python -m autora.workflow test_workflow.theorist --in-path data --out-path theory
     """
 
     with tempfile.TemporaryDirectory() as d:
         main(
-            "test_system.initial_state",
+            "test_workflow.initial_state",
             out_path=pathlib.Path(d, "start"),
         )
         main(
-            "test_system.experimentalist",
+            "test_workflow.experimentalist",
             in_path=pathlib.Path(d, "start"),
             out_path=pathlib.Path(d, "conditions"),
         )
         main(
-            "test_system.experiment_runner",
+            "test_workflow.experiment_runner",
             in_path=pathlib.Path(d, "conditions"),
             out_path=pathlib.Path(d, "data"),
         )
         main(
-            "test_system.theorist",
+            "test_workflow.theorist",
             in_path=pathlib.Path(d, "data"),
             out_path=pathlib.Path(d, "theory"),
         )
@@ -93,7 +93,7 @@ def test_nominal():
 
 @given(st.sampled_from(SerializersSupported), st.booleans(), st.booleans())
 @settings(verbosity=Verbosity.verbose, deadline=500)
-def test_serializers(serializer, verbose, debug):
+def test_e2e_serializers(serializer, verbose, debug):
     """Test a basic standard chain of CLI calls using a single serializer."""
 
     common_settings = dict(
@@ -102,24 +102,24 @@ def test_serializers(serializer, verbose, debug):
 
     with tempfile.TemporaryDirectory() as d:
         main(
-            "test_system.initial_state",
+            "test_workflow.initial_state",
             out_path=pathlib.Path(d, "start"),
             **common_settings
         )
         main(
-            "test_system.experimentalist",
+            "test_workflow.experimentalist",
             in_path=pathlib.Path(d, "start"),
             out_path=pathlib.Path(d, "conditions"),
             **common_settings
         )
         main(
-            "test_system.experiment_runner",
+            "test_workflow.experiment_runner",
             in_path=pathlib.Path(d, "conditions"),
             out_path=pathlib.Path(d, "data"),
             **common_settings
         )
         main(
-            "test_system.theorist",
+            "test_workflow.theorist",
             in_path=pathlib.Path(d, "data"),
             out_path=pathlib.Path(d, "theory"),
             **common_settings
@@ -140,7 +140,7 @@ def test_serializers(serializer, verbose, debug):
     st.booleans(),
 )
 @settings(verbosity=Verbosity.verbose, deadline=500)
-def test_valid_serializer_mix(
+def test_e2e_valid_serializer_mix(
     initial_serializer,
     experimental_serializer,
     experiment_runner_serializer,
@@ -154,13 +154,13 @@ def test_valid_serializer_mix(
 
     with tempfile.TemporaryDirectory() as d:
         main(
-            "test_system.initial_state",
+            "test_workflow.initial_state",
             out_path=pathlib.Path(d, "start"),
             out_dumper=initial_serializer,
             **common_settings
         )
         main(
-            "test_system.experimentalist",
+            "test_workflow.experimentalist",
             in_path=pathlib.Path(d, "start"),
             out_path=pathlib.Path(d, "conditions"),
             in_loader=initial_serializer,
@@ -168,7 +168,7 @@ def test_valid_serializer_mix(
             **common_settings
         )
         main(
-            "test_system.experiment_runner",
+            "test_workflow.experiment_runner",
             in_path=pathlib.Path(d, "conditions"),
             out_path=pathlib.Path(d, "data"),
             in_loader=experimental_serializer,
@@ -176,7 +176,7 @@ def test_valid_serializer_mix(
             **common_settings
         )
         main(
-            "test_system.theorist",
+            "test_workflow.theorist",
             in_path=pathlib.Path(d, "data"),
             out_path=pathlib.Path(d, "theory"),
             in_loader=experiment_runner_serializer,

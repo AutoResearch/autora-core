@@ -6,7 +6,12 @@ from typing import Optional
 import typer
 from typing_extensions import Annotated
 
-from autora.serializer import SerializersSupported, dump_state, load_state
+from autora.serializer import (
+    SerializersSupported,
+    default_serializer,
+    dump_state,
+    load_state,
+)
 
 _logger = logging.getLogger(__name__)
 
@@ -27,7 +32,7 @@ def main(
         typer.Option(
             help="(de)serializer to load the data",
         ),
-    ] = SerializersSupported.dill,
+    ] = default_serializer,
     out_path: Annotated[
         Optional[pathlib.Path],
         typer.Option(help="Path to output the final state"),
@@ -37,7 +42,7 @@ def main(
         typer.Option(
             help="serializer to save the data",
         ),
-    ] = SerializersSupported.dill,
+    ] = default_serializer,
     verbose: Annotated[bool, typer.Option(help="Turns on info logging level.")] = False,
     debug: Annotated[bool, typer.Option(help="Turns on debug logging level.")] = False,
 ):

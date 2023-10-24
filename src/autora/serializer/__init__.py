@@ -29,7 +29,7 @@ _serializer_dict: Dict[SerializersSupported, _SerializerDef] = {
     SerializersSupported.dill: _SerializerDef("dill", "load", "dump", "dumps", "b"),
 }
 
-_default_serializer = SerializersSupported.pickle
+default_serializer = SerializersSupported.pickle
 
 
 def _get_serializer_mode(
@@ -49,7 +49,7 @@ def _get_serializer_mode(
 
 def load_state(
     path: Optional[pathlib.Path],
-    loader: SerializersSupported = _default_serializer,
+    loader: SerializersSupported = default_serializer,
 ) -> Union[State, None]:
     """Load a State object from a path."""
     if path is not None:
@@ -66,7 +66,7 @@ def load_state(
 def dump_state(
     state_: State,
     path: Optional[pathlib.Path],
-    dumper: SerializersSupported = _default_serializer,
+    dumper: SerializersSupported = default_serializer,
 ) -> None:
     """Write a State object to a path."""
     if path is not None:

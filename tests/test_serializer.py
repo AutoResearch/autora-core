@@ -15,6 +15,7 @@ from autora.state import StandardState
 )
 @settings(verbosity=Verbosity.verbose)
 def test_load_inverts_dump(s, serializer):
+    """Test that each serializer can be used to serialize and deserialize a state object."""
     with tempfile.TemporaryDirectory() as dir:
         path = pathlib.Path(dir, f"{str(uuid.uuid4())}")
         print(path, s)

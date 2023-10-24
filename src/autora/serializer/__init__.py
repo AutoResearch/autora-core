@@ -23,7 +23,7 @@ _SerializerDef = namedtuple(
 )
 _serializer_dict: Dict[str, _SerializerDef] = dict(
     pickle=_SerializerDef("pickle", "load", "dump", "dumps", "b"),
-    yaml=_SerializerDef("autora.serializer.yaml_", "load", "dump", "dumps", ""),
+    yaml=_SerializerDef("autora.serializer._yaml", "load", "dump", "dumps", ""),
     dill=_SerializerDef("dill", "load", "dump", "dumps", "b"),
 )
 

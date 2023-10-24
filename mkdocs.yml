@@ -13,6 +13,6 @@ theme:
 nav:
 - Introduction: 'index.md'
 - "Basic Usage": "cli/basic-usage/Readme.ipynb"
-- "Using Cylc": "cli/with-cylc-pip/README.md"
+- "Using Cylc": "cli/cylc-pip/README.md"
 - "Using Cylc and Slurm": "cli/with-cylc-slurm-pip/README.md"
 

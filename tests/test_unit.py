@@ -5,8 +5,8 @@ import uuid
 from hypothesis import Verbosity, given, settings
 from hypothesis import strategies as st
 
+from autora.serializer import SerializersSupported, dump_state, load_state
 from autora.state import StandardState
-from autora.workflow.__main__ import SerializersSupported, dump_state, load_state
 
 
 @given(

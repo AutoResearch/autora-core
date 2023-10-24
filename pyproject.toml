@@ -11,9 +11,6 @@ license = {file = "LICENSE"}
 
 dependencies = [
     "autora-core>=4.0.0",
-    "scikit-learn",
-    "matplotlib",
-    "pandas",
     "typer[all]",
 ]
 
@@ -24,12 +21,17 @@ dev = [
     "autora-workflow[test]",
 ]
 docs = [
-    "autora-core[docs]>=4.0.0"
+    "autora-core[docs]>=4.0.0",
+    "scikit-learn",
+    "matplotlib",
+    "pandas",
 ]
 test = [
     "autora-core[test]>=4.0.0",
+    "autora-workflow[serializers]",
     "hypothesis",
-    "autora-workflow[serializers]"
+    "scikit-learn",
+    "pandas",
 ]
 cylc = [
     "cylc-flow",

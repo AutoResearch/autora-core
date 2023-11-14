@@ -829,6 +829,10 @@ class StateDataClass:
             new_value = {name: value}
         else:
             new_value = {}
+            if not (default != MISSING or default_factory != MISSING):
+                raise ValueError(
+                    "`value` or `default` or `default_factory` must be specified"
+                )
 
         new = new_class(**new_value, **asdict(self))
 

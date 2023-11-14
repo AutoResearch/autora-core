@@ -73,7 +73,10 @@ def dataframe_strategy(draw, variables: Sequence[Variable]):
             value_strategy = st.sampled_from(v.allowed_values)
         elif v.value_range is not None:
             min_value, max_value = sorted(v.value_range)
-            value_strategy = st.floats(min_value=min_value, max_value=max_value)
+            if isinstance(min_value, int):
+                value_strategy = st.integers(min_value=min_value, max_value=max_value)
+            elif isinstance(min_value, float):
+                value_strategy = st.floats(min_value=min_value, max_value=max_value)
         else:
             value_strategy = st.floats()
         d[v.name] = draw(
@@ -112,8 +115,8 @@ def test_core_dataclasses_serialize_deserialize(o):
     assert o_loaded == o
 
 
-@given(standard_state_dataclass_strategy())
 @settings(print_blob=True)
+@given(standard_state_dataclass_strategy())
 def test_standard_state_dataclass_serialize_deserialize(o: StandardStateDataClass):
     o_dumped = pickle.dumps(o)
     o_loaded: StandardStateDataClass = pickle.loads(o_dumped)

@@ -819,7 +819,7 @@ class StateDataClass:
         }
 
         new_class = make_dataclass(
-            cls_name=self.__class__.__name__,
+            cls_name=self.__class__.__name__ + str(hash((name, type_, _field))),
             fields=[(name, type_, _field)],
             bases=(self.__class__,),
             **_dataclass_params,

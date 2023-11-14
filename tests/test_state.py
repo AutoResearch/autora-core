@@ -13,7 +13,7 @@ from autora.variable import ValueType, Variable, VariableCollection
 def variable_strategy(draw):
     v = Variable(
         name=draw(st.text()),
-        type=ValueType.REAL,
+        type=draw(st.sampled_from(ValueType)),
         value_range=draw(
             st.one_of(
                 st.none(),

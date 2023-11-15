@@ -11,31 +11,23 @@ MAX_VARIABLES = 100  # Max 100 variables in total, for speed of testing
 
 logger = logging.getLogger(__name__)
 
+DEFAULT_VALUE_STRATEGY = st.sampled_from(
+    [
+        st.booleans(),
+        st.integers(),
+        st.floats(min_value=0, max_value=1, allow_nan=False, allow_subnormal=False),
+        st.floats(allow_infinity=False, allow_nan=False, allow_subnormal=False),
+        st.floats(allow_infinity=True, allow_nan=False, allow_subnormal=False),
+        st.floats(allow_infinity=True, allow_nan=False, allow_subnormal=True),
+        st.text(),
+    ]
+)
+
 
 @st.composite
 def variable_strategy(draw, value_strategy=None):
     if value_strategy is None:
-        value_strategy = draw(
-            st.sampled_from(
-                [
-                    st.booleans(),
-                    st.integers(),
-                    st.floats(
-                        min_value=0, max_value=1, allow_nan=False, allow_subnormal=False
-                    ),
-                    st.floats(
-                        allow_infinity=False, allow_nan=False, allow_subnormal=False
-                    ),
-                    st.floats(
-                        allow_infinity=True, allow_nan=False, allow_subnormal=False
-                    ),
-                    st.floats(
-                        allow_infinity=True, allow_nan=False, allow_subnormal=True
-                    ),
-                    st.text(),
-                ]
-            )
-        )
+        value_strategy = draw(DEFAULT_VALUE_STRATEGY)
 
     v = Variable(
         name=draw(st.text()),
@@ -69,6 +61,9 @@ def variablecollection_strategy(
         )
 
     n_variables = sum((num_ivs, num_dvs, n_covariates))
+
+    if value_strategy is None:
+        value_strategy = draw(DEFAULT_VALUE_STRATEGY)
 
     all_variables = draw(
         st.lists(

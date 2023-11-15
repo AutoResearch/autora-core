@@ -8,6 +8,7 @@ from hypothesis import strategies as st
 from autora.variable import ValueType, Variable, VariableCollection
 
 MAX_VARIABLES = 100  # Max 100 variables in total, for speed of testing
+SUPPORTED_SERIALIZERS = st.sampled_from([(pickle.loads, pickle.dumps)])
 
 logger = logging.getLogger(__name__)
 
@@ -84,7 +85,7 @@ def variablecollection_strategy(
 
 @given(
     st.one_of(variable_strategy(), variablecollection_strategy()),
-    st.sampled_from([(pickle.loads, pickle.dumps)]),
+    SUPPORTED_SERIALIZERS,
 )
 def test_dataclass_serialize_deserialize(o, loads_dumps):
     loads, dumps = loads_dumps

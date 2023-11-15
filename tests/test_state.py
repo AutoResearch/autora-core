@@ -17,7 +17,7 @@ def variable_strategy(draw):
         value_range=draw(
             st.one_of(
                 st.none(),
-                st.tuples(st.integers(), st.integers()),
+                st.tuples(st.integers(), st.integers()).filter(lambda v: v[0] <= v[1]),
                 st.tuples(
                     st.floats(allow_nan=False), st.floats(allow_nan=False)
                 ).filter(lambda v: v[0] <= v[1]),

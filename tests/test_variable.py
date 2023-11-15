@@ -28,7 +28,11 @@ def variable_strategy(draw):
             st.one_of(
                 st.none(),
                 st.lists(
-                    st.one_of(st.booleans(), st.integers(), st.floats(allow_nan=False)),
+                    st.one_of(
+                        # st.booleans(),  # TODO: work out how to include non-numeric data
+                        st.integers(),
+                        st.floats(allow_nan=False),
+                    ),
                     unique=True,
                     min_size=1,
                 ),

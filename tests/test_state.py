@@ -3,7 +3,10 @@ import pickle
 from typing import Optional, Sequence
 
 import pandas as pd
-from hypothesis import given
+import sklearn.base
+import sklearn.dummy
+import sklearn.linear_model
+from hypothesis import given, settings
 from hypothesis import strategies as st
 
 from autora.state import StandardStateDataClass
@@ -92,10 +95,59 @@ def standard_state_dataclass_strategy(draw):
     return s
 
 
+@st.composite
+def model_strategy(
+    draw,
+    variable_collection: Optional[VariableCollection] = None,
+    n_entries: Optional[int] = None,
+    experiment_data: Optional[pd.DataFrame] = None,
+    model: Optional[sklearn.base.BaseEstimator] = None,
+):
+    if variable_collection is None:
+        variable_collection = draw(variablecollection_strategy(num_variables=(1, 1, 0)))
+        assert isinstance(variable_collection, VariableCollection)
+    if n_entries is None:
+        n_entries = draw(st.integers(min_value=10, max_value=100))
+    if experiment_data is None:
+        experiment_data = draw(
+            dataframe_strategy(
+                variables=(
+                    list(variable_collection.independent_variables)
+                    + list(variable_collection.dependent_variables)
+                ),
+                n_entries=n_entries,
+            )
+        )
+    if model is None:
+        model = draw(
+            st.sampled_from(
+                [
+                    sklearn.dummy.DummyRegressor,
+                    # sklearn.linear_model.LinearRegression,
+                    # sklearn.linear_model.Ridge,
+                    # sklearn.linear_model.BayesianRidge,
+                ]
+            )
+        )
+
+    X = experiment_data[[v.name for v in variable_collection.independent_variables]]
+    y = experiment_data[[v.name for v in variable_collection.dependent_variables]]
+
+    result = model().fit(X, y)
+    return result
+
+
 @given(st.one_of(series_strategy(), dataframe_strategy()))
 def test_core_dataframe_serialize_deserialize(o):
     o_loaded = pickle.loads(pickle.dumps(o))
     assert pd.DataFrame.equals(o, o_loaded)
+
+
+@settings(max_examples=10)
+@given(model_strategy())
+def test_model_serialize_deserialize(o):
+    o_loaded = pickle.loads(pickle.dumps(o))
+    assert o == o_loaded
 
 
 @given(standard_state_dataclass_strategy())

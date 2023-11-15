@@ -1,4 +1,5 @@
 import pickle
+from typing import Optional, Tuple
 
 from hypothesis import given
 from hypothesis import strategies as st
@@ -47,12 +48,18 @@ def variable_strategy(draw):
 
 
 @st.composite
-def variablecollection_strategy(draw, max_length=MAX_VARIABLES):
-    num_ivs, num_dvs, n_covariates = draw(
-        st.tuples(
-            st.integers(min_value=0), st.integers(min_value=0), st.just(0)
-        ).filter(lambda n: sum(n) <= max_length)
-    )
+def variablecollection_strategy(
+    draw, max_length=MAX_VARIABLES, num_variables: Optional[Tuple[int, int, int]] = None
+):
+    if num_variables is not None:
+        num_ivs, num_dvs, n_covariates = num_variables
+    else:  # num_variables is None
+        num_ivs, num_dvs, n_covariates = draw(
+            st.tuples(
+                st.integers(min_value=0), st.integers(min_value=0), st.just(0)
+            ).filter(lambda n: sum(n) <= max_length)
+        )
+
     n_variables = sum((num_ivs, num_dvs, n_covariates))
 
     all_variables = draw(

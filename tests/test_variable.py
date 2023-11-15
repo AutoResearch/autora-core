@@ -1,3 +1,4 @@
+import logging
 import pickle
 from typing import Optional, Tuple
 
@@ -8,52 +9,55 @@ from autora.variable import ValueType, Variable, VariableCollection
 
 MAX_VARIABLES = 100  # Max 100 variables in total, for speed of testing
 
+logger = logging.getLogger(__name__)
+
 
 @st.composite
-def variable_strategy(draw):
+def variable_strategy(draw, value_strategy=None):
+    if value_strategy is None:
+        value_strategy = draw(
+            st.sampled_from(
+                [
+                    st.booleans(),
+                    st.integers(),
+                    st.floats(
+                        min_value=0, max_value=1, allow_nan=False, allow_subnormal=False
+                    ),
+                    st.floats(
+                        allow_infinity=False, allow_nan=False, allow_subnormal=False
+                    ),
+                    st.floats(
+                        allow_infinity=True, allow_nan=False, allow_subnormal=False
+                    ),
+                    st.floats(
+                        allow_infinity=True, allow_nan=False, allow_subnormal=True
+                    ),
+                    st.text(),
+                ]
+            )
+        )
+
     v = Variable(
         name=draw(st.text()),
         variable_label=draw(st.text()),
         units=draw(st.text()),
         type=draw(st.sampled_from(ValueType)),
         is_covariate=draw(st.booleans()),
-        value_range=draw(
-            st.one_of(
-                st.none(),
-                st.tuples(st.integers(), st.integers()),
-                st.tuples(st.floats(allow_nan=False), st.floats(allow_nan=False)),
-            )
-        ),
+        value_range=draw(st.one_of(st.none(), value_strategy)),
         allowed_values=draw(
-            st.one_of(
-                st.none(),
-                st.lists(
-                    st.one_of(
-                        # st.booleans(),  # TODO: work out how to include non-numeric data
-                        st.integers(),
-                        st.floats(allow_nan=False),
-                    ),
-                    unique=True,
-                    min_size=1,
-                ),
-            )
+            st.one_of(st.none(), st.lists(value_strategy, unique=True, min_size=0))
         ),
-        rescale=draw(
-            st.one_of(
-                st.just(1),
-                st.integers().filter(lambda v: v != 0),
-                st.floats(allow_infinity=False, allow_nan=False).filter(
-                    lambda v: v != 0
-                ),
-            )
-        ),
+        rescale=draw(st.one_of(st.just(1), value_strategy.filter(lambda v: v != 0))),
     )
     return v
 
 
 @st.composite
 def variablecollection_strategy(
-    draw, max_length=MAX_VARIABLES, num_variables: Optional[Tuple[int, int, int]] = None
+    draw,
+    max_length=MAX_VARIABLES,
+    num_variables: Optional[Tuple[int, int, int]] = None,
+    value_strategy: Optional[st.SearchStrategy] = None,
 ):
     if num_variables is not None:
         num_ivs, num_dvs, n_covariates = num_variables
@@ -68,7 +72,7 @@ def variablecollection_strategy(
 
     all_variables = draw(
         st.lists(
-            variable_strategy(),
+            variable_strategy(value_strategy=value_strategy),
             unique_by=lambda v: v.name,
             min_size=n_variables,
             max_size=n_variables,

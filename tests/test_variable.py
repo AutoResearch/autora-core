@@ -1,3 +1,6 @@
+import pickle
+
+from hypothesis import given
 from hypothesis import strategies as st
 
 from autora.variable import ValueType, Variable, VariableCollection
@@ -7,14 +10,15 @@ from autora.variable import ValueType, Variable, VariableCollection
 def variable_strategy(draw):
     v = Variable(
         name=draw(st.text()),
+        variable_label=draw(st.text()),
+        units=draw(st.text()),
         type=draw(st.sampled_from(ValueType)),
+        is_covariate=draw(st.booleans()),
         value_range=draw(
             st.one_of(
                 st.none(),
-                st.tuples(st.integers(), st.integers()).filter(lambda v: v[0] <= v[1]),
-                st.tuples(
-                    st.floats(allow_nan=False), st.floats(allow_nan=False)
-                ).filter(lambda v: v[0] <= v[1]),
+                st.tuples(st.integers(), st.integers()),
+                st.tuples(st.floats(allow_nan=False), st.floats(allow_nan=False)),
             )
         ),
         allowed_values=draw(
@@ -27,8 +31,6 @@ def variable_strategy(draw):
                 ),
             )
         ),
-        units=draw(st.text()),
-        variable_label=draw(st.text()),
         rescale=draw(
             st.one_of(
                 st.just(1),
@@ -38,7 +40,6 @@ def variable_strategy(draw):
                 ),
             )
         ),
-        is_covariate=draw(st.just(False)),
     )
     return v
 
@@ -58,3 +59,9 @@ def variablecollection_strategy(draw):
         covariates=[],
     )
     return vc
+
+
+@given(st.one_of(variable_strategy(), variablecollection_strategy()))
+def test_core_dataclasses_serialize_deserialize(o):
+    o_loaded = pickle.loads(pickle.dumps(o))
+    assert o_loaded == o

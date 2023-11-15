@@ -92,24 +92,15 @@ def standard_state_dataclass_strategy(draw):
     return s
 
 
-@given(st.one_of(variable_strategy(), variablecollection_strategy()))
-def test_core_dataclasses_serialize_deserialize(o):
-    o_dumped = pickle.dumps(o)
-    o_loaded = pickle.loads(o_dumped)
-    assert o_loaded == o
-
-
 @given(st.one_of(series_strategy(), dataframe_strategy()))
 def test_core_dataframe_serialize_deserialize(o):
     o_loaded = pickle.loads(pickle.dumps(o))
-    pd.DataFrame.equals(o, o_loaded)
+    assert pd.DataFrame.equals(o, o_loaded)
 
 
 @given(standard_state_dataclass_strategy())
 def test_standard_state_dataclass_serialize_deserialize(o: StandardStateDataClass):
-    o_dumped = pickle.dumps(o)
-    o_loaded = pickle.loads(o_dumped)
-
+    o_loaded = pickle.loads(pickle.dumps(o))
     assert o.variables == o_loaded.variables
     assert pd.DataFrame.equals(o.conditions, o_loaded.conditions)
     assert pd.DataFrame.equals(o.experiment_data, o_loaded.experiment_data)

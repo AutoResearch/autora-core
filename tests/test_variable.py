@@ -82,7 +82,11 @@ def variablecollection_strategy(
     return vc
 
 
-@given(st.one_of(variable_strategy(), variablecollection_strategy()))
-def test_dataclass_serialize_deserialize(o):
-    o_loaded = pickle.loads(pickle.dumps(o))
+@given(
+    st.one_of(variable_strategy(), variablecollection_strategy()),
+    st.sampled_from([(pickle.loads, pickle.dumps)]),
+)
+def test_dataclass_serialize_deserialize(o, loads_dumps):
+    loads, dumps = loads_dumps
+    o_loaded = loads(dumps(o))
     assert o_loaded == o

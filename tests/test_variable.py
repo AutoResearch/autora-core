@@ -5,6 +5,8 @@ from hypothesis import strategies as st
 
 from autora.variable import ValueType, Variable, VariableCollection
 
+MAX_VARIABLES = 100  # Max 100 variables in total, for speed of testing
+
 
 @st.composite
 def variable_strategy(draw):
@@ -45,23 +47,32 @@ def variable_strategy(draw):
 
 
 @st.composite
-def variablecollection_strategy(draw):
-    all_variables = draw(
-        st.lists(variable_strategy(), unique_by=lambda v: v.name, min_size=0)
+def variablecollection_strategy(draw, max_length=MAX_VARIABLES):
+    num_ivs, num_dvs, n_covariates = draw(
+        st.tuples(
+            st.integers(min_value=0), st.integers(min_value=0), st.just(0)
+        ).filter(lambda n: sum(n) <= max_length)
     )
-    num_variables = len(all_variables)
-    num_ivs = draw(st.integers(min_value=0, max_value=num_variables))
-    # TODO: Add support for covariates
-    num_ivs, num_dvs = num_ivs, num_variables - num_ivs
+    n_variables = sum((num_ivs, num_dvs, n_covariates))
+
+    all_variables = draw(
+        st.lists(
+            variable_strategy(),
+            unique_by=lambda v: v.name,
+            min_size=n_variables,
+            max_size=n_variables,
+        )
+    )
+
     vc = VariableCollection(
         independent_variables=all_variables[0:num_ivs],
         dependent_variables=all_variables[num_ivs : num_ivs + num_dvs],
-        covariates=[],
+        covariates=all_variables[num_ivs + num_dvs :],
     )
     return vc
 
 
 @given(st.one_of(variable_strategy(), variablecollection_strategy()))
-def test_core_dataclasses_serialize_deserialize(o):
+def test_dataclass_serialize_deserialize(o):
     o_loaded = pickle.loads(pickle.dumps(o))
     assert o_loaded == o

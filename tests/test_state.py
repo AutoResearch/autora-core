@@ -38,8 +38,10 @@ def variable_strategy(draw):
         rescale=draw(
             st.one_of(
                 st.just(1),
-                st.integers(),  # TODO: filter zeros
-                st.floats(allow_infinity=False, allow_nan=False),  # TODO: filter zeros
+                st.integers().filter(lambda v: v != 0),
+                st.floats(allow_infinity=False, allow_nan=False).filter(
+                    lambda v: v != 0
+                ),
             )
         ),
         is_covariate=draw(st.just(False)),

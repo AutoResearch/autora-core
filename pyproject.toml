@@ -27,7 +27,7 @@ dev = [
 ]
 test = [
     "pytest",
-    "hypothesis"
+    "hypothesis[pandas]"
 ]
 build = [
     "build",

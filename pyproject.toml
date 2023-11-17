@@ -50,6 +50,7 @@ docs = [
     "mkdocs-jupyter",
     "pymdown-extensions",
 ]
+serializers = ["dill"]
 
 [tool.isort]
 profile = "black"

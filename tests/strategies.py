@@ -186,8 +186,11 @@ def model_strategy(draw):
         allow_infinity=False,
         allow_subnormal=False,
         allow_nan=False,
-        max_magnitude=1e16,
-        min_magnitude=1e-9,
+        # Include some reasonable extreme values. Values near the upper limit of the float
+        # ~10**308 broke the fitting
+        min_value=-1e200,
+        max_value=1e200,
+        # min_magnitude and max_magnitude didn't work
     )
     X = draw(st_np.arrays(float, shape=(n_measurements, n_x), elements=elements))
     y = draw(st_np.arrays(float, shape=(n_measurements, n_y), elements=elements))

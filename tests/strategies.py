@@ -2,6 +2,7 @@ import logging
 from typing import Optional, Sequence, Tuple
 
 import numpy as np
+import pandas as pd
 import sklearn.base
 import sklearn.dummy
 import sklearn.linear_model
@@ -114,17 +115,27 @@ def variablecollection_strategy(
         n_dvs = draw(st.integers(min_value=0, max_value=max_length - n_ivs))
         n_covariates = 0
 
-    n_variables = sum((n_ivs, n_dvs, n_covariates))
+    n_variables = n_ivs + n_dvs + n_covariates
 
     names = draw(
-        st.lists(st.text(), unique=True, min_size=n_variables, max_size=n_variables)
+        st.lists(
+            st.text(min_size=1), unique=True, min_size=n_variables, max_size=n_variables
+        )
     )
-    all_variables = [draw(variable_strategy(name=name)) for name in names]
+    independent_variables = [
+        draw(variable_strategy(name=names.pop())) for i in range(n_ivs)
+    ]
+    dependent_variables = [
+        draw(variable_strategy(name=names.pop())) for i in range(n_dvs)
+    ]
+    covariates = [
+        draw(variable_strategy(name=names.pop())) for i in range(n_covariates)
+    ]
 
     vc = VariableCollection(
-        independent_variables=all_variables[0:n_ivs],
-        dependent_variables=all_variables[n_ivs : n_ivs + n_dvs],
-        covariates=all_variables[n_ivs + n_dvs :],
+        independent_variables=independent_variables,
+        dependent_variables=dependent_variables,
+        covariates=covariates,
     )
     return vc
 
@@ -141,14 +152,14 @@ def dataframe_strategy(
             + variable_collection.dependent_variables
             + variable_collection.covariates
         )
-
-    columns = [st_pd.column(name=v.name, dtype=v.data_type) for v in variables]
-    print(columns)
-    df = draw(
+    df: pd.DataFrame = draw(
         st_pd.data_frames(
-            columns=columns,
+            columns=[st_pd.column(dtype=v.data_type) for v in variables],
         )
     )
+
+    # rename the columns here, as putting them in at initialization was unreliable
+    df.columns = [v.name for v in variables]
 
     return df
 
@@ -180,7 +191,6 @@ def model_strategy(draw):
     )
     X = draw(st_np.arrays(float, shape=(n_measurements, n_x), elements=elements))
     y = draw(st_np.arrays(float, shape=(n_measurements, n_y), elements=elements))
-    print(X, y)
 
     result = model().fit(X, y)
     return result

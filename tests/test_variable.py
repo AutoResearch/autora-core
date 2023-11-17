@@ -3,11 +3,8 @@ import logging
 from hypothesis import given
 from hypothesis import strategies as st
 
-from .strategies import (
-    SUPPORTED_SERIALIZERS,
-    variable_strategy,
-    variablecollection_strategy,
-)
+from .strategies import variable_strategy, variablecollection_strategy
+from .test_serializer import SUPPORTED_SERIALIZERS
 
 logger = logging.getLogger(__name__)
 

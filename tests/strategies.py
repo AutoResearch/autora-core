@@ -1,11 +1,12 @@
 import logging
-import pickle
 from typing import Optional, Sequence, Tuple
 
-import pandas as pd
+import numpy as np
 import sklearn.base
 import sklearn.dummy
 from hypothesis import strategies as st
+from hypothesis.extra import numpy as st_np
+from hypothesis.extra import pandas as st_pd
 
 from autora.state import StandardStateDataClass
 from autora.variable import ValueType, Variable, VariableCollection
@@ -27,6 +28,25 @@ DEFAULT_VALUE_STRATEGY = st.sampled_from(
 MAX_VARIABLES = 100  # Max 100 variables in total, for speed of testing
 MAX_DATA_LENGTH = 1000
 
+FLOAT_STRATEGIES = st.one_of(
+    st.integers(),
+    st.floats(min_value=0, max_value=1, allow_nan=False, allow_subnormal=False),
+    st.floats(allow_infinity=False, allow_nan=False, allow_subnormal=False),
+    st.floats(allow_infinity=True, allow_nan=False, allow_subnormal=False),
+    st.floats(allow_infinity=True, allow_nan=False, allow_subnormal=True),
+)
+
+VALUE_TYPE_VALUE_STRATEGY_MAPPING = {
+    ValueType.BOOLEAN: st.booleans(),
+    ValueType.INTEGER: st.integers(),
+    ValueType.REAL: FLOAT_STRATEGIES,
+    ValueType.SIGMOID: FLOAT_STRATEGIES,
+    ValueType.PROBABILITY: FLOAT_STRATEGIES,
+    ValueType.PROBABILITY_SAMPLE: FLOAT_STRATEGIES,
+    ValueType.PROBABILITY_DISTRIBUTION: FLOAT_STRATEGIES,
+    ValueType.CLASS: st.text(),
+}
+
 
 @st.composite
 def data_length_strategy(draw, max_value=MAX_DATA_LENGTH):
@@ -34,43 +54,47 @@ def data_length_strategy(draw, max_value=MAX_DATA_LENGTH):
 
 
 @st.composite
-def variable_strategy(draw, value_strategy=None):
-    if value_strategy is None:
-        value_strategy = draw(DEFAULT_VALUE_STRATEGY)
+def variable_strategy(draw):
+    name = draw(st.text())
+    variable_label = draw(st.text())
+    units = draw(st.text())
+    is_covariate = draw(st.booleans())
+    type = draw(st.sampled_from(ValueType))
+    dtype = {
+        ValueType.BOOLEAN: bool,
+        ValueType.INTEGER: int,
+        ValueType.REAL: float,
+        ValueType.SIGMOID: float,
+        ValueType.PROBABILITY: float,
+        ValueType.PROBABILITY_SAMPLE: float,
+        ValueType.PROBABILITY_DISTRIBUTION: float,
+        ValueType.CLASS: str,
+    }[type]
+    value_strategy = VALUE_TYPE_VALUE_STRATEGY_MAPPING[type]
+
+    value_range = draw(
+        st.one_of(
+            st.none(),
+            st.tuples(value_strategy, value_strategy).filter(lambda v: v[0] <= v[1]),
+        )
+    )
+    allowed_values = draw(
+        st.one_of(st.none(), st.lists(value_strategy, unique=True, min_size=1))
+    )
+    rescale = draw(st.one_of(st.just(1), value_strategy.filter(lambda v: v != 0)))
 
     v = Variable(
-        name=draw(st.text()),
-        variable_label=draw(st.text()),
-        units=draw(st.text()),
-        type=draw(st.sampled_from(ValueType)),
-        is_covariate=draw(st.booleans()),
-        value_range=draw(st.one_of(st.none(), value_strategy)),
-        allowed_values=draw(
-            st.one_of(st.none(), st.lists(value_strategy, unique=True, min_size=0))
-        ),
-        rescale=draw(st.one_of(st.just(1), value_strategy.filter(lambda v: v != 0))),
+        name=name,
+        variable_label=variable_label,
+        units=units,
+        type=type,
+        is_covariate=is_covariate,
+        value_range=value_range,
+        allowed_values=allowed_values,
+        rescale=rescale,
+        data_type=dtype,
     )
     return v
-
-
-@st.composite
-def series_strategy(
-    draw,
-    variable: Optional[Variable] = None,
-    n_entries: Optional[int] = None,
-    value_strategy: Optional[st.SearchStrategy] = None,
-):
-    if variable is None:
-        variable = draw(variable_strategy())
-    if n_entries is None:
-        n_entries = draw(data_length_strategy())
-    if value_strategy is None:
-        value_strategy = draw(DEFAULT_VALUE_STRATEGY)
-
-    value = draw(st.lists(value_strategy, min_size=n_entries, max_size=n_entries))
-    result = pd.Series(value, name=variable.name)
-    logger.debug(result)
-    return result
 
 
 @st.composite
@@ -78,7 +102,6 @@ def variablecollection_strategy(
     draw,
     max_length=MAX_VARIABLES,
     num_variables: Optional[Tuple[int, int, int]] = None,
-    value_strategy: Optional[st.SearchStrategy] = None,
 ):
     if num_variables is not None:
         num_ivs, num_dvs, n_covariates = num_variables
@@ -91,12 +114,9 @@ def variablecollection_strategy(
 
     n_variables = sum((num_ivs, num_dvs, n_covariates))
 
-    if value_strategy is None:
-        value_strategy = draw(DEFAULT_VALUE_STRATEGY)
-
     all_variables = draw(
         st.lists(
-            variable_strategy(value_strategy=value_strategy),
+            variable_strategy(),
             unique_by=lambda v: v.name,
             min_size=n_variables,
             max_size=n_variables,
@@ -115,27 +135,50 @@ def variablecollection_strategy(
 def dataframe_strategy(
     draw,
     variables: Optional[Sequence[Variable]] = None,
-    n_entries: Optional[int] = None,
-    value_strategy: Optional[st.SearchStrategy] = None,
 ):
     if variables is None:
-        variables = draw(st.lists(variable_strategy()))
-    if n_entries is None:
-        n_entries = draw(data_length_strategy())
-    if value_strategy is None:
-        value_strategy = draw(DEFAULT_VALUE_STRATEGY)
+        variables = draw(st.lists(variable_strategy(), unique_by=lambda v: v.name))
 
-    d = {}
-    for v in variables:
-        series = draw(
-            series_strategy(
-                variable=v, n_entries=n_entries, value_strategy=value_strategy
-            )
+    df = draw(
+        st_pd.data_frames(
+            columns=[st_pd.column(name=v.name, dtype=v.data_type) for v in variables],
         )
-        d[v.name] = series
-    df = pd.DataFrame(d)
-    logger.debug(df)
+    )
+
     return df
+
+
+@st.composite
+def model_strategy(draw):
+    model = draw(
+        st.sampled_from(
+            [
+                sklearn.dummy.DummyRegressor,
+                # sklearn.linear_model.LinearRegression,
+                # sklearn.linear_model.Ridge,
+                # sklearn.linear_model.BayesianRidge,
+            ]
+        )
+    )
+
+    n_x = draw(st.integers(min_value=1, max_value=5))
+    n_y = draw(st.integers(min_value=1, max_value=1))
+    n_measurements = draw(st.integers(min_value=5, max_value=100))
+
+    elements = st_np.from_dtype(
+        np.dtype(float),
+        allow_infinity=False,
+        allow_subnormal=False,
+        allow_nan=False,
+        max_magnitude=1e16,
+        min_magnitude=1e-9,
+    )
+    X = draw(st_np.arrays(float, shape=(n_measurements, n_x), elements=elements))
+    y = draw(st_np.arrays(float, shape=(n_measurements, n_y), elements=elements))
+    print(X, y)
+
+    result = model().fit(X, y)
+    return result
 
 
 @st.composite
@@ -160,54 +203,5 @@ def standard_state_dataclass_strategy(draw):
     return s
 
 
-@st.composite
-def model_strategy(
-    draw,
-    variable_collection: Optional[VariableCollection] = None,
-    n_entries: Optional[int] = None,
-    experiment_data: Optional[pd.DataFrame] = None,
-    value_strategy: Optional[st.SearchStrategy] = None,
-    model: Optional[sklearn.base.BaseEstimator] = None,
-):
-    if variable_collection is None:
-        variable_collection = draw(variablecollection_strategy(num_variables=(1, 1, 0)))
-        assert isinstance(variable_collection, VariableCollection)
-    if n_entries is None:
-        n_entries = draw(st.integers(min_value=10, max_value=100))
-    if value_strategy is None:
-        value_strategy = draw(DEFAULT_VALUE_STRATEGY)()
-
-    if experiment_data is None:
-        experiment_data = draw(
-            dataframe_strategy(
-                variables=(
-                    list(variable_collection.independent_variables)
-                    + list(variable_collection.dependent_variables)
-                ),
-                n_entries=n_entries,
-                value_strategy=value_strategy,
-            )
-        )
-    if model is None:
-        model = draw(
-            st.sampled_from(
-                [
-                    sklearn.dummy.DummyRegressor,
-                    # sklearn.linear_model.LinearRegression,
-                    # sklearn.linear_model.Ridge,
-                    # sklearn.linear_model.BayesianRidge,
-                ]
-            )
-        )
-
-    X = experiment_data[[v.name for v in variable_collection.independent_variables]]
-    y = experiment_data[[v.name for v in variable_collection.dependent_variables]]
-
-    result = model().fit(X, y)
-    return result
-
-
-SUPPORTED_SERIALIZERS = st.sampled_from([(pickle.loads, pickle.dumps)])
-
 if __name__ == "__main__":
-    print(dataframe_strategy().example())
+    print(model_strategy().example())

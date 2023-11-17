@@ -4,12 +4,24 @@ from typing import Optional, Sequence, Tuple
 import numpy as np
 import sklearn.base
 import sklearn.dummy
+import sklearn.linear_model
 from hypothesis import strategies as st
 from hypothesis.extra import numpy as st_np
 from hypothesis.extra import pandas as st_pd
 
 from autora.state import StandardStateDataClass
 from autora.variable import ValueType, Variable, VariableCollection
+
+VALUE_TYPE_DTYPE_MAPPING = {
+    ValueType.BOOLEAN: bool,
+    ValueType.INTEGER: int,
+    ValueType.REAL: float,
+    ValueType.SIGMOID: float,
+    ValueType.PROBABILITY: float,
+    ValueType.PROBABILITY_SAMPLE: float,
+    ValueType.PROBABILITY_DISTRIBUTION: float,
+    ValueType.CLASS: str,
+}
 
 logger = logging.getLogger(__name__)
 
@@ -25,7 +37,7 @@ DEFAULT_VALUE_STRATEGY = st.sampled_from(
         st.text(),
     ]
 )
-MAX_VARIABLES = 100  # Max 100 variables in total, for speed of testing
+MAX_VARIABLES = 10  # Max 10 variables in total, for speed of testing
 MAX_DATA_LENGTH = 1000
 
 FLOAT_STRATEGIES = st.one_of(
@@ -54,34 +66,26 @@ def data_length_strategy(draw, max_value=MAX_DATA_LENGTH):
 
 
 @st.composite
-def variable_strategy(draw):
-    name = draw(st.text())
+def variable_strategy(draw, name=None):
+    if name is not None:
+        name = draw(st.text())
     variable_label = draw(st.text())
     units = draw(st.text())
     is_covariate = draw(st.booleans())
     type = draw(st.sampled_from(ValueType))
-    dtype = {
-        ValueType.BOOLEAN: bool,
-        ValueType.INTEGER: int,
-        ValueType.REAL: float,
-        ValueType.SIGMOID: float,
-        ValueType.PROBABILITY: float,
-        ValueType.PROBABILITY_SAMPLE: float,
-        ValueType.PROBABILITY_DISTRIBUTION: float,
-        ValueType.CLASS: str,
-    }[type]
+    dtype = VALUE_TYPE_DTYPE_MAPPING[type]
     value_strategy = VALUE_TYPE_VALUE_STRATEGY_MAPPING[type]
 
     value_range = draw(
         st.one_of(
             st.none(),
-            st.tuples(value_strategy, value_strategy).filter(lambda v: v[0] <= v[1]),
+            st.tuples(value_strategy, value_strategy).map(sorted),
         )
     )
     allowed_values = draw(
         st.one_of(st.none(), st.lists(value_strategy, unique=True, min_size=1))
     )
-    rescale = draw(st.one_of(st.just(1), value_strategy.filter(lambda v: v != 0)))
+    rescale = draw(st.one_of(st.just(1), value_strategy))
 
     v = Variable(
         name=name,
@@ -104,29 +108,23 @@ def variablecollection_strategy(
     num_variables: Optional[Tuple[int, int, int]] = None,
 ):
     if num_variables is not None:
-        num_ivs, num_dvs, n_covariates = num_variables
+        n_ivs, n_dvs, n_covariates = num_variables
     else:  # num_variables is None
-        num_ivs, num_dvs, n_covariates = draw(
-            st.tuples(
-                st.integers(min_value=0), st.integers(min_value=0), st.just(0)
-            ).filter(lambda n: sum(n) <= max_length)
-        )
+        n_ivs = draw(st.integers(min_value=0, max_value=max_length))
+        n_dvs = draw(st.integers(min_value=0, max_value=max_length - n_ivs))
+        n_covariates = 0
 
-    n_variables = sum((num_ivs, num_dvs, n_covariates))
+    n_variables = sum((n_ivs, n_dvs, n_covariates))
 
-    all_variables = draw(
-        st.lists(
-            variable_strategy(),
-            unique_by=lambda v: v.name,
-            min_size=n_variables,
-            max_size=n_variables,
-        )
+    names = draw(
+        st.lists(st.text(), unique=True, min_size=n_variables, max_size=n_variables)
     )
+    all_variables = [draw(variable_strategy(name=name)) for name in names]
 
     vc = VariableCollection(
-        independent_variables=all_variables[0:num_ivs],
-        dependent_variables=all_variables[num_ivs : num_ivs + num_dvs],
-        covariates=all_variables[num_ivs + num_dvs :],
+        independent_variables=all_variables[0:n_ivs],
+        dependent_variables=all_variables[n_ivs : n_ivs + n_dvs],
+        covariates=all_variables[n_ivs + n_dvs :],
     )
     return vc
 
@@ -137,11 +135,18 @@ def dataframe_strategy(
     variables: Optional[Sequence[Variable]] = None,
 ):
     if variables is None:
-        variables = draw(st.lists(variable_strategy(), unique_by=lambda v: v.name))
+        variable_collection = draw(variablecollection_strategy())
+        variables = (
+            variable_collection.independent_variables
+            + variable_collection.dependent_variables
+            + variable_collection.covariates
+        )
 
+    columns = [st_pd.column(name=v.name, dtype=v.data_type) for v in variables]
+    print(columns)
     df = draw(
         st_pd.data_frames(
-            columns=[st_pd.column(name=v.name, dtype=v.data_type) for v in variables],
+            columns=columns,
         )
     )
 
@@ -154,9 +159,9 @@ def model_strategy(draw):
         st.sampled_from(
             [
                 sklearn.dummy.DummyRegressor,
-                # sklearn.linear_model.LinearRegression,
-                # sklearn.linear_model.Ridge,
-                # sklearn.linear_model.BayesianRidge,
+                sklearn.linear_model.LinearRegression,
+                sklearn.linear_model.Ridge,
+                sklearn.linear_model.BayesianRidge,
             ]
         )
     )
@@ -195,10 +200,12 @@ def standard_state_dataclass_strategy(draw):
             )
         )
     )
+    models = draw(st.lists(model_strategy(), min_size=0, max_size=5))
     s = StandardStateDataClass(
         variables=variable_collection,
         conditions=conditions,
         experiment_data=experiment_data,
+        models=models,
     )
     return s
 

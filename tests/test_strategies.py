@@ -76,11 +76,17 @@ def data_length_strategy(draw, max_value=MAX_DATA_LENGTH):
 
 
 @st.composite
-def variable_strategy(draw, name=None):
+def variable_strategy(
+    draw,
+    name=None,
+    name_max_length=32,
+    variable_label_max_length=256,
+    units_max_length=32,
+):
     if name is None:
-        name = draw(st.text())
-    variable_label = draw(st.text())
-    units = draw(st.text())
+        name = draw(st.text(max_size=name_max_length))
+    variable_label = draw(st.text(max_size=variable_label_max_length))
+    units = draw(st.text(max_size=units_max_length))
     is_covariate = draw(st.booleans())
     type = draw(st.sampled_from(ValueType))
     dtype = VALUE_TYPE_DTYPE_MAPPING[type]
@@ -116,6 +122,8 @@ def variablecollection_strategy(
     draw,
     max_length=MAX_VARIABLES,
     num_variables: Optional[Tuple[int, int, int]] = None,
+    name_max_length=32,
+    **kwargs,
 ):
     if num_variables is not None:
         n_ivs, n_dvs, n_covariates = num_variables
@@ -130,17 +138,20 @@ def variablecollection_strategy(
 
     names = draw(
         st.lists(
-            st.text(min_size=1), unique=True, min_size=n_variables, max_size=n_variables
+            st.text(min_size=1, max_size=name_max_length),
+            unique=True,
+            min_size=n_variables,
+            max_size=n_variables,
         )
     )
     independent_variables = [
-        draw(variable_strategy(name=names.pop())) for _ in range(n_ivs)
+        draw(variable_strategy(name=names.pop(), **kwargs)) for _ in range(n_ivs)
     ]
     dependent_variables = [
-        draw(variable_strategy(name=names.pop())) for _ in range(n_dvs)
+        draw(variable_strategy(name=names.pop(), **kwargs)) for _ in range(n_dvs)
     ]
     covariates = [
-        draw(variable_strategy(name=names.pop())) for _ in range(n_covariates)
+        draw(variable_strategy(name=names.pop(), **kwargs)) for _ in range(n_covariates)
     ]
 
     vc = VariableCollection(
@@ -200,7 +211,11 @@ def model_strategy(draw, models=AVAILABLE_SKLEARN_MODELS_STRATEGY):
 
 @st.composite
 def standard_state_dataclass_strategy(draw):
-    variable_collection: VariableCollection = draw(variablecollection_strategy())
+    variable_collection: VariableCollection = draw(
+        variablecollection_strategy(
+            name_max_length=16, units_max_length=32, variable_label_max_length=32
+        )
+    )
     conditions = draw(
         dataframe_strategy(variables=variable_collection.independent_variables)
     )

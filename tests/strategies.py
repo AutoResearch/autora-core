@@ -6,7 +6,8 @@ import pandas as pd
 import sklearn.base
 import sklearn.dummy
 import sklearn.linear_model
-from hypothesis import strategies as st, given
+from hypothesis import given
+from hypothesis import strategies as st
 from hypothesis.extra import numpy as st_np
 from hypothesis.extra import pandas as st_pd
 
@@ -113,7 +114,9 @@ def variablecollection_strategy(
     else:  # num_variables is None
         n_ivs = draw(st.integers(min_value=1, max_value=max_length - 1))
         n_dvs = draw(st.integers(min_value=1, max_value=max_length - n_ivs))
-        n_covariates = draw(st.integers(min_value=0, max_value=max_length - n_ivs - n_dvs))
+        n_covariates = draw(
+            st.integers(min_value=0, max_value=max_length - n_ivs - n_dvs)
+        )
 
     n_variables = n_ivs + n_dvs + n_covariates
 
@@ -153,7 +156,8 @@ def dataframe_strategy(
             + variable_collection.covariates
         )
     df: pd.DataFrame = draw(
-        st_pd.data_frames(columns=[st_pd.column(name=v.name, dtype=v.data_type) for v in variables],
+        st_pd.data_frames(
+            columns=[st_pd.column(name=v.name, dtype=v.data_type) for v in variables],
         )
     )
 
@@ -196,7 +200,6 @@ def model_strategy(draw):
     )
 
     result = model().fit(X, y.ravel())
-    # print(X, y)
     return result
 
 
@@ -225,6 +228,7 @@ def standard_state_dataclass_strategy(draw):
     )
     return s
 
+
 @given(variable_strategy())
 def test_variable_strategy_creation(o):
     assert o
@@ -239,6 +243,7 @@ def test_variablecollection_strategy_creation(o):
 def test_dataframe_strategy_creation(o):
     assert o is not None
 
+
 @given(model_strategy())
 def test_model_strategy_creation(o):
     assert o
@@ -247,6 +252,7 @@ def test_model_strategy_creation(o):
 @given(standard_state_dataclass_strategy())
 def test_standard_state_dataclass_strategy_creation(o):
     assert o
+
 
 if __name__ == "__main__":
     print(model_strategy().example())

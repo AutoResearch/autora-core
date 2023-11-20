@@ -190,12 +190,8 @@ def model_strategy(draw, models=AVAILABLE_SKLEARN_MODELS_STRATEGY):
         max_value=1e5,
         min_magnitude=1e-3,
     )
-    X = draw(
-        st_np.arrays(float, shape=(n_measurements, n_x), elements=elements, unique=True)
-    )
-    y = draw(
-        st_np.arrays(float, shape=(n_measurements, n_y), elements=elements, unique=True)
-    )
+    X = draw(st_np.arrays(float, shape=(n_measurements, n_x), elements=elements))
+    y = draw(st_np.arrays(float, shape=(n_measurements, n_y), elements=elements))
 
     result = model().fit(X, y.ravel())
     return result

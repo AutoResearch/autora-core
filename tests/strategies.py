@@ -6,7 +6,7 @@ import pandas as pd
 import sklearn.base
 import sklearn.dummy
 import sklearn.linear_model
-from hypothesis import strategies as st
+from hypothesis import strategies as st, given
 from hypothesis.extra import numpy as st_np
 from hypothesis.extra import pandas as st_pd
 
@@ -227,6 +227,28 @@ def standard_state_dataclass_strategy(draw):
     )
     return s
 
+@given(variable_strategy())
+def test_variable_strategy_creation(o):
+    assert o
+
+
+@given(variablecollection_strategy())
+def test_variablecollection_strategy_creation(o):
+    assert o
+
+
+@given(dataframe_strategy())
+def test_dataframe_strategy_creation(o):
+    assert o is not None
+
+@given(model_strategy())
+def test_model_strategy_creation(o):
+    assert o
+
+
+@given(standard_state_dataclass_strategy())
+def test_standard_state_dataclass_strategy_creation(o):
+    assert o
 
 if __name__ == "__main__":
     print(model_strategy().example())

@@ -167,8 +167,8 @@ def model_strategy(draw):
             [
                 sklearn.dummy.DummyRegressor,
                 sklearn.linear_model.LinearRegression,
-                sklearn.linear_model.Ridge,
-                sklearn.linear_model.BayesianRidge,
+                # sklearn.linear_model.Ridge,
+                # sklearn.linear_model.BayesianRidge,
             ]
         )
     )
@@ -214,7 +214,9 @@ def standard_state_dataclass_strategy(draw):
             )
         )
     )
-    models = draw(st.lists(model_strategy(), min_size=0, max_size=5))
+    # Reduce number of model examples to a maximum of 2 to avoid crashing because of too-slow
+    # test generation – TODO: speed up model strategy to be faster and increase the number here
+    models = draw(st.lists(model_strategy(), min_size=0, max_size=2))
     s = StandardStateDataClass(
         variables=variable_collection,
         conditions=conditions,

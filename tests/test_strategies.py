@@ -3,7 +3,6 @@ from typing import Optional, Sequence, Tuple
 
 import numpy as np
 import pandas as pd
-import sklearn.base
 import sklearn.dummy
 import sklearn.linear_model
 from hypothesis import given

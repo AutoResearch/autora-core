@@ -212,6 +212,7 @@ def standard_state_dataclass_strategy(draw):
             variables=(
                 variable_collection.independent_variables
                 + variable_collection.dependent_variables
+                + variable_collection.covariates
             )
         )
     )

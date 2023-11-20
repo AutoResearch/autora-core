@@ -65,6 +65,8 @@ AVAILABLE_SKLEARN_MODELS_STRATEGY = st.sampled_from(
     [
         sklearn.dummy.DummyRegressor,
         sklearn.linear_model.LinearRegression,
+        sklearn.linear_model.Ridge,
+        sklearn.linear_model.BayesianRidge,
     ]
 )
 

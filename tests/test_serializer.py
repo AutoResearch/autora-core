@@ -42,7 +42,7 @@ def serializer_dump_load_string_strategy(draw):
     loads, dumps = serializer.module.loads, serializer.module.dumps
 
     def _load_dump_via_string(o):
-        print(f"load dump via string using {serializer.module=}")
+        logger.info(f"load dump via string using {serializer.module=}")
         return loads(dumps(o))
 
     return _load_dump_via_string
@@ -55,7 +55,7 @@ def serializer_dump_load_binary_file_strategy(draw):
     load, dump = serializer.module.load, serializer.module.dump
 
     def _load_dump_via_disk(o):
-        print(f"load dump via disk using {serializer.module=}")
+        logger.info(f"load dump via disk using {serializer.module=}")
         with tempfile.TemporaryDirectory() as tempdir:
             filename = str(uuid.uuid1())
             with open(pathlib.Path(tempdir, filename), f"w{serializer.file_type}") as f:

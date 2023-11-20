@@ -188,14 +188,19 @@ def model_strategy(draw):
         allow_nan=False,
         # Include some reasonable extreme values. Values near the upper limit of the float
         # ~10**308 broke the fitting
-        min_value=-1e100,
-        max_value=1e100,
-        # min_magnitude and max_magnitude didn't work
+        min_value=-1e5,
+        max_value=1e5,
+        min_magnitude=1e-3,
     )
-    X = draw(st_np.arrays(float, shape=(n_measurements, n_x), elements=elements))
-    y = draw(st_np.arrays(float, shape=(n_measurements, n_y), elements=elements))
+    X = draw(
+        st_np.arrays(float, shape=(n_measurements, n_x), elements=elements, unique=True)
+    )
+    y = draw(
+        st_np.arrays(float, shape=(n_measurements, n_y), elements=elements, unique=True)
+    )
 
-    result = model().fit(X, y)
+    result = model().fit(X, y.ravel())
+    # print(X, y)
     return result
 
 

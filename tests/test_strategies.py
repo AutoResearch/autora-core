@@ -213,7 +213,7 @@ def model_strategy(draw, models=AVAILABLE_SKLEARN_MODELS_STRATEGY):
 def standard_state_dataclass_strategy(draw):
     variable_collection: VariableCollection = draw(
         variablecollection_strategy(
-            name_max_length=16, units_max_length=32, variable_label_max_length=32
+            name_max_length=16, units_max_length=16, variable_label_max_length=32
         )
     )
     conditions = draw(

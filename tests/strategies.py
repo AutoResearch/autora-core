@@ -214,9 +214,7 @@ def standard_state_dataclass_strategy(draw):
             )
         )
     )
-    # Reduce number of model examples to a maximum of 2 to avoid crashing because of too-slow
-    # test generation – TODO: speed up model strategy to be faster and increase the number here
-    models = draw(st.lists(model_strategy(), min_size=0, max_size=2))
+    models = draw(st.lists(model_strategy(), min_size=0, max_size=10))
     s = StandardStateDataClass(
         variables=variable_collection,
         conditions=conditions,

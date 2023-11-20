@@ -3,8 +3,8 @@ import logging
 from hypothesis import given
 from hypothesis import strategies as st
 
-from .strategies import variable_strategy, variablecollection_strategy
 from .test_serializer import serializer_dump_load_strategy
+from .test_strategies import variable_strategy, variablecollection_strategy
 
 logger = logging.getLogger(__name__)
 

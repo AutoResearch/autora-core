@@ -5,8 +5,8 @@ from hypothesis import given
 
 from autora.state import StandardStateDataClass
 
-from .strategies import standard_state_dataclass_strategy
 from .test_serializer import serializer_dump_load_strategy
+from .test_strategies import standard_state_dataclass_strategy
 
 logger = logging.getLogger(__name__)
 

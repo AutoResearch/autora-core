@@ -179,7 +179,7 @@ def model_strategy(draw, models=AVAILABLE_SKLEARN_MODELS_STRATEGY):
 
     n_x = draw(st.integers(min_value=1, max_value=5))
     n_y = draw(st.integers(min_value=1, max_value=1))
-    n_measurements = draw(st.integers(min_value=5, max_value=50))
+    n_measurements = draw(st.integers(min_value=5, max_value=100))
 
     elements = st_np.from_dtype(
         np.dtype(float),

@@ -157,9 +157,6 @@ def dataframe_strategy(
         )
     )
 
-    # rename the columns here, as putting them in at initialization was unreliable
-    df.columns = [v.name for v in variables]
-
     return df
 
 

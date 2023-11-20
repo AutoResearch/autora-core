@@ -187,7 +187,7 @@ def model_strategy(draw, models=AVAILABLE_SKLEARN_MODELS_STRATEGY):
         allow_subnormal=False,
         allow_nan=False,
         # Include some reasonable extreme values. Values near the upper limit of the float
-        # ~10**308 broke the fitting
+        # ~10**308, and very small values broke the fitting
         min_value=-1e5,
         max_value=1e5,
         min_magnitude=1e-3,

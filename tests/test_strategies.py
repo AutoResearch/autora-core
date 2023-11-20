@@ -38,7 +38,7 @@ DEFAULT_VALUE_STRATEGY = st.sampled_from(
         st.text(),
     ]
 )
-MAX_VARIABLES = 10  # Max 10 variables in total, for speed of testing
+MAX_VARIABLES = 5  # Max 5 variables in total, for speed of testing
 MAX_DATA_LENGTH = 1000
 
 FLOAT_STRATEGIES = st.one_of(

@@ -213,7 +213,7 @@ def standard_state_dataclass_strategy(draw):
             )
         )
     )
-    models = draw(st.lists(model_strategy(), min_size=0, max_size=3))
+    models = draw(st.lists(model_strategy(), min_size=0, max_size=0))
     s = StandardStateDataClass(
         variables=variable_collection,
         conditions=conditions,

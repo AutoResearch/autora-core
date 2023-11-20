@@ -68,7 +68,7 @@ def data_length_strategy(draw, max_value=MAX_DATA_LENGTH):
 
 @st.composite
 def variable_strategy(draw, name=None):
-    if name is not None:
+    if name is None:
         name = draw(st.text())
     variable_label = draw(st.text())
     units = draw(st.text())

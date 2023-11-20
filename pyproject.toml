@@ -27,7 +27,8 @@ dev = [
 ]
 test = [
     "pytest",
-    "hypothesis[pandas]"
+    "hypothesis[pandas]",
+    "autora-core[serializers]"
 ]
 build = [
     "build",
@@ -50,7 +51,7 @@ docs = [
     "mkdocs-jupyter",
     "pymdown-extensions",
 ]
-serializers = ["dill"]
+serializers = ["dill", "pyyaml"]
 
 [tool.isort]
 profile = "black"

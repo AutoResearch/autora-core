@@ -10,7 +10,14 @@ logger = logging.getLogger(__name__)
 
 
 @given(
-    st.one_of(variable_strategy(), variablecollection_strategy()),
+    st.one_of(
+        variable_strategy(
+            name_max_length=256, units_max_length=256, variable_label_max_length=256
+        ),
+        variablecollection_strategy(
+            name_max_length=256, units_max_length=256, variable_label_max_length=256
+        ),
+    ),
     serializer_dump_load_strategy(),
 )
 def test_variable_serialize_deserialize(o, dump_load):

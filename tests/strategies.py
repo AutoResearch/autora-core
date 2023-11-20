@@ -61,6 +61,13 @@ VALUE_TYPE_VALUE_STRATEGY_MAPPING = {
     ValueType.CLASS: st.text(),
 }
 
+AVAILABLE_SKLEARN_MODELS_STRATEGY = st.sampled_from(
+    [
+        sklearn.dummy.DummyRegressor,
+        sklearn.linear_model.LinearRegression,
+    ]
+)
+
 
 @st.composite
 def data_length_strategy(draw, max_value=MAX_DATA_LENGTH):
@@ -165,17 +172,8 @@ def dataframe_strategy(
 
 
 @st.composite
-def model_strategy(draw):
-    model = draw(
-        st.sampled_from(
-            [
-                sklearn.dummy.DummyRegressor,
-                sklearn.linear_model.LinearRegression,
-                # sklearn.linear_model.Ridge,
-                # sklearn.linear_model.BayesianRidge,
-            ]
-        )
-    )
+def model_strategy(draw, models=AVAILABLE_SKLEARN_MODELS_STRATEGY):
+    model = draw(models)
 
     n_x = draw(st.integers(min_value=1, max_value=5))
     n_y = draw(st.integers(min_value=1, max_value=1))

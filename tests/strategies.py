@@ -123,13 +123,13 @@ def variablecollection_strategy(
         )
     )
     independent_variables = [
-        draw(variable_strategy(name=names.pop())) for i in range(n_ivs)
+        draw(variable_strategy(name=names.pop())) for _ in range(n_ivs)
     ]
     dependent_variables = [
-        draw(variable_strategy(name=names.pop())) for i in range(n_dvs)
+        draw(variable_strategy(name=names.pop())) for _ in range(n_dvs)
     ]
     covariates = [
-        draw(variable_strategy(name=names.pop())) for i in range(n_covariates)
+        draw(variable_strategy(name=names.pop())) for _ in range(n_covariates)
     ]
 
     vc = VariableCollection(

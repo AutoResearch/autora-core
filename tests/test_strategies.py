@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 import sklearn.dummy
 import sklearn.linear_model
-from hypothesis import given
+from hypothesis import HealthCheck, given, settings
 from hypothesis import strategies as st
 from hypothesis.extra import numpy as st_np
 from hypothesis.extra import pandas as st_pd
@@ -418,6 +418,7 @@ def standard_state_dataclass_strategy(draw):
     return s
 
 
+@settings(suppress_health_check={HealthCheck.too_slow})
 @given(standard_state_dataclass_strategy())
 def test_standard_state_dataclass_strategy_creation(o):
     assert o

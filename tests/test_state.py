@@ -1,7 +1,7 @@
 import logging
 
 import pandas as pd
-from hypothesis import given
+from hypothesis import HealthCheck, given, settings
 
 from autora.state import StandardStateDataClass
 
@@ -11,6 +11,7 @@ from .test_strategies import standard_state_dataclass_strategy
 logger = logging.getLogger(__name__)
 
 
+@settings(suppress_health_check={HealthCheck.too_slow})
 @given(standard_state_dataclass_strategy(), serializer_dump_load_strategy())
 def test_state_serialize_deserialize(o: StandardStateDataClass, dump_load):
     o_loaded = dump_load(o)

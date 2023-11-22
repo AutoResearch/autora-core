@@ -350,11 +350,16 @@ def dataframe_strategy(
 
     df: pd.DataFrame = draw(
         st_pd.data_frames(
-            columns=[st_pd.column(dtype=v.data_type) for v in variables],
+            columns=[st_pd.column(name=v.name, dtype=v.data_type) for v in variables],
         )
     )
 
     return df
+
+
+@given(dataframe_strategy())
+def test_dataframe_strategy_creation(o):
+    assert o is not None
 
 
 @st.composite
@@ -383,6 +388,11 @@ def model_strategy(draw, models=AVAILABLE_SKLEARN_MODELS_STRATEGY):
     return result
 
 
+@given(model_strategy())
+def test_model_strategy_creation(o):
+    assert o
+
+
 @st.composite
 def standard_state_dataclass_strategy(draw):
     variable_collection: VariableCollection = draw(variablecollection_strategy())
@@ -406,16 +416,6 @@ def standard_state_dataclass_strategy(draw):
         models=models,
     )
     return s
-
-
-@given(dataframe_strategy())
-def test_dataframe_strategy_creation(o):
-    assert o is not None
-
-
-@given(model_strategy())
-def test_model_strategy_creation(o):
-    assert o
 
 
 @given(standard_state_dataclass_strategy())

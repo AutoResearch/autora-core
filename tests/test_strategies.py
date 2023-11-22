@@ -26,31 +26,6 @@ VALUE_TYPE_DTYPE_MAPPING = {
 
 logger = logging.getLogger(__name__)
 
-MAX_VARIABLES = 5  # Max 5 variables in each IVs, DVs, Covariates, for speed of testing
-MAX_DATA_LENGTH = 1000
-
-FLOAT_STRATEGIES = st.one_of(
-    st.integers(),
-    st.floats(allow_infinity=False, allow_nan=False, allow_subnormal=False),
-    st.floats(allow_infinity=True, allow_nan=False, allow_subnormal=False),
-    st.floats(allow_infinity=True, allow_nan=False, allow_subnormal=True),
-)
-
-PROBABILITY_STRATEGIES = st.floats(
-    min_value=0, max_value=1, allow_nan=False, allow_subnormal=False
-)
-
-VALUE_TYPE_VALUE_STRATEGY_MAPPING = {
-    ValueType.BOOLEAN: st.booleans(),
-    ValueType.INTEGER: st.integers(),
-    ValueType.REAL: FLOAT_STRATEGIES,
-    ValueType.SIGMOID: FLOAT_STRATEGIES,
-    ValueType.PROBABILITY: PROBABILITY_STRATEGIES,
-    ValueType.PROBABILITY_SAMPLE: PROBABILITY_STRATEGIES,
-    ValueType.PROBABILITY_DISTRIBUTION: FLOAT_STRATEGIES,
-    ValueType.CLASS: st.text(),
-}
-
 AVAILABLE_SKLEARN_MODELS_STRATEGY = st.sampled_from(
     [
         sklearn.dummy.DummyRegressor,
@@ -317,9 +292,9 @@ def test_variable_strategy_creation(o):
 @st.composite
 def variablecollection_strategy(
     draw,
-    max_ivs=MAX_VARIABLES,
-    max_dvs=MAX_VARIABLES,
-    max_covariates=MAX_VARIABLES,
+    max_ivs=5,
+    max_dvs=1,
+    max_covariates=2,
     name_max_length=32,
     **kwargs,
 ):

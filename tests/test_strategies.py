@@ -73,14 +73,28 @@ def variable_strategy(
     name_max_length=32,
     variable_label_max_length=256,
     units_max_length=32,
+    value_type: Optional[ValueType] = None,
 ):
     if name is None:
         name = draw(st.text(max_size=name_max_length))
+    if value_type is None:
+        value_type = draw(
+            st.sampled_from(
+                [
+                    ValueType.BOOLEAN,
+                    ValueType.INTEGER,
+                    ValueType.REAL,
+                    ValueType.SIGMOID,
+                    ValueType.PROBABILITY,
+                    ValueType.PROBABILITY_SAMPLE,
+                    ValueType.PROBABILITY_DISTRIBUTION,
+                    ValueType.CLASS,
+                ]
+            )
+        )
     variable_label = draw(st.text(max_size=variable_label_max_length))
     units = draw(st.text(max_size=units_max_length))
     is_covariate = draw(st.booleans())
-
-    value_type = draw(st.sampled_from(ValueType))
 
     dtype = VALUE_TYPE_DTYPE_MAPPING[value_type]
 
@@ -91,7 +105,7 @@ def variable_strategy(
     elif value_type is ValueType.CLASS:
         value_range = None
         rescale = 1
-        allowed_values = draw(st.lists(st.text(min_size=1), unique=True))
+        allowed_values = draw(st.lists(st.text(min_size=1, max_size=16), unique=True))
     elif value_type is ValueType.INTEGER:
         value_range = draw(
             st.one_of(
@@ -129,6 +143,10 @@ def variable_strategy(
         ValueType.PROBABILITY_DISTRIBUTION,
     }:
         value_range = (0, 1)
+        allowed_values = None
+        rescale = 1
+    elif value_type is ValueType.SIGMOID:
+        value_range = (-np.inf, +np.inf)
         allowed_values = None
         rescale = 1
     else:  # Some float value

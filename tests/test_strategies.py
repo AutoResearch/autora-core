@@ -26,18 +26,6 @@ VALUE_TYPE_DTYPE_MAPPING = {
 
 logger = logging.getLogger(__name__)
 
-
-DEFAULT_VALUE_STRATEGY = st.sampled_from(
-    [
-        st.booleans(),
-        st.integers(),
-        st.floats(min_value=0, max_value=1, allow_nan=False, allow_subnormal=False),
-        st.floats(allow_infinity=False, allow_nan=False, allow_subnormal=False),
-        st.floats(allow_infinity=True, allow_nan=False, allow_subnormal=False),
-        st.floats(allow_infinity=True, allow_nan=False, allow_subnormal=True),
-        st.text(),
-    ]
-)
 MAX_VARIABLES = 5  # Max 5 variables in each IVs, DVs, Covariates, for speed of testing
 MAX_DATA_LENGTH = 1000
 
@@ -95,12 +83,46 @@ def variable_strategy(
     value_type = draw(st.sampled_from(ValueType))
 
     dtype = VALUE_TYPE_DTYPE_MAPPING[value_type]
-    value_strategy = VALUE_TYPE_VALUE_STRATEGY_MAPPING[value_type]
 
     if value_type is ValueType.BOOLEAN:
         allowed_values = [True, False]
         value_range = None
         rescale = 1
+    elif value_type is ValueType.CLASS:
+        value_range = None
+        rescale = 1
+        allowed_values = draw(st.lists(st.text(min_size=1), unique=True))
+    elif value_type is ValueType.INTEGER:
+        value_range = draw(
+            st.one_of(
+                st.none(),
+                st.lists(st.integers(), unique=True, min_size=2, max_size=2).map(
+                    sorted
+                ),
+            )
+        )
+        if value_range is None:
+            allowed_values = draw(
+                st.one_of(st.none(), st.lists(st.integers(), unique=True, min_size=1))
+            )
+        else:
+            allowed_values = draw(
+                st.one_of(
+                    st.none(),
+                    st.lists(
+                        st.integers(min_value=value_range[0], max_value=value_range[1]),
+                        unique=True,
+                        min_size=1,
+                    ),
+                )
+            )
+        rescale = draw(
+            st.one_of(
+                st.just(1),
+                st.integers(),
+                st.floats(allow_infinity=False, allow_subnormal=False, allow_nan=False),
+            )
+        )
     elif value_type in {
         ValueType.PROBABILITY,
         ValueType.PROBABILITY_SAMPLE,
@@ -109,17 +131,38 @@ def variable_strategy(
         value_range = (0, 1)
         allowed_values = None
         rescale = 1
-    else:
+    else:  # Some float value
+        range_strategy = st.floats(allow_nan=False, allow_subnormal=False)
         value_range = draw(
             st.one_of(
                 st.none(),
-                st.tuples(value_strategy, value_strategy).map(sorted),
+                st.lists(range_strategy, unique=True, min_size=2, max_size=2).map(
+                    sorted
+                ),
             )
         )
-        allowed_values = draw(
-            st.one_of(st.none(), st.lists(value_strategy, unique=True, min_size=1))
-        )
-        rescale = draw(st.one_of(st.just(1), value_strategy))
+
+        if value_range is None:
+            allowed_values = draw(
+                st.one_of(st.none(), st.lists(range_strategy, unique=True, min_size=1))
+            )
+        else:
+            allowed_values = draw(
+                st.one_of(
+                    st.none(),
+                    st.lists(
+                        st.floats(
+                            min_value=value_range[0],
+                            max_value=value_range[1],
+                            allow_nan=False,
+                            allow_subnormal=False,
+                        ),
+                        unique=True,
+                        min_size=1,
+                    ),
+                )
+            )
+        rescale = draw(st.one_of(st.just(1), range_strategy))
 
     v = Variable(
         name=name,
@@ -233,7 +276,9 @@ def model_strategy(draw, models=AVAILABLE_SKLEARN_MODELS_STRATEGY):
 def standard_state_dataclass_strategy(draw):
     variable_collection: VariableCollection = draw(
         variablecollection_strategy(
-            name_max_length=16, units_max_length=16, variable_label_max_length=32
+            name_max_length=16,
+            variable_label_max_length=18,
+            units_max_length=17,
         )
     )
     conditions = draw(

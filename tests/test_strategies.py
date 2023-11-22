@@ -182,6 +182,60 @@ def variable_probability_strategy(
 
 
 @st.composite
+def variable_probability_sample_strategy(
+    draw, name=None, label=None, units=None, covariate=None
+):
+    name, label, units, covariate = draw(
+        _name_label_units_strategy(
+            name=name, label=label, units=units, covariate=covariate
+        )
+    )
+    value_type = ValueType.PROBABILITY_SAMPLE
+    dtype = float
+    value_range = (0, 1)
+    allowed_values = None
+    rescale = 1
+    return Variable(
+        name=name,
+        variable_label=label,
+        units=units,
+        type=value_type,
+        is_covariate=covariate,
+        value_range=value_range,
+        allowed_values=allowed_values,
+        rescale=rescale,
+        data_type=dtype,
+    )
+
+
+@st.composite
+def variable_probability_distribution_strategy(
+    draw, name=None, label=None, units=None, covariate=None
+):
+    name, label, units, covariate = draw(
+        _name_label_units_strategy(
+            name=name, label=label, units=units, covariate=covariate
+        )
+    )
+    value_type = ValueType.PROBABILITY_DISTRIBUTION
+    dtype = float
+    value_range = (0, 1)
+    allowed_values = None
+    rescale = 1
+    return Variable(
+        name=name,
+        variable_label=label,
+        units=units,
+        type=value_type,
+        is_covariate=covariate,
+        value_range=value_range,
+        allowed_values=allowed_values,
+        rescale=rescale,
+        data_type=dtype,
+    )
+
+
+@st.composite
 def variable_sigmoid_strategy(draw, name=None, label=None, units=None, covariate=None):
     name, label, units, covariate = draw(
         _name_label_units_strategy(
@@ -235,6 +289,8 @@ VARIABLE_STRATEGIES = (
     variable_boolean_strategy,
     variable_integer_strategy,
     variable_probability_strategy,
+    variable_probability_sample_strategy,
+    variable_probability_distribution_strategy,
     variable_sigmoid_strategy,
     variable_real_strategy,
     variable_class_strategy,
@@ -255,8 +311,8 @@ def variable_strategy(
             ValueType.REAL: variable_real_strategy,
             ValueType.SIGMOID: variable_sigmoid_strategy,
             ValueType.PROBABILITY: variable_probability_strategy,
-            # ValueType.PROBABILITY_SAMPLE: variable_PROBABILITY_SAMPLE_strategy,
-            # ValueType.PROBABILITY_DISTRIBUTION: variable_PROBABILITY_DISTRIBUTION_strategy,
+            ValueType.PROBABILITY_SAMPLE: variable_probability_sample_strategy,
+            ValueType.PROBABILITY_DISTRIBUTION: variable_probability_distribution_strategy,
             ValueType.CLASS: variable_class_strategy,
         }[value_type]
     return draw(strategy(**kwargs))

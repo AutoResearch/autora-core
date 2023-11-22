@@ -388,13 +388,7 @@ def model_strategy(draw, models=AVAILABLE_SKLEARN_MODELS_STRATEGY):
 
 @st.composite
 def standard_state_dataclass_strategy(draw):
-    variable_collection: VariableCollection = draw(
-        variablecollection_strategy(
-            name_max_length=16,
-            variable_label_max_length=18,
-            units_max_length=17,
-        )
-    )
+    variable_collection: VariableCollection = draw(variablecollection_strategy())
     conditions = draw(
         dataframe_strategy(variables=variable_collection.independent_variables)
     )

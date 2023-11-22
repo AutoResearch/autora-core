@@ -1,5 +1,5 @@
 import logging
-from typing import Optional, Sequence, Tuple
+from typing import Optional, Sequence
 
 import numpy as np
 import pandas as pd
@@ -62,158 +62,274 @@ AVAILABLE_SKLEARN_MODELS_STRATEGY = st.sampled_from(
 
 
 @st.composite
-def data_length_strategy(draw, max_value=MAX_DATA_LENGTH):
-    return draw(st.integers(min_value=0, max_value=max_value))
+def _name_label_units_strategy(draw, name=None, label=None, units=None, covariate=None):
+    if name is None:
+        name = draw(st.text(min_size=1))
+    if label is None:
+        label = draw(st.text(min_size=0))
+    if units is None:
+        units = draw(st.text(min_size=0))
+    if covariate is None:
+        covariate = draw(st.booleans())
+    return name, label, units, covariate
 
 
 @st.composite
-def variable_strategy(
-    draw,
-    name=None,
-    name_max_length=32,
-    variable_label_max_length=256,
-    units_max_length=32,
-    value_type: Optional[ValueType] = None,
-):
-    if name is None:
-        name = draw(st.text(max_size=name_max_length))
-    if value_type is None:
-        value_type = draw(
-            st.sampled_from(
-                [
-                    ValueType.BOOLEAN,
-                    ValueType.INTEGER,
-                    ValueType.REAL,
-                    ValueType.SIGMOID,
-                    ValueType.PROBABILITY,
-                    ValueType.PROBABILITY_SAMPLE,
-                    ValueType.PROBABILITY_DISTRIBUTION,
-                    ValueType.CLASS,
-                ]
-            )
+def variable_boolean_strategy(draw, name=None, label=None, units=None, covariate=None):
+    name, label, units, covariate = draw(
+        _name_label_units_strategy(
+            name=name, label=label, units=units, covariate=covariate
         )
-    variable_label = draw(st.text(max_size=variable_label_max_length))
-    units = draw(st.text(max_size=units_max_length))
-    is_covariate = draw(st.booleans())
-
-    dtype = VALUE_TYPE_DTYPE_MAPPING[value_type]
-
-    if value_type is ValueType.BOOLEAN:
-        allowed_values = [True, False]
-        value_range = None
-        rescale = 1
-    elif value_type is ValueType.CLASS:
-        value_range = None
-        rescale = 1
-        allowed_values = draw(st.lists(st.text(min_size=1, max_size=16), unique=True))
-    elif value_type is ValueType.INTEGER:
-        value_range = draw(
-            st.one_of(
-                st.none(),
-                st.lists(st.integers(), unique=True, min_size=2, max_size=2).map(
-                    sorted
-                ),
-            )
-        )
-        if value_range is None:
-            allowed_values = draw(
-                st.one_of(st.none(), st.lists(st.integers(), unique=True, min_size=1))
-            )
-        else:
-            allowed_values = draw(
-                st.one_of(
-                    st.none(),
-                    st.lists(
-                        st.integers(min_value=value_range[0], max_value=value_range[1]),
-                        unique=True,
-                        min_size=1,
-                    ),
-                )
-            )
-        rescale = draw(
-            st.one_of(
-                st.just(1),
-                st.integers(),
-                st.floats(allow_infinity=False, allow_subnormal=False, allow_nan=False),
-            )
-        )
-    elif value_type in {
-        ValueType.PROBABILITY,
-        ValueType.PROBABILITY_SAMPLE,
-        ValueType.PROBABILITY_DISTRIBUTION,
-    }:
-        value_range = (0, 1)
-        allowed_values = None
-        rescale = 1
-    elif value_type is ValueType.SIGMOID:
-        value_range = (-np.inf, +np.inf)
-        allowed_values = None
-        rescale = 1
-    else:  # Some float value
-        range_strategy = st.floats(allow_nan=False, allow_subnormal=False)
-        value_range = draw(
-            st.one_of(
-                st.none(),
-                st.lists(range_strategy, unique=True, min_size=2, max_size=2).map(
-                    sorted
-                ),
-            )
-        )
-
-        if value_range is None:
-            allowed_values = draw(
-                st.one_of(st.none(), st.lists(range_strategy, unique=True, min_size=1))
-            )
-        else:
-            allowed_values = draw(
-                st.one_of(
-                    st.none(),
-                    st.lists(
-                        st.floats(
-                            min_value=value_range[0],
-                            max_value=value_range[1],
-                            allow_nan=False,
-                            allow_subnormal=False,
-                        ),
-                        unique=True,
-                        min_size=1,
-                    ),
-                )
-            )
-        rescale = draw(st.one_of(st.just(1), range_strategy))
-
-    v = Variable(
+    )
+    value_type = ValueType.BOOLEAN
+    dtype = bool
+    allowed_values = [True, False]
+    value_range = None
+    rescale = 1
+    return Variable(
         name=name,
-        variable_label=variable_label,
+        variable_label=label,
         units=units,
         type=value_type,
-        is_covariate=is_covariate,
+        is_covariate=covariate,
         value_range=value_range,
         allowed_values=allowed_values,
         rescale=rescale,
         data_type=dtype,
     )
-    return v
+
+
+@st.composite
+def variable_integer_strategy(draw, name=None, label=None, units=None, covariate=None):
+    name, label, units, covariate = draw(
+        _name_label_units_strategy(
+            name=name, label=label, units=units, covariate=covariate
+        )
+    )
+    value_type = ValueType.INTEGER
+    dtype = int
+    value_range = draw(
+        st.one_of(
+            st.none(),
+            st.tuples(st.integers(), st.integers())
+            .filter(lambda x: x[0] != x[1])
+            .map(sorted),
+        )
+    )
+    if value_range is None:
+        allowed_values = draw(
+            st.one_of(st.none(), st.lists(st.integers(), unique=True, min_size=1))
+        )
+    else:
+        allowed_values = draw(
+            st.one_of(
+                st.none(),
+                st.lists(
+                    st.integers(min_value=value_range[0], max_value=value_range[1]),
+                    unique=True,
+                    min_size=1,
+                ),
+            )
+        )
+    rescale = draw(
+        st.one_of(
+            st.just(1),
+            st.integers(),
+            st.floats(allow_infinity=False, allow_subnormal=False, allow_nan=False),
+        )
+    )
+    return Variable(
+        name=name,
+        variable_label=label,
+        units=units,
+        type=value_type,
+        is_covariate=covariate,
+        value_range=value_range,
+        allowed_values=allowed_values,
+        rescale=rescale,
+        data_type=dtype,
+    )
+
+
+@st.composite
+def variable_real_strategy(draw, name=None, label=None, units=None, covariate=None):
+    name, label, units, covariate = draw(
+        _name_label_units_strategy(
+            name=name, label=label, units=units, covariate=covariate
+        )
+    )
+    value_type = ValueType.REAL
+    dtype = float
+    range_strategy = st.floats(allow_nan=False, allow_subnormal=False)
+    value_range = draw(
+        st.one_of(
+            st.none(),
+            st.tuples(range_strategy, range_strategy)
+            .filter(lambda x: x[0] != x[1])
+            .map(sorted),
+        )
+    )
+
+    if value_range is None:
+        allowed_values = draw(
+            st.one_of(st.none(), st.lists(range_strategy, unique=True, min_size=1))
+        )
+    else:
+        allowed_values = draw(
+            st.one_of(
+                st.none(),
+                st.lists(
+                    st.floats(
+                        min_value=value_range[0],
+                        max_value=value_range[1],
+                        allow_nan=False,
+                        allow_subnormal=False,
+                    ),
+                    unique=True,
+                    min_size=1,
+                ),
+            )
+        )
+    rescale = draw(st.one_of(st.just(1), range_strategy))
+    return Variable(
+        name=name,
+        variable_label=label,
+        units=units,
+        type=value_type,
+        is_covariate=covariate,
+        value_range=value_range,
+        allowed_values=allowed_values,
+        rescale=rescale,
+        data_type=dtype,
+    )
+
+
+@st.composite
+def variable_probability_strategy(
+    draw, name=None, label=None, units=None, covariate=None
+):
+    name, label, units, covariate = draw(
+        _name_label_units_strategy(
+            name=name, label=label, units=units, covariate=covariate
+        )
+    )
+    value_type = ValueType.PROBABILITY
+    dtype = float
+    value_range = (0, 1)
+    allowed_values = None
+    rescale = 1
+    return Variable(
+        name=name,
+        variable_label=label,
+        units=units,
+        type=value_type,
+        is_covariate=covariate,
+        value_range=value_range,
+        allowed_values=allowed_values,
+        rescale=rescale,
+        data_type=dtype,
+    )
+
+
+@st.composite
+def variable_sigmoid_strategy(draw, name=None, label=None, units=None, covariate=None):
+    name, label, units, covariate = draw(
+        _name_label_units_strategy(
+            name=name, label=label, units=units, covariate=covariate
+        )
+    )
+    value_type = ValueType.SIGMOID
+    dtype = float
+    value_range = (-np.inf, +np.inf)
+    allowed_values = None
+    rescale = 1
+    return Variable(
+        name=name,
+        variable_label=label,
+        units=units,
+        type=value_type,
+        is_covariate=covariate,
+        value_range=value_range,
+        allowed_values=allowed_values,
+        rescale=rescale,
+        data_type=dtype,
+    )
+
+
+@st.composite
+def variable_class_strategy(draw, name=None, label=None, units=None, covariate=None):
+    name, label, units, covariate = draw(
+        _name_label_units_strategy(
+            name=name, label=label, units=units, covariate=covariate
+        )
+    )
+    value_type = ValueType.CLASS
+    dtype = str
+    value_range = None
+    rescale = 1
+    allowed_values = draw(st.lists(st.text(min_size=1, max_size=16), unique=True))
+    return Variable(
+        name=name,
+        variable_label=label,
+        units=units,
+        type=value_type,
+        is_covariate=covariate,
+        value_range=value_range,
+        allowed_values=allowed_values,
+        rescale=rescale,
+        data_type=dtype,
+    )
+
+
+@st.composite
+def variable_strategy(draw, value_type: Optional[ValueType] = None, **kwargs):
+    if value_type is None:
+        return draw(
+            st.one_of(
+                variable_boolean_strategy(**kwargs),
+                variable_integer_strategy(**kwargs),
+                variable_real_strategy(**kwargs),
+                variable_probability_strategy(**kwargs),
+                variable_sigmoid_strategy(**kwargs),
+                variable_class_strategy(**kwargs),
+            )
+        )
+    else:
+        return draw(
+            {
+                ValueType.BOOLEAN: variable_boolean_strategy,
+                ValueType.INTEGER: variable_integer_strategy,
+                ValueType.REAL: variable_real_strategy,
+                ValueType.SIGMOID: variable_sigmoid_strategy,
+                ValueType.PROBABILITY: variable_probability_strategy,
+                # ValueType.PROBABILITY_SAMPLE: variable_PROBABILITY_SAMPLE_strategy,
+                # ValueType.PROBABILITY_DISTRIBUTION: variable_PROBABILITY_DISTRIBUTION_strategy,
+                ValueType.CLASS: variable_class_strategy,
+            }[value_type](**kwargs)
+        )
+
+
+@given(variable_strategy())
+def test_variable_strategy_creation(o):
+    assert o
 
 
 @st.composite
 def variablecollection_strategy(
     draw,
-    max_length=MAX_VARIABLES,
-    num_variables: Optional[Tuple[int, int, int]] = None,
+    max_ivs=MAX_VARIABLES,
+    max_dvs=MAX_VARIABLES,
+    max_covariates=MAX_VARIABLES,
     name_max_length=32,
     **kwargs,
 ):
-    if num_variables is not None:
-        n_ivs, n_dvs, n_covariates = num_variables
-    else:  # num_variables is None
-        n_ivs, n_dvs, n_covariates = draw(
-            st.tuples(
-                st.integers(min_value=1, max_value=max_length),
-                st.integers(min_value=1, max_value=max_length),
-                st.integers(min_value=0, max_value=max_length),
-            )
+    n_ivs, n_dvs, n_covariates = draw(
+        st.tuples(
+            st.integers(min_value=1, max_value=max_ivs),
+            st.integers(min_value=1, max_value=max_dvs),
+            st.integers(min_value=0, max_value=max_covariates),
         )
+    )
 
     n_variables = n_ivs + n_dvs + n_covariates
 
@@ -241,6 +357,11 @@ def variablecollection_strategy(
         covariates=covariates,
     )
     return vc
+
+
+@given(variablecollection_strategy())
+def test_variablecollection_strategy_creation(o):
+    assert o
 
 
 @st.composite
@@ -319,16 +440,6 @@ def standard_state_dataclass_strategy(draw):
         models=models,
     )
     return s
-
-
-@given(variable_strategy())
-def test_variable_strategy_creation(o):
-    assert o
-
-
-@given(variablecollection_strategy())
-def test_variablecollection_strategy_creation(o):
-    assert o
 
 
 @given(dataframe_strategy())

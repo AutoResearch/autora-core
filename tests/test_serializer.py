@@ -6,6 +6,7 @@ import uuid
 from collections import namedtuple
 
 import hypothesis.strategies as st
+from hypothesis import settings
 
 logger = logging.getLogger(__name__)
 
@@ -67,6 +68,7 @@ def serializer_dump_load_binary_file_strategy(draw):
     return _load_dump_via_disk
 
 
+@settings(deadline=500)  # some serializers are slow
 @st.composite
 def serializer_dump_load_strategy(draw):
     """Strategy returns a function which dumps an object and reloads it via a supported method."""

@@ -38,7 +38,7 @@ DEFAULT_VALUE_STRATEGY = st.sampled_from(
         st.text(),
     ]
 )
-MAX_VARIABLES = 5  # Max 5 variables in total, for speed of testing
+MAX_VARIABLES = 5  # Max 5 variables in each IVs, DVs, Covariates, for speed of testing
 MAX_DATA_LENGTH = 1000
 
 FLOAT_STRATEGIES = st.one_of(
@@ -128,11 +128,9 @@ def variablecollection_strategy(
     if num_variables is not None:
         n_ivs, n_dvs, n_covariates = num_variables
     else:  # num_variables is None
-        n_ivs = draw(st.integers(min_value=1, max_value=max_length - 1))
-        n_dvs = draw(st.integers(min_value=1, max_value=max_length - n_ivs))
-        n_covariates = draw(
-            st.integers(min_value=0, max_value=max_length - n_ivs - n_dvs)
-        )
+        n_ivs = draw(st.integers(min_value=1, max_value=max_length))
+        n_dvs = draw(st.integers(min_value=1, max_value=max_length))
+        n_covariates = draw(st.integers(min_value=0, max_value=max_length))
 
     n_variables = n_ivs + n_dvs + n_covariates
 

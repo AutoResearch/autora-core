@@ -26,32 +26,28 @@
             $CYLC_WORKFLOW_SHARE_DIR/env/bin/python \
                 -m autora.workflow \
                 components.initial_state \
-                --out-path "$CYLC_WORKFLOW_SHARE_DIR/$CYLC_TASK_CYCLE_POINT/result.dill" \
-                --debug
+                --out-path "$CYLC_WORKFLOW_SHARE_DIR/$CYLC_TASK_CYCLE_POINT/result"
         """
     [[experimentalist]]
         script = """
             $CYLC_WORKFLOW_SHARE_DIR/env/bin/python -m autora.workflow \
                 components.experimentalist \
-                --in-path "$CYLC_WORKFLOW_SHARE_DIR/$((CYLC_TASK_CYCLE_POINT - 1))/result.dill" \
-                --out-path "$CYLC_WORKFLOW_SHARE_DIR/$CYLC_TASK_CYCLE_POINT/conditions.dill" \
-                --debug
+                --in-path "$CYLC_WORKFLOW_SHARE_DIR/$((CYLC_TASK_CYCLE_POINT - 1))/result" \
+                --out-path "$CYLC_WORKFLOW_SHARE_DIR/$CYLC_TASK_CYCLE_POINT/conditions"
         """
     [[experiment_runner]]
         script = """
             $CYLC_WORKFLOW_SHARE_DIR/env/bin/python -m autora.workflow \
                 components.experiment_runner \
-                --in-path "$CYLC_WORKFLOW_SHARE_DIR/$CYLC_TASK_CYCLE_POINT/conditions.dill" \
-                --out-path "$CYLC_WORKFLOW_SHARE_DIR/$CYLC_TASK_CYCLE_POINT/data.dill" \
-                --debug
+                --in-path "$CYLC_WORKFLOW_SHARE_DIR/$CYLC_TASK_CYCLE_POINT/conditions" \
+                --out-path "$CYLC_WORKFLOW_SHARE_DIR/$CYLC_TASK_CYCLE_POINT/data"
         """
     [[theorist]]
         script = """
             $CYLC_WORKFLOW_SHARE_DIR/env/bin/python -m autora.workflow \
                 components.theorist \
-                --in-path "$CYLC_WORKFLOW_SHARE_DIR/$CYLC_TASK_CYCLE_POINT/data.dill" \
-                --out-path "$CYLC_WORKFLOW_SHARE_DIR/$CYLC_TASK_CYCLE_POINT/result.dill" \
-                --debug
+                --in-path "$CYLC_WORKFLOW_SHARE_DIR/$CYLC_TASK_CYCLE_POINT/data" \
+                --out-path "$CYLC_WORKFLOW_SHARE_DIR/$CYLC_TASK_CYCLE_POINT/result"
         """
 
 

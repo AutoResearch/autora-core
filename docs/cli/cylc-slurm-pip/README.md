@@ -16,16 +16,32 @@ A new environment will be created during the setup phase of the `cylc` workflow 
 
 Cylc requires a site-specific setup when using a scheduler like slurm. See the cylc documentation for a guide on setting up cylc on your platform.
 For Oscar at Brown University, we can use the following configuration in 
-[`./global.cylc`](./global.cylc)
+[`./global.cylc`](global.cylc)
+
+```ini
+--8<-- "https://raw.githubusercontent.com/AutoResearch/autora-workflow/main/docs/cli/cylc-slurm-pip/global.cylc"
+```
+
 
 ## Setup
 
 To initialize the workflow, we define a file in the`lib/python` directory 
 [(a cylc convention)](https://cylc.github.io/cylc-doc/stable/html/user-guide/writing-workflows/configuration.html#workflow-configuration-directories) with the code for the experiment: 
-[`lib/python/components.py`](./lib/python/controller_setup.py), including all the required functions. These 
-functions will be called in turn by the `autora.workflow.__main__` script.
+[`lib/python/runner.py`](./lib/python/runner.py), including all the required functions. 
 
-The [`flow.cylc`](./flow.cylc) file defines the workflow.
+```python
+--8<-- "https://raw.githubusercontent.com/AutoResearch/autora-workflow/main/docs/cli/cylc-slurm-pip/lib/python/runner.py"
+```
+
+
+These functions will be called in turn by the `autora.workflow` script.
+
+The [`flow.cylc`](flow.cylc) file defines the workflow.
+
+```ini
+--8<-- "https://raw.githubusercontent.com/AutoResearch/autora-workflow/main/docs/cli/cylc-slurm-pip/flow.cylc"
+```
+
 
 ## Execution
 
@@ -46,17 +62,10 @@ cylc gui
 We can load and interrogate the resulting object in Python as follows:
 
 ```python
-import os
-import dill
 
-from autora.state import State
+from autora.serializer import load_state
 
-def show_results(s: State):
-    print(s)
-
-with open(os.path.expanduser("~/cylc-run/cylc-pip/runN/share/controller.dill"),"rb") as file:
-    state = dill.load(file)
-
-show_results(state)
+state = load_state("~/cylc-run/cylc-slurm-pip/runN/share/result")
+print(state)
 ```
 

@@ -13,7 +13,7 @@ _logger = logging.getLogger(__name__)
 
 # Developer notes:
 # Add a new serializer by:
-# - including its name in the SerializersSupported Enum. This {name} will be available on the
+# - including its name in the SupportedSerializer Enum. This {name} will be available on the
 #   command line: `python -m autora.workflow --serializer {name}`
 # - Adding the basic data about it to the _SERIALIZER_INFO dictionary. This should include the
 #   fully qualified name under which it can be imported, and which file mode it expects:
@@ -26,7 +26,7 @@ _SERIALIZER_INFO_ENTRY = namedtuple(
 LOADED_SERIALIZER = namedtuple("LOADED_SERIALIZER", ["module", "file_mode"])
 
 
-class SerializersSupported(str, Enum):
+class SupportedSerializer(str, Enum):
     """Listing of allowed serializers."""
 
     pickle = "pickle"
@@ -35,21 +35,21 @@ class SerializersSupported(str, Enum):
 
 
 # Dictionary of details about each serializer
-_SERIALIZER_INFO: Dict[SerializersSupported, _SERIALIZER_INFO_ENTRY] = {
-    SerializersSupported.pickle: _SERIALIZER_INFO_ENTRY("pickle", "b"),
-    SerializersSupported.dill: _SERIALIZER_INFO_ENTRY("dill", "b"),
-    SerializersSupported.yaml: _SERIALIZER_INFO_ENTRY("autora.serializer.yaml_", ""),
+_SERIALIZER_INFO: Dict[SupportedSerializer, _SERIALIZER_INFO_ENTRY] = {
+    SupportedSerializer.pickle: _SERIALIZER_INFO_ENTRY("pickle", "b"),
+    SupportedSerializer.dill: _SERIALIZER_INFO_ENTRY("dill", "b"),
+    SupportedSerializer.yaml: _SERIALIZER_INFO_ENTRY("autora.serializer.yaml_", ""),
 }
 
 # Set the default serializer for the package
-default_serializer = SerializersSupported.pickle
+default_serializer = SupportedSerializer.pickle
 
 # A dictionary to handle lazy loading of the serializers
-_LOADED_SERIALIZERS: Dict[SerializersSupported, LOADED_SERIALIZER] = dict()
+_LOADED_SERIALIZERS: Dict[SupportedSerializer, LOADED_SERIALIZER] = dict()
 
 
 def load_serializer(
-    serializer: Union[SerializersSupported, str] = default_serializer
+    serializer: Union[SupportedSerializer, str] = default_serializer
 ) -> LOADED_SERIALIZER:
     """
     Load a serializer, returning an object which includes data on the file mode it expects
@@ -87,17 +87,17 @@ def load_serializer(
         True
 
         The Serializer can be specified by the SerializersSupported enum:
-        >>> load_serializer(SerializersSupported.pickle)  # doctest: +ELLIPSIS
+        >>> load_serializer(SupportedSerializer.pickle)  # doctest: +ELLIPSIS
         LOADED_SERIALIZER(module=<module 'pickle'...
 
-        >>> load_serializer(SerializersSupported.dill)  # doctest: +ELLIPSIS
+        >>> load_serializer(SupportedSerializer.dill)  # doctest: +ELLIPSIS
         LOADED_SERIALIZER(module=<module 'dill'...
 
-        >>> load_serializer(SerializersSupported.yaml)  # doctest: +ELLIPSIS
+        >>> load_serializer(SupportedSerializer.yaml)  # doctest: +ELLIPSIS
         LOADED_SERIALIZER(module=<module 'autora.serializer.yaml_'...
 
     """
-    serializer = SerializersSupported(serializer)
+    serializer = SupportedSerializer(serializer)
     try:
         serializer_def = _LOADED_SERIALIZERS[serializer]
 
@@ -112,7 +112,7 @@ def load_serializer(
 
 def load_state(
     path: Optional[pathlib.Path],
-    loader: SerializersSupported = default_serializer,
+    loader: SupportedSerializer = default_serializer,
 ) -> Union[State, None]:
     """Load a State object from a path."""
     serializer = load_serializer(loader)
@@ -129,7 +129,7 @@ def load_state(
 def dump_state(
     state_: State,
     path: Optional[pathlib.Path],
-    dumper: SerializersSupported = default_serializer,
+    dumper: SupportedSerializer = default_serializer,
 ) -> None:
     """Write a State object to a path."""
     serializer = load_serializer(dumper)

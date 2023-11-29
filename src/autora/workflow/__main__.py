@@ -7,7 +7,7 @@ import typer
 from typing_extensions import Annotated
 
 from autora.serializer import (
-    SerializersSupported,
+    SupportedSerializer,
     default_serializer,
     dump_state,
     load_state,
@@ -28,7 +28,7 @@ def main(
         typer.Option(help="Path to a file with the initial state"),
     ] = None,
     in_loader: Annotated[
-        SerializersSupported,
+        SupportedSerializer,
         typer.Option(
             help="(de)serializer to load the data",
         ),
@@ -38,7 +38,7 @@ def main(
         typer.Option(help="Path to output the final state"),
     ] = None,
     out_dumper: Annotated[
-        SerializersSupported,
+        SupportedSerializer,
         typer.Option(
             help="serializer to save the data",
         ),

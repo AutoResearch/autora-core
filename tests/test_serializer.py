@@ -5,15 +5,11 @@ import uuid
 
 import hypothesis.strategies as st
 
-from autora.serializer import SerializersSupported, load_serializer
+from autora.serializer import SupportedSerializer, load_serializer
 
 logger = logging.getLogger(__name__)
 
 
-# Define an ordered list of serializers we're going to test.
-AVAILABLE_SERIALIZERS = st.sampled_from(
-    [load_serializer(s) for s in SerializersSupported]
-)
 
 
 @st.composite
@@ -47,6 +43,9 @@ def serializer_dump_load_binary_file_strategy(draw):
 
     return _load_dump_via_disk
 
+# Preload all the serializer modules to avoid delays when running each the first time (which could
+# cause issues for hypothesis)
+[load_serializer(s) for s in SupportedSerializer]
 
 @st.composite
 def serializer_dump_load_strategy(draw):

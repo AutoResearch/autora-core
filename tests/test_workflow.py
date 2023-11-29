@@ -7,7 +7,7 @@ import numpy as np
 from hypothesis import Verbosity, given, settings
 from hypothesis import strategies as st
 
-from autora.serializer import SerializersSupported, load_state
+from autora.serializer import SupportedSerializer, load_state
 from autora.state import StandardState, State
 from autora.workflow.__main__ import main
 
@@ -68,7 +68,7 @@ def test_e2e_nominal(workflow_library_module):
 
 @given(
     example_workflow_library_module,
-    st.sampled_from(SerializersSupported),
+    st.sampled_from(SupportedSerializer),
     st.booleans(),
     st.booleans(),
 )
@@ -113,10 +113,10 @@ def test_e2e_serializers(workflow_library_module, serializer, verbose, debug):
 
 @given(
     example_workflow_library_module,
-    st.sampled_from(SerializersSupported),
-    st.sampled_from(SerializersSupported),
-    st.sampled_from(SerializersSupported),
-    st.sampled_from(SerializersSupported),
+    st.sampled_from(SupportedSerializer),
+    st.sampled_from(SupportedSerializer),
+    st.sampled_from(SupportedSerializer),
+    st.sampled_from(SupportedSerializer),
     st.booleans(),
     st.booleans(),
 )

@@ -58,9 +58,9 @@ def serializer_dump_load_binary_file_strategy(draw):
         logger.info(f"load dump via disk using {serializer.module=}")
         with tempfile.TemporaryDirectory() as tempdir:
             filename = str(uuid.uuid1())
-            with open(pathlib.Path(tempdir, filename), f"w{serializer.file_type}") as f:
+            with open(pathlib.Path(tempdir, filename), f"w{serializer.file_mode}") as f:
                 dump(o, f)
-            with open(pathlib.Path(tempdir, filename), f"r{serializer.file_type}") as f:
+            with open(pathlib.Path(tempdir, filename), f"r{serializer.file_mode}") as f:
                 o_loaded = load(f)
         return o_loaded
 

@@ -26,4 +26,4 @@ jobs:
         python-version: ${{ matrix.python-version }}
         cache: "pip"
     - run: pip install ".[test]"
-    - run: pytest --doctest-modules --import-mode importlib --hypothesis-show-statistics --hypothesis-profile ci
+    - run: pytest --doctest-modules --import-mode importlib --hypothesis-show-statistics --hypothesis-max-examples 1000

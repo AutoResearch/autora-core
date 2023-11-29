@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
         variable_strategy(),
         variablecollection_strategy(),
     ),
-    serializer_dump_load_strategy(),
+    serializer_dump_load_strategy,
 )
 def test_variable_serialize_deserialize(o, dump_load):
     o_loaded = dump_load(o)

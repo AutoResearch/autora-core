@@ -6,6 +6,8 @@ from typing import Any, Optional, Sequence, Tuple
 class ValueType(str, Enum):
     """Specifies supported value types supported by Variables."""
 
+    BOOLEAN = "boolean"
+    INTEGER = "integer"
     REAL = "real"
     SIGMOID = "sigmoid"
     PROBABILITY = "probability"  # single probability

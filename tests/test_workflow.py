@@ -13,6 +13,8 @@ from autora.workflow.__main__ import main
 
 _logger = logging.getLogger(__name__)
 
+example_workflow_library_module = st.sampled_from(["_example_workflow_library"])
+
 
 def validate_model(state: Optional[State]):
     assert state is not None
@@ -26,9 +28,6 @@ def validate_model(state: Optional[State]):
     assert state.model is not None
     assert np.allclose(state.model.coef_, [[2.0]])
     assert np.allclose(state.model.intercept_, [[0.5]])
-
-
-example_workflow_library_module = st.sampled_from(["_example_workflow_library"])
 
 
 @given(example_workflow_library_module)

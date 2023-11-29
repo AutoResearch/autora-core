@@ -1,31 +1,24 @@
-import importlib
 import logging
 import pathlib
 import tempfile
 import uuid
-from collections import namedtuple
 
 import hypothesis.strategies as st
 
+from autora.serializer import _AVAILABLE_SERIALIZER_INFO, SerializersSupported
+
 logger = logging.getLogger(__name__)
 
-_SUPPORTED_SERIALIZERS = [
-    ("pickle", "b"),
-    ("dill", "b"),
-    ("autora.serializer.yaml_", ""),
-]
-_SERIALIZER_DEF = namedtuple("_SERIALIZER_DEF", ["name", "module", "file_type"])
-_AVAILABLE_SERIALIZERS = []
 
-for module_name, file_type in _SUPPORTED_SERIALIZERS:
-    try:
-        module = importlib.import_module(module_name)
-    except ImportError:
-        logger.info(f"serializer {module} not available")
-        continue
-    _AVAILABLE_SERIALIZERS.append(_SERIALIZER_DEF(module_name, module, file_type))
-
-AVAILABLE_SERIALIZERS = st.sampled_from(_AVAILABLE_SERIALIZERS)
+# Define an ordered list of serializers we're going to test.
+# We use the same order as the SerializersSupported Enum.
+AVAILABLE_SERIALIZERS = st.sampled_from(
+    [
+        _AVAILABLE_SERIALIZER_INFO[k]
+        for k in SerializersSupported
+        if k in _AVAILABLE_SERIALIZER_INFO
+    ]
+)
 
 
 @st.composite

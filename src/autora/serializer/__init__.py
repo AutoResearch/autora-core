@@ -18,31 +18,42 @@ class SerializersSupported(str, Enum):
     yaml = "yaml"
 
 
-_SerializerDef = namedtuple(
-    "_SerializerDef", ["module", "load", "dump", "dumps", "file_mode"]
+# Dictionary of details about each serializer
+_SERIALIZER_INFO_ENTRY = namedtuple(
+    "_SERIALIZER_INFO_ENTRY", ["module_path", "file_mode"]
 )
-_serializer_dict: Dict[SerializersSupported, _SerializerDef] = {
-    SerializersSupported.pickle: _SerializerDef("pickle", "load", "dump", "dumps", "b"),
-    SerializersSupported.yaml: _SerializerDef(
-        "autora.serializer._yaml", "load", "dump", "dumps", ""
-    ),
-    SerializersSupported.dill: _SerializerDef("dill", "load", "dump", "dumps", "b"),
+_SERIALIZER_INFO: Dict[SerializersSupported, _SERIALIZER_INFO_ENTRY] = {
+    SerializersSupported.pickle: _SERIALIZER_INFO_ENTRY("pickle", "b"),
+    SerializersSupported.dill: _SERIALIZER_INFO_ENTRY("dill", "b"),
+    SerializersSupported.yaml: _SERIALIZER_INFO_ENTRY("autora.serializer.yaml_", ""),
 }
+
+# Import those serializers which are actually importable
+_AVAILABLE_SERIALIZER_INFO = dict()
+_LOADED_SERIALIZER_DEF = namedtuple(
+    "_LOADED_SERIALIZER_DEF", ["name", "module", "file_mode"]
+)
+for serializer_enum in SerializersSupported:
+    serializer_info = _SERIALIZER_INFO[serializer_enum]
+    try:
+        module = importlib.import_module(serializer_info.module_path)
+    except ImportError:
+        _logger.info(f"serializer {serializer_info.module_path} not available")
+        continue
+    _AVAILABLE_SERIALIZER_INFO[serializer_enum] = _LOADED_SERIALIZER_DEF(
+        serializer_info.module_path, module, serializer_info.file_mode
+    )
 
 default_serializer = SerializersSupported.pickle
 
 
 def _get_serializer_mode(
-    serializer: SerializersSupported, interface: Literal["load", "dump", "dumps"]
+    serializer: SerializersSupported,
+    interface: Literal["load", "dump", "loads", "dumps"],
 ) -> Tuple[Callable, str]:
-    serializer_def = _serializer_dict[serializer]
+    serializer_def = _AVAILABLE_SERIALIZER_INFO[serializer]
     module = serializer_def.module
-    interface_function_name = getattr(serializer_def, interface)
-    _logger.debug(
-        f"_get_serializer_mode: loading {interface_function_name=} from" f" {module=}"
-    )
-    module = importlib.import_module(module)
-    function = getattr(module, interface_function_name)
+    function = getattr(module, interface)
     file_mode = serializer_def.file_mode
     return function, file_mode
 

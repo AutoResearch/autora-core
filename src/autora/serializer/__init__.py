@@ -48,9 +48,56 @@ default_serializer = SerializersSupported.pickle
 _LOADED_SERIALIZERS: Dict[SerializersSupported, LOADED_SERIALIZER] = dict()
 
 
-def load_serializer(serializer: SerializersSupported) -> LOADED_SERIALIZER:
-    """Load"""
+def load_serializer(
+    serializer: Union[SerializersSupported, str] = default_serializer
+) -> LOADED_SERIALIZER:
+    """
+    Load a serializer, returning an object which includes data on the file mode it expects
+    (regular or binary).
 
+    Examples:
+        The default serializer is pickle:
+        >>> load_serializer()  # doctest: +ELLIPSIS
+        LOADED_SERIALIZER(module=<module 'pickle' from '.../pickle.py'>, file_mode='b')
+
+        All supported serializers can be loaded explictly:
+        >>> p_ = load_serializer("pickle")
+        >>> p_  # doctest: +ELLIPSIS
+        LOADED_SERIALIZER(module=<module 'pickle' from '.../pickle.py'>, file_mode='b')
+
+        >>> d_ = load_serializer("dill")
+        >>> d_  # doctest: +ELLIPSIS
+        LOADED_SERIALIZER(module=<module 'dill' from '...dill/__init__.py'>, file_mode='b')
+
+        >>> y_ = load_serializer("yaml")
+        >>> y_  # doctest: +ELLIPSIS +NORMALIZE_WHITESPACE
+        LOADED_SERIALIZER(module=<module 'autora.serializer.yaml_'
+                          from '.../autora/serializer/yaml_.py'>, file_mode='')
+
+        Note that the yaml serializer is a wrapped version of the `pyyaml` package,
+        which conforms to the same interface as `pickle`.
+
+        This function loads the modules lazily and caches them, and returns the same object if the
+        same serializer is loaded more than once.
+        >>> p_ is load_serializer("pickle")
+        True
+        >>> d_ is load_serializer("dill")
+        True
+        >>> y_ is load_serializer("yaml")
+        True
+
+        The Serializer can be specified by the SerializersSupported enum:
+        >>> load_serializer(SerializersSupported.pickle)  # doctest: +ELLIPSIS
+        LOADED_SERIALIZER(module=<module 'pickle'...
+
+        >>> load_serializer(SerializersSupported.dill)  # doctest: +ELLIPSIS
+        LOADED_SERIALIZER(module=<module 'dill'...
+
+        >>> load_serializer(SerializersSupported.yaml)  # doctest: +ELLIPSIS
+        LOADED_SERIALIZER(module=<module 'autora.serializer.yaml_'...
+
+    """
+    serializer = SerializersSupported(serializer)
     try:
         serializer_def = _LOADED_SERIALIZERS[serializer]
 

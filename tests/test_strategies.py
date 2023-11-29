@@ -57,7 +57,6 @@ def variable_boolean_strategy(draw, name=None, label=None, units=None, covariate
         )
     )
     value_type = ValueType.BOOLEAN
-    dtype = bool
     allowed_values = [True, False]
     value_range = None
     rescale = 1
@@ -70,7 +69,6 @@ def variable_boolean_strategy(draw, name=None, label=None, units=None, covariate
         value_range=value_range,
         allowed_values=allowed_values,
         rescale=rescale,
-        data_type=dtype,
     )
 
 
@@ -82,7 +80,6 @@ def variable_integer_strategy(draw, name=None, label=None, units=None, covariate
         )
     )
     value_type = ValueType.INTEGER
-    dtype = int
 
     value_range = draw(
         st.one_of(
@@ -113,7 +110,6 @@ def variable_integer_strategy(draw, name=None, label=None, units=None, covariate
         value_range=value_range,
         allowed_values=allowed_values,
         rescale=rescale,
-        data_type=dtype,
     )
 
 
@@ -125,7 +121,6 @@ def variable_real_strategy(draw, name=None, label=None, units=None, covariate=No
         )
     )
     value_type = ValueType.REAL
-    dtype = float
     range_strategy = st.floats(allow_nan=False, allow_subnormal=False)
     value_range = draw(
         st.one_of(
@@ -150,7 +145,6 @@ def variable_real_strategy(draw, name=None, label=None, units=None, covariate=No
         value_range=value_range,
         allowed_values=allowed_values,
         rescale=rescale,
-        data_type=dtype,
     )
 
 
@@ -164,7 +158,6 @@ def variable_probability_strategy(
         )
     )
     value_type = ValueType.PROBABILITY
-    dtype = float
     value_range = (0, 1)
     allowed_values = None
     rescale = 1
@@ -177,7 +170,6 @@ def variable_probability_strategy(
         value_range=value_range,
         allowed_values=allowed_values,
         rescale=rescale,
-        data_type=dtype,
     )
 
 
@@ -191,7 +183,6 @@ def variable_probability_sample_strategy(
         )
     )
     value_type = ValueType.PROBABILITY_SAMPLE
-    dtype = float
     value_range = (0, 1)
     allowed_values = None
     rescale = 1
@@ -204,7 +195,6 @@ def variable_probability_sample_strategy(
         value_range=value_range,
         allowed_values=allowed_values,
         rescale=rescale,
-        data_type=dtype,
     )
 
 
@@ -218,7 +208,6 @@ def variable_probability_distribution_strategy(
         )
     )
     value_type = ValueType.PROBABILITY_DISTRIBUTION
-    dtype = float
     value_range = (0, 1)
     allowed_values = None
     rescale = 1
@@ -231,7 +220,6 @@ def variable_probability_distribution_strategy(
         value_range=value_range,
         allowed_values=allowed_values,
         rescale=rescale,
-        data_type=dtype,
     )
 
 
@@ -243,7 +231,6 @@ def variable_sigmoid_strategy(draw, name=None, label=None, units=None, covariate
         )
     )
     value_type = ValueType.SIGMOID
-    dtype = float
     value_range = (-np.inf, +np.inf)
     allowed_values = None
     rescale = 1
@@ -256,7 +243,6 @@ def variable_sigmoid_strategy(draw, name=None, label=None, units=None, covariate
         value_range=value_range,
         allowed_values=allowed_values,
         rescale=rescale,
-        data_type=dtype,
     )
 
 
@@ -268,7 +254,6 @@ def variable_class_strategy(draw, name=None, label=None, units=None, covariate=N
         )
     )
     value_type = ValueType.CLASS
-    dtype = str
     value_range = None
     rescale = 1
     allowed_values = draw(st.lists(st.text(min_size=1, max_size=16), unique=True))
@@ -281,7 +266,6 @@ def variable_class_strategy(draw, name=None, label=None, units=None, covariate=N
         value_range=value_range,
         allowed_values=allowed_values,
         rescale=rescale,
-        data_type=dtype,
     )
 
 
@@ -406,7 +390,10 @@ def dataframe_strategy(
 
     df: pd.DataFrame = draw(
         st_pd.data_frames(
-            columns=[st_pd.column(name=v.name, dtype=v.data_type) for v in variables],
+            columns=[
+                st_pd.column(name=v.name, dtype=VALUE_TYPE_DTYPE_MAPPING[v.type])
+                for v in variables
+            ],
         )
     )
 

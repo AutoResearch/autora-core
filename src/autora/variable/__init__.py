@@ -30,7 +30,6 @@ class Variable:
     variable_label: str = ""
     rescale: float = 1
     is_covariate: bool = False
-    data_type: Any = None
 
 
 @dataclass

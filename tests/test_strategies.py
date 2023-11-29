@@ -461,7 +461,11 @@ def standard_state_dataclass_strategy(draw):
     return s
 
 
-@settings(suppress_health_check={HealthCheck.too_slow})
+@settings(
+    suppress_health_check={
+        HealthCheck.too_slow,
+    }
+)
 @given(standard_state_dataclass_strategy())
 def test_standard_state_dataclass_strategy_creation(o):
     assert o

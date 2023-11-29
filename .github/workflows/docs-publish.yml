@@ -1,0 +1,23 @@
+name: Publish Documentation to GitHub Pages
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: 3.x
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: pip install ".[dev]"
+
+      - run: mkdocs gh-deploy --force

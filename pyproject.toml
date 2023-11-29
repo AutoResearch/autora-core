@@ -33,7 +33,8 @@ dependencies = [
     "numpy",
     "matplotlib",
     "pandas",
-    "scikit-learn"
+    "scikit-learn",
+    "typer[all]",
 ]
 
 
@@ -46,6 +47,8 @@ dev = [
 ]
 test = [
     "pytest",
+    "hypothesis",
+    "autora-core[serializers]",
 ]
 build = [
     "build",
@@ -68,9 +71,18 @@ docs = [
     "mkdocs-jupyter",
     "pymdown-extensions",
 ]
+serializers = [
+    "dill",
+    "pyyaml"
+]
+cylc = [
+    "cylc-flow",
+    "cylc-uiserver"
+]
 
 [tool.isort]
 profile = "black"
+known_first_party = ["autora"]
 
 [tool.mypy]
 mypy_path="./src"

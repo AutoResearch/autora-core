@@ -21,12 +21,6 @@ AVAILABLE_SERIALIZERS = st.sampled_from(
 )
 
 
-@st.composite
-def serializer_loads_dumps_strategy(draw):
-    serializer = draw(AVAILABLE_SERIALIZERS)
-    loads, dumps = serializer.module.loads, serializer.module.dumps
-    return loads, dumps
-
 
 @st.composite
 def serializer_dump_load_string_strategy(draw):

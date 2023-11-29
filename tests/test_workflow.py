@@ -4,42 +4,14 @@ import tempfile
 from typing import Optional
 
 import numpy as np
-import pandas as pd
 from hypothesis import Verbosity, given, settings
 from hypothesis import strategies as st
-from sklearn.linear_model import LinearRegression
 
-from autora.experimentalist.grid import grid_pool
 from autora.serializer import SerializersSupported, load_state
-from autora.state import StandardState, State, estimator_on_state, on_state
-from autora.variable import Variable, VariableCollection
+from autora.state import StandardState, State
 from autora.workflow.__main__ import main
 
 _logger = logging.getLogger(__name__)
-
-
-def initial_state(_):
-    state = StandardState(
-        variables=VariableCollection(
-            independent_variables=[Variable(name="x", allowed_values=range(100))],
-            dependent_variables=[Variable(name="y")],
-            covariates=[],
-        ),
-        conditions=None,
-        experiment_data=pd.DataFrame({"x": [], "y": []}),
-        models=[],
-    )
-    return state
-
-
-experimentalist = on_state(grid_pool, output=["conditions"])
-
-experiment_runner = on_state(
-    lambda conditions: conditions.assign(y=2 * conditions["x"] + 0.5),
-    output=["experiment_data"],
-)
-
-theorist = estimator_on_state(LinearRegression(fit_intercept=True))
 
 
 def validate_model(state: Optional[State]):
@@ -56,7 +28,11 @@ def validate_model(state: Optional[State]):
     assert np.allclose(state.model.intercept_, [[0.5]])
 
 
-def test_e2e_nominal():
+example_workflow_library_module = st.sampled_from(["_example_workflow_library"])
+
+
+@given(example_workflow_library_module)
+def test_e2e_nominal(workflow_library_module):
     """Test a basic standard chain of CLI calls using the default serializer.
 
     Equivalent to:
@@ -68,21 +44,21 @@ def test_e2e_nominal():
 
     with tempfile.TemporaryDirectory() as d:
         main(
-            "test_workflow.initial_state",
+            f"{workflow_library_module}.initial_state",
             out_path=pathlib.Path(d, "start"),
         )
         main(
-            "test_workflow.experimentalist",
+            f"{workflow_library_module}.experimentalist",
             in_path=pathlib.Path(d, "start"),
             out_path=pathlib.Path(d, "conditions"),
         )
         main(
-            "test_workflow.experiment_runner",
+            f"{workflow_library_module}.experiment_runner",
             in_path=pathlib.Path(d, "conditions"),
             out_path=pathlib.Path(d, "data"),
         )
         main(
-            "test_workflow.theorist",
+            f"{workflow_library_module}.theorist",
             in_path=pathlib.Path(d, "data"),
             out_path=pathlib.Path(d, "theory"),
         )
@@ -91,9 +67,14 @@ def test_e2e_nominal():
         validate_model(final_state)
 
 
-@given(st.sampled_from(SerializersSupported), st.booleans(), st.booleans())
+@given(
+    example_workflow_library_module,
+    st.sampled_from(SerializersSupported),
+    st.booleans(),
+    st.booleans(),
+)
 @settings(verbosity=Verbosity.verbose, deadline=500)
-def test_e2e_serializers(serializer, verbose, debug):
+def test_e2e_serializers(workflow_library_module, serializer, verbose, debug):
     """Test a basic standard chain of CLI calls using a single serializer."""
 
     common_settings = dict(
@@ -102,27 +83,27 @@ def test_e2e_serializers(serializer, verbose, debug):
 
     with tempfile.TemporaryDirectory() as d:
         main(
-            "test_workflow.initial_state",
+            f"{workflow_library_module}.initial_state",
             out_path=pathlib.Path(d, "start"),
-            **common_settings
+            **common_settings,
         )
         main(
-            "test_workflow.experimentalist",
+            f"{workflow_library_module}.experimentalist",
             in_path=pathlib.Path(d, "start"),
             out_path=pathlib.Path(d, "conditions"),
-            **common_settings
+            **common_settings,
         )
         main(
-            "test_workflow.experiment_runner",
+            f"{workflow_library_module}.experiment_runner",
             in_path=pathlib.Path(d, "conditions"),
             out_path=pathlib.Path(d, "data"),
-            **common_settings
+            **common_settings,
         )
         main(
-            "test_workflow.theorist",
+            f"{workflow_library_module}.theorist",
             in_path=pathlib.Path(d, "data"),
             out_path=pathlib.Path(d, "theory"),
-            **common_settings
+            **common_settings,
         )
 
         final_state: StandardState = load_state(
@@ -132,6 +113,7 @@ def test_e2e_serializers(serializer, verbose, debug):
 
 
 @given(
+    example_workflow_library_module,
     st.sampled_from(SerializersSupported),
     st.sampled_from(SerializersSupported),
     st.sampled_from(SerializersSupported),
@@ -141,6 +123,7 @@ def test_e2e_serializers(serializer, verbose, debug):
 )
 @settings(verbosity=Verbosity.verbose, deadline=500)
 def test_e2e_valid_serializer_mix(
+    workflow_library_module,
     initial_serializer,
     experimental_serializer,
     experiment_runner_serializer,
@@ -154,34 +137,34 @@ def test_e2e_valid_serializer_mix(
 
     with tempfile.TemporaryDirectory() as d:
         main(
-            "test_workflow.initial_state",
+            f"{workflow_library_module}.initial_state",
             out_path=pathlib.Path(d, "start"),
             out_dumper=initial_serializer,
-            **common_settings
+            **common_settings,
         )
         main(
-            "test_workflow.experimentalist",
+            f"{workflow_library_module}.experimentalist",
             in_path=pathlib.Path(d, "start"),
             out_path=pathlib.Path(d, "conditions"),
             in_loader=initial_serializer,
             out_dumper=experimental_serializer,
-            **common_settings
+            **common_settings,
         )
         main(
-            "test_workflow.experiment_runner",
+            f"{workflow_library_module}.experiment_runner",
             in_path=pathlib.Path(d, "conditions"),
             out_path=pathlib.Path(d, "data"),
             in_loader=experimental_serializer,
             out_dumper=experiment_runner_serializer,
-            **common_settings
+            **common_settings,
         )
         main(
-            "test_workflow.theorist",
+            f"{workflow_library_module}.theorist",
             in_path=pathlib.Path(d, "data"),
             out_path=pathlib.Path(d, "theory"),
             in_loader=experiment_runner_serializer,
             out_dumper=theorist_serializer,
-            **common_settings
+            **common_settings,
         )
 
         final_state: StandardState = load_state(

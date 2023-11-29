@@ -5,21 +5,15 @@ import uuid
 
 import hypothesis.strategies as st
 
-from autora.serializer import _AVAILABLE_SERIALIZER_INFO, SerializersSupported
+from autora.serializer import SerializersSupported, load_serializer
 
 logger = logging.getLogger(__name__)
 
 
 # Define an ordered list of serializers we're going to test.
-# We use the same order as the SerializersSupported Enum.
 AVAILABLE_SERIALIZERS = st.sampled_from(
-    [
-        _AVAILABLE_SERIALIZER_INFO[k]
-        for k in SerializersSupported
-        if k in _AVAILABLE_SERIALIZER_INFO
-    ]
+    [load_serializer(s) for s in SerializersSupported]
 )
-
 
 
 @st.composite

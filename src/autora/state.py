@@ -430,9 +430,6 @@ columns=list("xyz")))).q
         return value, used_key
 
 
-State = StateDict
-
-
 @dataclass(frozen=True)
 class StateDataClass:
     """
@@ -696,6 +693,9 @@ class StateDataClass:
         use `dataclasses.replace` instead.
         """
         return self + Delta(**kwargs)
+
+
+State = StateDataClass
 
 
 def _get_value(f, other: Union[Delta, Mapping]):
@@ -1794,7 +1794,7 @@ class StandardStateDict(StateDict):
             return None
 
 
-StandardState = StandardStateDict
+StandardState = StandardStateDataClass
 
 X = TypeVar("X")
 Y = TypeVar("Y")

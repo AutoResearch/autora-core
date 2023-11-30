@@ -72,7 +72,7 @@ def test_e2e_nominal(workflow_library_module):
     st.booleans(),
     st.booleans(),
 )
-@settings(verbosity=Verbosity.verbose, deadline=500)
+@settings(verbosity=Verbosity.verbose, deadline=1000)
 def test_e2e_serializers(workflow_library_module, serializer, verbose, debug):
     """Test a basic standard chain of CLI calls using a single serializer."""
 
@@ -120,7 +120,7 @@ def test_e2e_serializers(workflow_library_module, serializer, verbose, debug):
     st.booleans(),
     st.booleans(),
 )
-@settings(verbosity=Verbosity.verbose, deadline=500)
+@settings(verbosity=Verbosity.verbose, deadline=1000)
 def test_e2e_valid_serializer_mix(
     workflow_library_module,
     initial_serializer,

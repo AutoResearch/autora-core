@@ -46,6 +46,8 @@ dev = [
 ]
 test = [
     "pytest",
+    "hypothesis[pandas]",
+    "autora-core[serializers]"
 ]
 build = [
     "build",
@@ -68,6 +70,7 @@ docs = [
     "mkdocs-jupyter",
     "pymdown-extensions",
 ]
+serializers = ["dill", "pyyaml"]
 
 [tool.isort]
 profile = "black"
@@ -90,3 +93,7 @@ requires = ["setuptools", "setuptools-scm"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools_scm]
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = "--doctest-modules --import-mode importlib"

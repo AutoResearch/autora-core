@@ -437,7 +437,7 @@ def test_model_strategy_creation(o):
 
 
 @st.composite
-def standard_state_dataclass_strategy(draw):
+def standard_state_strategy(draw):
     variable_collection: VariableCollection = draw(variablecollection_strategy())
     conditions = draw(
         dataframe_strategy(variables=variable_collection.independent_variables)
@@ -462,7 +462,7 @@ def standard_state_dataclass_strategy(draw):
 
 
 @settings(suppress_health_check={HealthCheck.too_slow})
-@given(standard_state_dataclass_strategy())
+@given(standard_state_strategy())
 def test_standard_state_dataclass_strategy_creation(o):
     assert o
 

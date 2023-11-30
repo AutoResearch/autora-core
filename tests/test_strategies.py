@@ -463,7 +463,7 @@ def standard_state_strategy(draw):
 
 @settings(suppress_health_check={HealthCheck.too_slow})
 @given(standard_state_strategy())
-def test_standard_state_dataclass_strategy_creation(o):
+def test_standard_state_strategy_creation(o):
     assert o
 
 

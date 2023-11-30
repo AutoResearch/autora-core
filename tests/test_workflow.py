@@ -25,9 +25,9 @@ def validate_model(state: Optional[StandardState]):
     assert state.experiment_data is not None
     assert len(state.experiment_data) == 100
 
-    assert state.model is not None
-    assert np.allclose(state.model.coef_, [[2.0]])
-    assert np.allclose(state.model.intercept_, [[0.5]])
+    assert state.models[-1] is not None
+    assert np.allclose(state.models[-1].coef_, [[2.0]])
+    assert np.allclose(state.models[-1].intercept_, [[0.5]])
 
 
 @given(example_workflow_library_module)

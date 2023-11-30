@@ -10,7 +10,7 @@ from hypothesis import strategies as st
 from hypothesis.extra import numpy as st_np
 from hypothesis.extra import pandas as st_pd
 
-from autora.state import StandardStateDataClass
+from autora.state import StandardState
 from autora.variable import ValueType, Variable, VariableCollection
 
 VALUE_TYPE_DTYPE_MAPPING = {
@@ -452,7 +452,7 @@ def standard_state_dataclass_strategy(draw):
         )
     )
     models = draw(st.lists(model_strategy(), min_size=0, max_size=5))
-    s = StandardStateDataClass(
+    s = StandardState(
         variables=variable_collection,
         conditions=conditions,
         experiment_data=experiment_data,

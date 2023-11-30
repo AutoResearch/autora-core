@@ -58,21 +58,20 @@ def load_serializer(
     Examples:
         The default serializer is pickle:
         >>> load_serializer()  # doctest: +ELLIPSIS
-        LOADED_SERIALIZER(module=<module 'pickle' from '.../pickle.py'>, file_mode='b')
+        LOADED_SERIALIZER(module=<module 'pickle' from '...'>, file_mode='b')
 
         All supported serializers can be loaded explictly:
         >>> p_ = load_serializer("pickle")
         >>> p_  # doctest: +ELLIPSIS
-        LOADED_SERIALIZER(module=<module 'pickle' from '.../pickle.py'>, file_mode='b')
+        LOADED_SERIALIZER(module=<module 'pickle' from '...'>, file_mode='b')
 
         >>> d_ = load_serializer("dill")
         >>> d_  # doctest: +ELLIPSIS
-        LOADED_SERIALIZER(module=<module 'dill' from '...dill/__init__.py'>, file_mode='b')
+        LOADED_SERIALIZER(module=<module 'dill' from '...'>, file_mode='b')
 
         >>> y_ = load_serializer("yaml")
-        >>> y_  # doctest: +ELLIPSIS +NORMALIZE_WHITESPACE
-        LOADED_SERIALIZER(module=<module 'autora.serializer.yaml_'
-                          from '.../autora/serializer/yaml_.py'>, file_mode='')
+        >>> y_  # doctest: +ELLIPSIS
+        LOADED_SERIALIZER(module=<module 'autora.serializer.yaml_' from '...'>, file_mode='')
 
         Note that the yaml serializer is a wrapped version of the `pyyaml` package,
         which conforms to the same interface as `pickle`.

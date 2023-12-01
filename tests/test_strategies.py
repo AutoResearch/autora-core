@@ -10,7 +10,7 @@ from hypothesis import strategies as st
 from hypothesis.extra import numpy as st_np
 from hypothesis.extra import pandas as st_pd
 
-from autora.state import StandardStateDataClass
+from autora.state import StandardState
 from autora.variable import ValueType, Variable, VariableCollection
 
 VALUE_TYPE_DTYPE_MAPPING = {
@@ -437,7 +437,7 @@ def test_model_strategy_creation(o):
 
 
 @st.composite
-def standard_state_dataclass_strategy(draw):
+def standard_state_strategy(draw):
     variable_collection: VariableCollection = draw(variablecollection_strategy())
     conditions = draw(
         dataframe_strategy(variables=variable_collection.independent_variables)
@@ -452,7 +452,7 @@ def standard_state_dataclass_strategy(draw):
         )
     )
     models = draw(st.lists(model_strategy(), min_size=0, max_size=5))
-    s = StandardStateDataClass(
+    s = StandardState(
         variables=variable_collection,
         conditions=conditions,
         experiment_data=experiment_data,
@@ -462,8 +462,8 @@ def standard_state_dataclass_strategy(draw):
 
 
 @settings(suppress_health_check={HealthCheck.too_slow})
-@given(standard_state_dataclass_strategy())
-def test_standard_state_dataclass_strategy_creation(o):
+@given(standard_state_strategy())
+def test_standard_state_strategy_creation(o):
     assert o
 
 

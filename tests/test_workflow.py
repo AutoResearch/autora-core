@@ -8,7 +8,7 @@ from hypothesis import Verbosity, given, settings
 from hypothesis import strategies as st
 
 from autora.serializer import SupportedSerializer, load_state
-from autora.state import StandardState, State
+from autora.state import StandardState
 from autora.workflow.__main__ import main
 
 _logger = logging.getLogger(__name__)
@@ -16,7 +16,7 @@ _logger = logging.getLogger(__name__)
 example_workflow_library_module = st.sampled_from(["_example_workflow_library"])
 
 
-def validate_model(state: Optional[State]):
+def validate_model(state: Optional[StandardState]):
     assert state is not None
 
     assert state.conditions is not None

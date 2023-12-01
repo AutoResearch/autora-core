@@ -2,12 +2,12 @@ import pandas as pd
 from sklearn.linear_model import LinearRegression
 
 from autora.experimentalist.grid import grid_pool
-from autora.state import StandardStateDataClass, estimator_on_state, on_state
+from autora.state import StandardState, estimator_on_state, on_state
 from autora.variable import Variable, VariableCollection
 
 
 def initial_state(_):
-    state = StandardStateDataClass(
+    state = StandardState(
         variables=VariableCollection(
             independent_variables=[Variable(name="x", allowed_values=range(100))],
             dependent_variables=[Variable(name="y")],

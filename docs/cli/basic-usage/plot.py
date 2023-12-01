@@ -30,6 +30,9 @@ def plot_results(state: StandardState):
     assert isinstance(state.models[-1], GridSearchCV)
     plt.plot(x, state.models[-1].predict(x), label="model")
 
+    plt.xlabel("x")
+    plt.ylabel("y")
+
     plt.legend()
     plt.show()
 

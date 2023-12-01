@@ -106,13 +106,8 @@ print(state)
 # )
 ```
 
-`state` is the following object which, once loaded, can be treated like any other `State` object: 
-```python
-```
-
-
+`state` is the following object which, once loaded, can be treated like any other `State` object.
 For instance, we can plot the results:
-
 
 ```python title="plot.py"
 --8<-- "https://raw.githubusercontent.com/AutoResearch/autora-core/docs/update-workflow-docs/docs/cli/basic-usage/plot.py"

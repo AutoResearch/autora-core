@@ -28,7 +28,7 @@ nav:
 - Cycle:
   - Functional: 'cycle/Linear and Cyclical Workflows using Functions and States.ipynb'
 - "Command Line Interface":
-  - "Basic Usage": "cli/basic-usage/Readme.ipynb"
+  - "Basic Usage": "cli/basic-usage/README.md"
   - "Using Cylc": "cli/cylc-pip/README.md"
   - "Using Cylc and Slurm": "cli/cylc-slurm-pip/README.md"
 

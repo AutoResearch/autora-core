@@ -1,4 +1,4 @@
-# Basic usage
+# Command Line Interface Overview
 
 The command line interface allows us to load and save `States` and run arbitrary functions on them.
 

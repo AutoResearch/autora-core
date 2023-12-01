@@ -33,7 +33,8 @@ dependencies = [
     "numpy",
     "matplotlib",
     "pandas",
-    "scikit-learn"
+    "scikit-learn",
+    "typer[all]",
 ]
 
 
@@ -70,10 +71,18 @@ docs = [
     "mkdocs-jupyter",
     "pymdown-extensions",
 ]
-serializers = ["dill", "pyyaml"]
+serializers = [
+    "dill",
+    "pyyaml"
+]
+cylc = [
+    "cylc-flow",
+    "cylc-uiserver"
+]
 
 [tool.isort]
 profile = "black"
+known_first_party = ["autora"]
 
 [tool.mypy]
 mypy_path="./src"
@@ -97,3 +106,4 @@ build-backend = "setuptools.build_meta"
 [tool.pytest.ini_options]
 minversion = "6.0"
 addopts = "--doctest-modules --import-mode importlib"
+pythonpath = "tests"

@@ -6,13 +6,12 @@ The command line interface allows us to load and save `States` and run arbitrary
 
 To use the command line, we first define a package `example` containing the functions we want to run on the State:
 
-```python title="example/__init__.py"
---8<-- "https://raw.githubusercontent.com/AutoResearch/autora-core/main/docs/cli/basic-usage/example/__init__.py"
-```
-
-
 ```python title="example/lib.py"
 --8<-- "https://raw.githubusercontent.com/AutoResearch/autora-core/main/docs/cli/basic-usage/example/lib.py"
+```
+
+```python title="example/__init__.py"
+--8<-- "https://raw.githubusercontent.com/AutoResearch/autora-core/main/docs/cli/basic-usage/example/__init__.py"
 ```
 
 We can run the pipeline of initialization, condition generation, experiment and theory building as follows.

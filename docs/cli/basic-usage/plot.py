@@ -24,7 +24,6 @@ def plot_results(state: StandardState):
     )
 
     assert isinstance(state.experiment_data, pd.DataFrame)
-
     xi, yi = state.experiment_data["x"], state.experiment_data["y"]
     plt.scatter(xi, yi, label="observations")
 

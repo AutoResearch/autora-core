@@ -7,7 +7,7 @@ The command line interface allows us to load and save `States` and run arbitrary
 To use the command line, we first define a file containing the functions we want to run on the State.
 
 ```python title="lib.py"
---8<-- "https://raw.githubusercontent.com/AutoResearch/autora-core/feat/reintegrate-workflow/docs/cli/basic-usage/lib.py"
+--8<-- "https://raw.githubusercontent.com/AutoResearch/autora-core/docs/update-workflow-docs/docs/cli/basic-usage/lib.py"
 ```
 
 We can run the pipeline of initialization, condition generation, experiment and theory building as follows.
@@ -115,38 +115,7 @@ For instance, we can plot the results:
 
 
 ```python title="plot.py"
-# TODO: replace with snippet
-
-#!/usr/bin/env python
-import numpy as np
-from matplotlib import pyplot as plt
-import typer
-
-from autora.workflow.__main__ import load_state
-
-from lib import ground_truth, noise_std
-
-
-def plot_results(state):
-    x = np.linspace(-10, 10, 100).reshape((-1, 1))
-    plt.plot(x, ground_truth(x), label="ground_truth", c="orange")
-    plt.fill_between(x.flatten(), ground_truth(x).flatten() + noise_std, ground_truth(x).flatten() - noise_std,
-                     alpha=0.3, color="orange")
-    
-    xi, yi = state.experiment_data["x"], state.experiment_data["y"]
-    plt.scatter(xi, yi, label=f"observations")
-    
-    plt.plot(x, state.models[-1].predict(x), label="model")
-    
-    plt.legend()
-    plt.show()
-
-def main(filename: str):    
-    state = load_state(filename)  # load from the first  
-    plot_results(state)
-
-if __name__ == "__main__":
-    typer.run(main)
+--8<-- "https://raw.githubusercontent.com/AutoResearch/autora-core/docs/update-workflow-docs/docs/cli/basic-usage/plot.py"
 ```
     
 ```shell

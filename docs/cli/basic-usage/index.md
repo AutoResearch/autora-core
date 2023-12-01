@@ -15,28 +15,28 @@ We can run the pipeline of initialization, condition generation, experiment and 
 First we create an initial state file:
 
 ```shell
-python -m autora.workflow lib.initial_state --out-path initial.pkl
+python -m autora.workflow example.lib.initial_state --out-path initial.pkl
 ```
 
 Next we run the condition generation:
 
 
 ```shell
-python -m autora.workflow lib.experimentalist --in-path initial.pkl --out-path conditions.pkl
+python -m autora.workflow example.lib.experimentalist --in-path initial.pkl --out-path conditions.pkl
 ```
 
 We run the experiment:
 
 
 ```shell
-python -m autora.workflow lib.experiment_runner --in-path conditions.pkl --out-path experiment_data.pkl
+python -m autora.workflow example.lib.experiment_runner --in-path conditions.pkl --out-path experiment_data.pkl
 ```
 
 And then the theorist:
 
 
 ```shell
-python -m autora.workflow lib.theorist --in-path experiment_data.pkl --out-path model.pkl
+python -m autora.workflow example.lib.theorist --in-path experiment_data.pkl --out-path model.pkl
 ```
 
 We can interrogate the results by loading them into the current session.
@@ -114,7 +114,7 @@ For instance, we can plot the results:
 ```
     
 ```shell
-python plot.py model.pkl
+python -m example.plot model.pkl
 ```
 
 
@@ -125,16 +125,16 @@ If we instead run the experiment for 4 cycles, we can get results closer to the 
 ```shell
 set -x  # echo each command 
 
-python -m autora.workflow lib.initial_state --out-path "result.pkl"
+python -m autora.workflow example.lib.initial_state --out-path "result.pkl"
 
 for i in {1..4}
 do
-    python -m autora.workflow lib.experimentalist --in-path "result.pkl" --out-path "result.pkl"
-    python -m autora.workflow lib.experiment_runner --in-path "result.pkl" --out-path "result.pkl"
-    python -m autora.workflow lib.theorist --in-path "result.pkl" --out-path "result.pkl"
+    python -m autora.workflow example.lib.experimentalist --in-path "result.pkl" --out-path "result.pkl"
+    python -m autora.workflow example.lib.experiment_runner --in-path "result.pkl" --out-path "result.pkl"
+    python -m autora.workflow example.lib.theorist --in-path "result.pkl" --out-path "result.pkl"
 done
 
-python plot.py result.pkl
+python example.plot result.pkl
 ```
 
 ![png](img/after-four-cycles.png)

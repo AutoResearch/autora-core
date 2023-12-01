@@ -6,8 +6,8 @@ The command line interface allows us to load and save `States` and run arbitrary
 
 To use the command line, we first define a file containing the functions we want to run on the State.
 
-```python title="lib.py"
---8<-- "https://raw.githubusercontent.com/AutoResearch/autora-core/docs/update-workflow-docs/docs/cli/basic-usage/lib.py"
+```python title="example/lib.py"
+--8<-- "https://raw.githubusercontent.com/AutoResearch/autora-core/docs/update-workflow-docs/docs/cli/basic-usage/example/lib.py"
 ```
 
 We can run the pipeline of initialization, condition generation, experiment and theory building as follows.
@@ -109,8 +109,8 @@ print(state)
 `state` is the following object which, once loaded, can be treated like any other `State` object.
 For instance, we can plot the results:
 
-```python title="plot.py"
---8<-- "https://raw.githubusercontent.com/AutoResearch/autora-core/docs/update-workflow-docs/docs/cli/basic-usage/plot.py"
+```python title="example/plot.py"
+--8<-- "https://raw.githubusercontent.com/AutoResearch/autora-core/docs/update-workflow-docs/docs/cli/basic-usage/example/plot.py"
 ```
     
 ```shell

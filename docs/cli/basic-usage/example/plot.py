@@ -4,12 +4,13 @@ import pathlib
 import numpy as np
 import pandas as pd
 import typer
-from lib import ground_truth, noise_std
 from matplotlib import pyplot as plt
 from sklearn.model_selection import GridSearchCV
 
 from autora.state import StandardState
 from autora.workflow.__main__ import load_state
+
+from .lib import ground_truth, noise_std
 
 
 def plot_results(state: StandardState):

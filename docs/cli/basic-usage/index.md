@@ -4,7 +4,7 @@ The command line interface allows us to load and save `States` and run arbitrary
 
 ## Setup
 
-To use the command line, we first define a file containing the functions we want to run on the State.
+To use the command line, we first define a package `example` containing the functions we want to run on the State:
 
 ```python title="example/lib.py"
 --8<-- "https://raw.githubusercontent.com/AutoResearch/autora-core/docs/update-workflow-docs/docs/cli/basic-usage/example/lib.py"

@@ -1309,7 +1309,7 @@ def combined_functions_on_state(
         >>> s_double
         U(conditions=[1, 2, 1, 2])
 
-        # We can also pass parameters to the functions:
+        We can also pass parameters to the functions:
         >>> def multiply(conditions, multiplier):
         ...     return [el * multiplier for el in conditions]
         >>> double_and_triple = combined_functions_on_state(
@@ -1322,7 +1322,7 @@ def combined_functions_on_state(
         >>> s_double_triple
         U(conditions=[2, 4, 3, 6])
 
-        # If the functions return a Delta object, we don't need to provide an output argument
+        If the functions return a Delta object, we don't need to provide an output argument:
         >>> def decrement(conditions, dec):
         ...     return Delta(conditions=[el-dec for el in conditions])
         >>> def increment(conditions, inc):

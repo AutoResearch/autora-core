@@ -8,7 +8,6 @@ collection, and documentation for open science.
 The primary purpose of this module is to provide utilities for: 
 - describing experiments, 
 - running experimentalist pipelines,
-- running cyclical experiments (currently in the 
-  [`autora-workflow` subpackage](https://github.com/autoresearch/autora-workflow))
+- running cyclical experiments
 
 See the tutorials and user guide at [`autora`](https://autoresearch.github.io/autora/) to get started.

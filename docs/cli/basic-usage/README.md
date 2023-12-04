@@ -45,7 +45,6 @@ python -m autora.workflow example.lib.theorist --in-path experiment_data.pkl --o
 
 We can interrogate the results by loading them into the current session.
 
-
 ```python
 #!/usr/bin/env python
 from autora.workflow.__main__ import load_state
@@ -110,17 +109,17 @@ print(state)
 # )
 ```
 
-`state` is the following object which, once loaded, can be treated like any other `State` object.
-For instance, we can plot the results:
+For instance, we can plot the results. We define another script in the `example` package:
 
 ```python title="example/plot.py"
 --8<-- "https://raw.githubusercontent.com/AutoResearch/autora-core/main/docs/cli/basic-usage/example/plot.py"
 ```
     
+... and invoke it on the command line:
+
 ```shell
 python -m example.plot model.pkl
 ```
-
 
 ![png](img/after-one-cycle.png)
 

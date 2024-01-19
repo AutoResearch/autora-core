@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 import sklearn.dummy
 import sklearn.linear_model
-from hypothesis import HealthCheck, given, settings
+from hypothesis import Verbosity, given, settings
 from hypothesis import strategies as st
 from hypothesis.extra import numpy as st_np
 from hypothesis.extra import pandas as st_pd
@@ -461,7 +461,7 @@ def standard_state_strategy(draw):
     return s
 
 
-@settings(suppress_health_check={HealthCheck.too_slow})
+@settings(verbosity=Verbosity.verbose)
 @given(standard_state_strategy())
 def test_standard_state_strategy_creation(o):
     assert o

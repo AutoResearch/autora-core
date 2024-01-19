@@ -1,7 +1,7 @@
 import logging
 
 import pandas as pd
-from hypothesis import HealthCheck, given, settings
+from hypothesis import Verbosity, given, settings
 
 from autora.state import StandardState
 
@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 
 @given(standard_state_strategy(), serializer_dump_load_strategy)
-@settings(suppress_health_check={HealthCheck.too_slow}, deadline=1000)
+@settings(verbosity=Verbosity.verbose)
 def test_state_serialize_deserialize(o: StandardState, dump_load):
     o_loaded = dump_load(o)
     assert o.variables == o_loaded.variables

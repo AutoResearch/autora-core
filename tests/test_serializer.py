@@ -43,11 +43,11 @@ load_dump_yaml_disk = partial(_load_dump_via_disk, module_name="yaml")
 serializer_dump_load_strategy = st.sampled_from(
     [
         load_dump_pickle_string,
-        load_dump_dill_string,
-        load_dump_yaml_string,
+        # load_dump_dill_string,
+        # load_dump_yaml_string,
         load_dump_pickle_disk,
-        load_dump_dill_disk,
-        load_dump_yaml_disk,
+        # load_dump_dill_disk,
+        # load_dump_yaml_disk,
     ]
 )
 

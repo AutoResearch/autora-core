@@ -12,6 +12,8 @@ theme:
     - content.code.copy
 nav:
 - Home: 'index.md'
+- State: 'The State Mechanism.ipynb'
+- Variable: 'Variable.ipynb'
 - Experimentalist Pipeline: 'pipeline/Experimentalist Pipeline Examples.ipynb'
 - Experimentalists:
   - Pooler:

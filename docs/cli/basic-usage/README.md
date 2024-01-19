@@ -1,32 +1,6 @@
-# Command Line Interface Basic Usage
+# Command Line Interface Overview
 
 The command line interface allows us to load and save `States` and run arbitrary functions on them.
-
-You can use the command line interface if the following conditions are true:
-
-1. Every part of `s` can be successfully [pickled](https://docs.python.org/3/library/pickle.html).
-2. You can write each step of your experiment as a single importable function which operates on a state and returns 
-   a state:
-    ```python
-    from example.lib import initial_state, experimentalist, experiment_runner, theorist
-    s = initial_state()
-    for i in range(3):
-        s = experimentalist(s)
-        s = experiment_runner(s)
-        s = theorist(s)
-    ```
-
-Often, different parts of AutoRA experiments require very different computational resources. For instance:
-- The theorist and experimentalist might require training or use of neural networks, and benefit from high 
-  performance computing (HPC) resources for short bursts – minutes or hours.
-- The experiment runner might post an experiment using a service like "Prolific" and poll every few minutes for 
-  hours, days or week until the experimental data are gathered.
-
-Running the experiment runner with the same resources as the theorist and experimentalist in this case would be 
-wasteful, and may be prohibitively expensive.
-
-To solve this problem, AutoRA comes with a command line interface. This can be used with HPC schedulers like [SLURM]
-(https://slurm.schedmd.com/) to run different steps in the cycle with different resources.
 
 ## Setup
 

@@ -28,6 +28,7 @@ You can use the CLI if the following conditions are true:
     ```
 
 Contents of this section:
+
 - ["Basic Usage"](./basic-usage): Basic usage of the CLI
 - ["Usage with Cylc workflow manager"](./cylc-pip): Example using the Cylc workflow manager (which 
   handles cyclical processes)

@@ -72,6 +72,11 @@ def variable_boolean_strategy(draw, name=None, label=None, units=None, covariate
     )
 
 
+@given(variable_boolean_strategy())
+def test_variable_boolean_strategy_creation(o):
+    assert o
+
+
 @st.composite
 def variable_integer_strategy(draw, name=None, label=None, units=None, covariate=None):
     name, label, units, covariate = draw(
@@ -84,9 +89,7 @@ def variable_integer_strategy(draw, name=None, label=None, units=None, covariate
     value_range = draw(
         st.one_of(
             st.none(),
-            st.tuples(st.integers(), st.integers())
-            .filter(lambda x: x[0] != x[1])
-            .map(sorted),
+            st.tuples(st.integers(), st.integers()).map(sorted),
         )
     )
     if value_range is None:
@@ -111,6 +114,11 @@ def variable_integer_strategy(draw, name=None, label=None, units=None, covariate
         allowed_values=allowed_values,
         rescale=rescale,
     )
+
+
+@given(variable_integer_strategy())
+def test_variable_integer_strategy_creation(o):
+    assert o
 
 
 @st.composite
@@ -148,6 +156,11 @@ def variable_real_strategy(draw, name=None, label=None, units=None, covariate=No
     )
 
 
+@given(variable_real_strategy())
+def test_variable_real_strategy_creation(o):
+    assert o
+
+
 @st.composite
 def variable_probability_strategy(
     draw, name=None, label=None, units=None, covariate=None
@@ -171,6 +184,11 @@ def variable_probability_strategy(
         allowed_values=allowed_values,
         rescale=rescale,
     )
+
+
+@given(variable_probability_strategy())
+def test_variable_probability_strategy_creation(o):
+    assert o
 
 
 @st.composite
@@ -198,6 +216,11 @@ def variable_probability_sample_strategy(
     )
 
 
+@given(variable_probability_sample_strategy())
+def test_variable_probability_sample_strategy_creation(o):
+    assert o
+
+
 @st.composite
 def variable_probability_distribution_strategy(
     draw, name=None, label=None, units=None, covariate=None
@@ -223,6 +246,11 @@ def variable_probability_distribution_strategy(
     )
 
 
+@given(variable_probability_distribution_strategy())
+def test_variable_probability_distribution_strategy_creation(o):
+    assert o
+
+
 @st.composite
 def variable_sigmoid_strategy(draw, name=None, label=None, units=None, covariate=None):
     name, label, units, covariate = draw(
@@ -246,6 +274,11 @@ def variable_sigmoid_strategy(draw, name=None, label=None, units=None, covariate
     )
 
 
+@given(variable_sigmoid_strategy())
+def test_variable_sigmoid_strategy_creation(o):
+    assert o
+
+
 @st.composite
 def variable_class_strategy(draw, name=None, label=None, units=None, covariate=None):
     name, label, units, covariate = draw(
@@ -267,6 +300,11 @@ def variable_class_strategy(draw, name=None, label=None, units=None, covariate=N
         allowed_values=allowed_values,
         rescale=rescale,
     )
+
+
+@given(variable_class_strategy())
+def test_variable_class_strategy_creation(o):
+    assert o
 
 
 VARIABLE_STRATEGIES = (

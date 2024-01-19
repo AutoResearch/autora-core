@@ -89,9 +89,7 @@ def variable_integer_strategy(draw, name=None, label=None, units=None, covariate
     value_range = draw(
         st.one_of(
             st.none(),
-            st.tuples(st.integers(), st.integers())
-            .filter(lambda x: x[0] != x[1])
-            .map(sorted),
+            st.tuples(st.integers(), st.integers()).map(sorted),
         )
     )
     if value_range is None:

@@ -1,6 +1,7 @@
 # Command Line Interface
 
-Often, different parts of AutoRA experiments require very different computational resources. For instance:
+Different parts of AutoRA experiments can require very different computational resources. For instance:
+
 - The theorist and experimentalist might require training or use of neural networks, and benefit from high 
   performance computing (HPC) resources for short bursts – minutes or hours.
 - The experiment runner might post an experiment using a service like "Prolific" and poll every few minutes for 

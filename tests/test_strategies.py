@@ -93,7 +93,9 @@ def variable_integer_strategy(draw, name=None, label=None, units=None, covariate
         )
     )
     if value_range is None:
-        allowed_values = draw(st.one_of(st.none(), st.sets(st.integers(), min_size=1)))
+        allowed_values = draw(
+            st.one_of(st.none(), st.lists(st.integers(), min_size=1, unique=True))
+        )
     else:
         allowed_values = None
 
@@ -140,7 +142,9 @@ def variable_real_strategy(draw, name=None, label=None, units=None, covariate=No
     )
 
     if value_range is None:
-        allowed_values = draw(st.one_of(st.none(), st.sets(range_strategy, min_size=1)))
+        allowed_values = draw(
+            st.one_of(st.none(), st.lists(range_strategy, min_size=1, unique=True))
+        )
     else:
         allowed_values = None
     rescale = draw(st.one_of(st.just(1), range_strategy))

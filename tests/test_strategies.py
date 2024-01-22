@@ -438,7 +438,7 @@ def variablecollection_strategy(
 
     names = draw(
         st.lists(
-            st.text(min_size=1, max_size=name_max_length),
+            variable_name(max_size=name_max_length),
             unique=True,
             min_size=n_variables,
             max_size=n_variables,

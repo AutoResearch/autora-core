@@ -430,14 +430,30 @@ def dataframe_strategy(
             + variable_collection.covariates
         )
 
-    df: pd.DataFrame = draw(
-        st_pd.data_frames(
-            columns=[
-                st_pd.column(name=v.name, dtype=VALUE_TYPE_DTYPE_MAPPING[v.type])
-                for v in variables
-            ],
-        )
-    )
+    columns = []
+    for v in variables:
+        dtype = VALUE_TYPE_DTYPE_MAPPING[v.type]
+        if v.allowed_values is not None and v.allowed_values != []:
+            c = st_pd.column(name=v.name, elements=st.sampled_from(v.allowed_values))
+        elif v.value_range is not None and dtype is int:
+            c = st_pd.column(
+                name=v.name,
+                elements=st.integers(
+                    min_value=v.value_range[0], max_value=v.value_range[1]
+                ),
+            )
+        elif v.value_range is not None and dtype is float:
+            c = st_pd.column(
+                name=v.name,
+                elements=st.floats(
+                    min_value=v.value_range[0], max_value=v.value_range[1]
+                ),
+            )
+        else:
+            c = st_pd.column(name=v.name, dtype=dtype)
+        columns.append(c)
+
+    df: pd.DataFrame = draw(st_pd.data_frames(columns=columns))
 
     return df
 

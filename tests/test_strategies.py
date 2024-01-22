@@ -35,6 +35,37 @@ AVAILABLE_SKLEARN_MODELS_STRATEGY = st.sampled_from(
     ]
 )
 
+SI_UNITS = st.sampled_from(
+    ["unitless", "metre", "second", "mole", "Ampere", "Kelvin", "candela", "gram"]
+)
+SI_PREFIXES = st.sampled_from(
+    [
+        "",
+        "deca",
+        "deci",
+        "hecto",
+        "centi",
+        "kilo",
+        "milli",
+        "mega",
+        "micro",
+        "giga",
+        "nano",
+        "tera",
+        "pico",
+    ]
+)
+
+
+@st.composite
+def si_units(draw):
+    base_unit = draw(SI_UNITS)
+    if base_unit == "unitless":
+        return base_unit
+    else:
+        prefix = draw(st.one_of(SI_PREFIXES))
+        return prefix + base_unit
+
 
 @st.composite
 def _name_label_units_strategy(draw, name=None, label=None, units=None, covariate=None):

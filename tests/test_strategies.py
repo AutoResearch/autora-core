@@ -68,13 +68,48 @@ def si_units(draw):
 
 
 @st.composite
-def _name_label_units_strategy(draw, name=None, label=None, units=None, covariate=None):
+def variable_name(draw, max_size=16):
+    name = draw(
+        st.one_of(
+            st.sampled_from(
+                list("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
+            ),
+            st.sampled_from(
+                list("ΑαΒβΓγΔδΕεΖζΗηΘθΙιΚκΛλΜμΝνΞξΟοΠπΡρΣσ/ςΤτΥυΦφΧχΨψΩω.")
+            ),
+            st.text(min_size=1, max_size=max_size),
+        )
+    )
+    return name
+
+
+@st.composite
+def _name_label_units_strategy(
+    draw,
+    name=None,
+    label=None,
+    units=None,
+    covariate=None,
+    name_max_length=4,
+    label_max_length=16,
+    units_max_length=4,
+):
     if name is None:
-        name = draw(st.text(min_size=1))
+        name = draw(variable_name(max_size=name_max_length))
     if label is None:
-        label = draw(st.text(min_size=0))
+        label = draw(
+            st.one_of(
+                st.none(), st.just(name), st.text(min_size=0, max_size=label_max_length)
+            )
+        )
     if units is None:
-        units = draw(st.text(min_size=0))
+        units = draw(
+            st.one_of(
+                st.none(),
+                si_units(),
+                st.text(min_size=0, max_size=units_max_length),
+            )
+        )
     if covariate is None:
         covariate = draw(st.booleans())
     return name, label, units, covariate

@@ -44,7 +44,7 @@ def variable_name(draw, max_size=16):
             st.sampled_from(
                 list("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
             ),
-            st.sampled_from(list("ΑαΒβΓγΔδΕεΖζΗηΘθΙιΚκΛλΜμΝνΞξΟοΠπΡρΣσςΤτΥυΦφΧχΨψΩω")),
+            st.sampled_from(list("αβγδεζηθικλμνξοπρσςτυφχψωΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩ")),
             st.text(min_size=1, max_size=max_size),
         )
     )

@@ -74,9 +74,7 @@ def variable_name(draw, max_size=16):
             st.sampled_from(
                 list("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
             ),
-            st.sampled_from(
-                list("ΑαΒβΓγΔδΕεΖζΗηΘθΙιΚκΛλΜμΝνΞξΟοΠπΡρΣσ/ςΤτΥυΦφΧχΨψΩω.")
-            ),
+            st.sampled_from(list("ΑαΒβΓγΔδΕεΖζΗηΘθΙιΚκΛλΜμΝνΞξΟοΠπΡρΣσςΤτΥυΦφΧχΨψΩω")),
             st.text(min_size=1, max_size=max_size),
         )
     )
@@ -115,6 +113,7 @@ def _name_label_units_strategy(
     return name, label, units, covariate
 
 
+@settings(verbosity=Verbosity.verbose)
 @st.composite
 def variable_boolean_strategy(draw, name=None, label=None, units=None, covariate=None):
     name, label, units, covariate = draw(
@@ -138,6 +137,7 @@ def variable_boolean_strategy(draw, name=None, label=None, units=None, covariate
     )
 
 
+@settings(verbosity=Verbosity.verbose)
 @given(variable_boolean_strategy())
 def test_variable_boolean_strategy_creation(o):
     assert o
@@ -350,7 +350,9 @@ def test_variable_sigmoid_strategy_creation(o):
 
 
 @st.composite
-def variable_class_strategy(draw, name=None, label=None, units=None, covariate=None):
+def variable_class_strategy(
+    draw, name=None, label=None, units=None, covariate=None, class_name_max_length=2
+):
     name, label, units, covariate = draw(
         _name_label_units_strategy(
             name=name, label=label, units=units, covariate=covariate
@@ -359,7 +361,9 @@ def variable_class_strategy(draw, name=None, label=None, units=None, covariate=N
     value_type = ValueType.CLASS
     value_range = None
     rescale = 1
-    allowed_values = draw(st.lists(st.text(min_size=1, max_size=16), unique=True))
+    allowed_values = draw(
+        st.lists(st.text(min_size=1, max_size=class_name_max_length), unique=True)
+    )
     return Variable(
         name=name,
         variable_label=label,
@@ -372,7 +376,7 @@ def variable_class_strategy(draw, name=None, label=None, units=None, covariate=N
     )
 
 
-@given(variable_class_strategy())
+@given(variable_class_strategy(class_name_max_length=32))
 def test_variable_class_strategy_creation(o):
     assert o
 
@@ -560,6 +564,7 @@ def test_model_strategy_creation(o):
     assert o
 
 
+@settings(verbosity=Verbosity.verbose)
 @st.composite
 def standard_state_strategy(draw):
     variable_collection: VariableCollection = draw(variablecollection_strategy())

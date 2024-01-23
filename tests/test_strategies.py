@@ -13,6 +13,10 @@ from hypothesis.extra import pandas as st_pd
 from autora.state import StandardState
 from autora.variable import ValueType, Variable, VariableCollection
 
+from ._superscript import to_superscript
+
+logger = logging.getLogger(__name__)
+
 VALUE_TYPE_DTYPE_MAPPING = {
     ValueType.BOOLEAN: bool,
     ValueType.INTEGER: int,
@@ -23,9 +27,6 @@ VALUE_TYPE_DTYPE_MAPPING = {
     ValueType.PROBABILITY_DISTRIBUTION: float,
     ValueType.CLASS: str,
 }
-
-logger = logging.getLogger(__name__)
-
 AVAILABLE_SKLEARN_MODELS_STRATEGY = st.sampled_from(
     [
         sklearn.dummy.DummyRegressor,
@@ -34,37 +35,6 @@ AVAILABLE_SKLEARN_MODELS_STRATEGY = st.sampled_from(
         sklearn.linear_model.BayesianRidge,
     ]
 )
-
-SI_UNITS = st.sampled_from(
-    ["unitless", "metre", "second", "mole", "Ampere", "Kelvin", "candela", "gram"]
-)
-SI_PREFIXES = st.sampled_from(
-    [
-        "",
-        "deca",
-        "deci",
-        "hecto",
-        "centi",
-        "kilo",
-        "milli",
-        "mega",
-        "micro",
-        "giga",
-        "nano",
-        "tera",
-        "pico",
-    ]
-)
-
-
-@st.composite
-def si_units(draw):
-    base_unit = draw(SI_UNITS)
-    if base_unit == "unitless":
-        return base_unit
-    else:
-        prefix = draw(st.one_of(SI_PREFIXES))
-        return prefix + base_unit
 
 
 @st.composite
@@ -79,6 +49,83 @@ def variable_name(draw, max_size=16):
         )
     )
     return name
+
+
+@st.composite
+def si_unit_with_power_full_strategy(draw):
+    base_unit = draw(
+        st.sampled_from(
+            [
+                "metre",
+                "second",
+                "mole",
+                "Ampere",
+                "Kelvin",
+                "candela",
+                "gram",
+            ]
+        )
+    )
+    prefix = draw(
+        st.sampled_from(
+            [
+                "",
+                "deca",
+                "deci",
+                "hecto",
+                "centi",
+                "kilo",
+                "milli",
+                "mega",
+                "micro",
+                "giga",
+                "nano",
+                "tera",
+                "pico",
+            ]
+        )
+    )
+    return prefix + base_unit
+
+
+@st.composite
+def si_unit_with_power_abbreviated_strategy(draw):
+    base_unit = draw(
+        st.sampled_from(
+            [
+                "m",
+                "s",
+                "mol",
+                "A",
+                "K",
+                "cd",
+                "g",
+            ]
+        )
+    )
+
+    i = draw(st.integers(min_value=-3, max_value=3).filter(lambda x: x != 0))
+    if i == 1:
+        suffix = ""
+    else:
+        suffix = str(i).translate(to_superscript)
+
+    return base_unit + suffix
+
+
+@st.composite
+def units_strategy(draw, max_size=16):
+    unit = draw(
+        st.one_of(
+            st.none(),
+            st.just(""),
+            st.just("unitless"),
+            si_unit_with_power_full_strategy(),  # just latin charaters
+            si_unit_with_power_abbreviated_strategy(),  # uses UTF-8 superscripts
+            st.text(min_size=1, max_size=max_size),  # arbitrary characters
+        )
+    )
+    return unit
 
 
 @st.composite
@@ -101,13 +148,7 @@ def _name_label_units_strategy(
             )
         )
     if units is None:
-        units = draw(
-            st.one_of(
-                st.none(),
-                si_units(),
-                st.text(min_size=0, max_size=units_max_length),
-            )
-        )
+        units = draw(units_strategy(max_size=units_max_length))
     if covariate is None:
         covariate = draw(st.booleans())
     return name, label, units, covariate

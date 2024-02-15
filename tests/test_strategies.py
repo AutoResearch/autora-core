@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 import sklearn.dummy
 import sklearn.linear_model
-from hypothesis import Verbosity, given, settings
+from hypothesis import given
 from hypothesis import strategies as st
 from hypothesis.extra import numpy as st_np
 from hypothesis.extra import pandas as st_pd
@@ -154,7 +154,6 @@ def _name_label_units_strategy(
     return name, label, units, covariate
 
 
-@settings(verbosity=Verbosity.verbose)
 @st.composite
 def variable_boolean_strategy(draw, name=None, label=None, units=None, covariate=None):
     name, label, units, covariate = draw(
@@ -178,7 +177,6 @@ def variable_boolean_strategy(draw, name=None, label=None, units=None, covariate
     )
 
 
-@settings(verbosity=Verbosity.verbose)
 @given(variable_boolean_strategy())
 def test_variable_boolean_strategy_creation(o):
     assert o
@@ -605,7 +603,6 @@ def test_model_strategy_creation(o):
     assert o
 
 
-@settings(verbosity=Verbosity.verbose)
 @st.composite
 def standard_state_strategy(draw):
     variable_collection: VariableCollection = draw(variablecollection_strategy())
@@ -631,7 +628,6 @@ def standard_state_strategy(draw):
     return s
 
 
-@settings(verbosity=Verbosity.verbose)
 @given(standard_state_strategy())
 def test_standard_state_strategy_creation(o):
     assert o

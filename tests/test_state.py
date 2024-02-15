@@ -1,7 +1,7 @@
 import logging
 
 import pandas as pd
-from hypothesis import Verbosity, given, settings
+from hypothesis import given
 from pandas import DataFrame
 
 from autora.state import StandardState
@@ -19,28 +19,24 @@ logger = logging.getLogger(__name__)
 
 
 @given(variable_strategy(), serializer_dump_load_strategy)
-@settings(verbosity=Verbosity.verbose)
 def test_variable_serialize_deserialize(o: Variable, dump_load):
     o_loaded = dump_load(o)
     assert o == o_loaded
 
 
 @given(variablecollection_strategy(), serializer_dump_load_strategy)
-@settings(verbosity=Verbosity.verbose)
 def test_variablecollection_serialize_deserialize(o: VariableCollection, dump_load):
     o_loaded = dump_load(o)
     assert o == o_loaded
 
 
 @given(dataframe_strategy(), serializer_dump_load_strategy)
-@settings(verbosity=Verbosity.verbose)
 def test_dataframe_serialize_deserialize(o: DataFrame, dump_load):
     o_loaded = dump_load(o)
     o.equals(o_loaded)
 
 
 @given(standard_state_strategy(), serializer_dump_load_strategy)
-@settings(verbosity=Verbosity.verbose)
 def test_state_serialize_deserialize(o: StandardState, dump_load):
     o_loaded = dump_load(o)
     assert o.variables == o_loaded.variables

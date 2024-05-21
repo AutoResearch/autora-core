@@ -10,6 +10,7 @@ class StandardStateHistory(StandardState, StateHistory):
     Examples:
         The state can be initialized emtpy
         >>> from autora.variable import VariableCollection, Variable
+        >>> from autora.state import Delta
         >>> s = StandardStateHistory()
         >>> s  # doctest: +NORMALIZE_WHITESPACE
         StandardStateHistory(history=[{'variables': None,

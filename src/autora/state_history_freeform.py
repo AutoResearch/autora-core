@@ -13,38 +13,42 @@ class HistoryStateList(UserList):
         >>> a = HistoryStateList()
         >>> a
         []
+        HistoryStateList()
 
         >>> a + {"conditions": [1, 2, 3]}
-        [Entry(kind='conditions', data=[1, 2, 3])]
+        HistoryStateList(Entry(kind='conditions', data=[1, 2, 3]))
 
         >>> a + Delta(conditions=[1, 2, 3])
-        [Entry(kind='conditions', data=[1, 2, 3])]
+        HistoryStateList(Entry(kind='conditions', data=[1, 2, 3]))
 
         >>> a + Entry(kind='conditions', data=[1, 2, 3])
-        [Entry(kind='conditions', data=[1, 2, 3])]
+        HistoryStateList(Entry(kind='conditions', data=[1, 2, 3]))
 
         >>> a + [Entry(kind='conditions', data=[1, 2, 3])]
         [Entry(kind='conditions', data=[1, 2, 3])]
+        HistoryStateList(Entry(kind='conditions', data=[1, 2, 3]))
+
 
         >>> b = a + {"conditions": [1, 2, 3]}
 
         >>> b + {"conditions": [4, 5, 6]}   # doctest: +NORMALIZE_WHITESPACE
-        [Entry(kind='conditions', data=[1, 2, 3]),
-         Entry(kind='conditions', data=[4, 5, 6])]
+        HistoryStateList(Entry(kind='conditions', data=[1, 2, 3]),
+                         Entry(kind='conditions', data=[4, 5, 6]))
 
         >>> b + [{"conditions": [7, 8]}, {"conditions": [9, 10]}]  # doctest: +NORMALIZE_WHITESPACE
-        [Entry(kind='conditions', data=[1, 2, 3]),
-         Entry(kind='conditions', data=[7, 8]),
-         Entry(kind='conditions', data=[9, 10])]
+        HistoryStateList(Entry(kind='conditions', data=[1, 2, 3]),
+                         Entry(kind='conditions', data=[7, 8]),
+                         Entry(kind='conditions', data=[9, 10]))
 
         >>> list(b.filter_by("conditions"))
         [Entry(kind='conditions', data=[1, 2, 3])]
+        HistoryStateList(Entry(kind='conditions', data=[1, 2, 3]))
 
         >>> from autora.state import Delta
         >>> a + {"experiment_data": [101, 102, 103],
         ...      "model": "it's a trap!"}  # doctest: +NORMALIZE_WHITESPACE
-        [Entry(kind='experiment_data', data=[101, 102, 103]),
-         Entry(kind='model', data="it's a trap!")]
+        HistoryStateList(Entry(kind='experiment_data', data=[101, 102, 103]),
+                         Entry(kind='model', data="it's a trap!"))
 
     """
 
@@ -75,6 +79,9 @@ class HistoryStateList(UserList):
     def filter_by(self, kind):
         filtered_data = filter(lambda d: d.kind == kind, self.data)
         return filtered_data
+
+    def __repr__(self):
+        return f"{self.__class__.__name__}({', '.join([repr(i) for i in self])})"
 
     def __setitem__(self, i, item):
         raise NotImplementedError("HistoryStateList does not support updating in place")

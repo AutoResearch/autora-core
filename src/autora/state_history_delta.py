@@ -136,62 +136,10 @@ class StateHistory(State):
         0  a  1  alpha
         1  b  2   beta
 
-        ... or an array:
-        >>> import numpy as np
-        >>> (s + Delta(q=np.linspace([1, 2], [10, 15], 3))).q
-              0     1
-        0   1.0   2.0
-        1   5.5   8.5
-        2  10.0  15.0
-
-        ... or a dictionary:
-        >>> (s + Delta(q={"a": [1,2,3], "b": [4,5,6]})).q
-           a  b
-        0  1  4
-        1  2  5
-        2  3  6
-
-        ... or a list:
-        >>> (s + Delta(q=[11, 12, 13])).q
-            0
-        0  11
-        1  12
-        2  13
-
-        ... but not, for instance, a string:
-        >>> (s + Delta(q="not compatible with pd.DataFrame")).q
-        Traceback (most recent call last):
-        ...
-        ValueError: DataFrame constructor not properly called!
-
-        Without a converter:
-        >>> @dataclass(frozen=True)
-        ... class CoerceStateDataFrameNoConverter(StateHistory):
-        ...    r: pd.DataFrame = field(default_factory=pd.DataFrame, metadata={"delta": "replace"})
-
-        ... there is no coercion – the object is passed unchanged
-        >>> t = CoerceStateDataFrameNoConverter()
-        >>> (t + Delta(r=np.linspace([1, 2], [10, 15], 3))).r
-        array([[ 1. ,  2. ],
-               [ 5.5,  8.5],
-               [10. , 15. ]])
-
-
-        A converter can cast from a DataFrame to a np.ndarray (with a single datatype),
-        for instance:
-        >>> @dataclass(frozen=True)
-        ... class CoerceStateArray(State):
-        ...    r: Optional[np.ndarray] = field(default=None,
-        ...                            metadata={"delta": "replace",
-        ...                                      "converter": np.asarray})
-
-        Here we pass a dataframe, but expect a numpy array:
-        >>> (CoerceStateArray() + Delta(r=pd.DataFrame([("a",1), ("b",2)], columns=list("xy")))).r
-        array([['a', 1],
-               ['b', 2]], dtype=object)
-
-        We can define aliases which can transform between different potential field
-        names.
+        ... but be aware that the history stores the Delta object as it was provided,
+        before coercion.
+        >>> (s + Delta(q=[("a",1,"alpha"), ("b",2,"beta")])).history  # doctest: +ELLIPSIS
+        [..., {'q': [('a', 1, 'alpha'), ('b', 2, 'beta')]}]
 
     """
 

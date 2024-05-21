@@ -12,8 +12,10 @@ class HistoryStateList(UserList):
     Examples:
         >>> a = HistoryStateList()
         >>> a
-        []
         HistoryStateList()
+
+        >>> HistoryStateList(Entry(kind='conditions', data=[1, 2, 3]))
+        HistoryStateList(Entry(kind='conditions', data=[1, 2, 3]))
 
         >>> a + {"conditions": [1, 2, 3]}
         HistoryStateList(Entry(kind='conditions', data=[1, 2, 3]))
@@ -25,9 +27,10 @@ class HistoryStateList(UserList):
         HistoryStateList(Entry(kind='conditions', data=[1, 2, 3]))
 
         >>> a + [Entry(kind='conditions', data=[1, 2, 3])]
-        [Entry(kind='conditions', data=[1, 2, 3])]
         HistoryStateList(Entry(kind='conditions', data=[1, 2, 3]))
 
+        >>> a + HistoryStateList(Entry(kind='conditions', data=[1, 2, 3]))
+        HistoryStateList(Entry(kind='conditions', data=[1, 2, 3]))
 
         >>> b = a + {"conditions": [1, 2, 3]}
 
@@ -40,8 +43,7 @@ class HistoryStateList(UserList):
                          Entry(kind='conditions', data=[7, 8]),
                          Entry(kind='conditions', data=[9, 10]))
 
-        >>> list(b.filter_by("conditions"))
-        [Entry(kind='conditions', data=[1, 2, 3])]
+        >>> b.get("conditions")
         HistoryStateList(Entry(kind='conditions', data=[1, 2, 3]))
 
         >>> from autora.state import Delta
@@ -76,8 +78,8 @@ class HistoryStateList(UserList):
             new = new + entry
         return new
 
-    def filter_by(self, kind):
-        filtered_data = filter(lambda d: d.kind == kind, self.data)
+    def get(self, kind):
+        filtered_data = self.__class__(filter(lambda d: d.kind == kind, self.data))
         return filtered_data
 
     def __repr__(self):

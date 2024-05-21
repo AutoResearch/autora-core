@@ -71,14 +71,6 @@ class StateHistory(State):
         >>> l + Delta(o="not a field")  # doctest: +ELLIPSIS
         ListState(history=[..., {'o': 'not a field'}], l=['a', 'b', 'c'], m=['x', 'y', 'z'])
 
-        ... but will trigger a warning:
-        >>> import warnings
-        >>> with warnings.catch_warnings(record=True) as w:
-        ...     _ = l + Delta(o="not a field")
-        ...     print(w[0].message) # doctest: +NORMALIZE_WHITESPACE
-        These fields: ['o'] could not be used to update ListState,
-        which has these fields & aliases: ['history', 'l', 'm']
-
         We can also use the `.update` method to do the same thing:
         >>> l.update(l=list("ghi"), m=list("rst"))  # doctest: +NORMALIZE_WHITESPACE +ELLIPSIS
         ListState(history=[..., {'l': ['g', 'h', 'i'], 'm': ['r', 's', 't']}],
@@ -206,7 +198,7 @@ class StateHistory(State):
     history: List[Delta] = field(default_factory=list)
 
     def __add__(self, other):
-        new = super().__add__(other)
+        new = super().__add__(other, warn_on_unused_fields=False)
         new = replace(new, history=self.history + [other])
         return new
 

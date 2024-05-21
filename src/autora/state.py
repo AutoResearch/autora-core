@@ -214,7 +214,7 @@ class State:
 
     """
 
-    def __add__(self, other: Union[Delta, Mapping]):
+    def __add__(self, other: Union[Delta, Mapping], warn_on_unused_fields=True):
         updates = dict()
         other_fields_unused = list(other.keys())
         for self_field in fields(self):
@@ -245,7 +245,7 @@ class State:
                     "delta_behaviour=`%s` not implemented" % delta_behavior
                 )
 
-        if len(other_fields_unused) > 0:
+        if warn_on_unused_fields and len(other_fields_unused) > 0:
             warnings.warn(
                 "These fields: %s could not be used to update %s, "
                 "which has these fields & aliases: %s"

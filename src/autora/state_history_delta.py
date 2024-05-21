@@ -159,6 +159,18 @@ class StateHistory(State):
             }
             self.history.append(initial_data_except_history)
 
+    def history_of(self, key: str):
+        relevant_history_entries = filter(
+            lambda e: key in e.keys(),
+            self.history,
+        )
+        relevant_entries = [k.get(key) for k in relevant_history_entries]
+        return relevant_entries
+
+    def history_filter(self, cond):
+        relevant_history_entries = list(filter(cond, self.history))
+        return relevant_history_entries
+
 
 @dataclass(frozen=True)
 class StandardStateHistory(StandardState, StateHistory):

@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field, fields, replace
 from typing import List
 
-from autora.state import Delta, State
+from autora.state import Delta, StandardState, State
 
 
 @dataclass(frozen=True)
@@ -158,3 +158,134 @@ class StateHistory(State):
                 if f.name != "history"
             }
             self.history.append(initial_data_except_history)
+
+
+@dataclass(frozen=True)
+class StandardStateHistory(StandardState, StateHistory):
+    """
+    Examples:
+        The state can be initialized emtpy
+        >>> from autora.variable import VariableCollection, Variable
+        >>> s = StandardStateHistory()
+        >>> s  # doctest: +NORMALIZE_WHITESPACE
+        StandardStateHistory(history=[{'variables': None,
+                                       'conditions': None,
+                                       'experiment_data': None,
+                                       'models': []}],
+                            variables=None, conditions=None, experiment_data=None, models=[])
+
+        The `variables` can be updated using a `Delta`:
+        >>> dv1 = Delta(variables=VariableCollection(independent_variables=[Variable("1")]))
+        >>> s + dv1 # doctest: +NORMALIZE_WHITESPACE +ELLIPSIS
+        StandardStateHistory(history=[...],
+            variables=VariableCollection(independent_variables=[Variable(name='1', ...)], ...),
+            ...)
+
+        ... and are replaced by each `Delta`:
+        >>> dv2 = Delta(variables=VariableCollection(independent_variables=[Variable("2")]))
+        >>> s + dv1 + dv2 # doctest: +NORMALIZE_WHITESPACE +ELLIPSIS
+        StandardState(history=[..],
+            variables=VariableCollection(independent_variables=[Variable(name='2',...)
+
+        The `conditions` can be updated using a `Delta`:
+        >>> dc1 = Delta(conditions=pd.DataFrame({"x": [1, 2, 3]}))
+        >>> (s + dc1).conditions
+           x
+        0  1
+        1  2
+        2  3
+
+        ... and are replaced by each `Delta`:
+        >>> dc2 = Delta(conditions=pd.DataFrame({"x": [4, 5]}))
+        >>> (s + dc1 + dc2).conditions
+           x
+        0  4
+        1  5
+
+        Datatypes other than `pd.DataFrame` will be coerced into a `DataFrame` if possible.
+        >>> import numpy as np
+        >>> dc3 = Delta(conditions=np.core.records.fromrecords([(8, "h"), (9, "i")], names="n,c"))
+        >>> (s + dc3).conditions
+           n  c
+        0  8  h
+        1  9  i
+
+        If they are passed without column names, no column names are inferred.
+        This is to ensure that accidental mislabeling of columns cannot occur.
+        Column names should usually be provided.
+        >>> dc4 = Delta(conditions=[(6,), (7,)])
+        >>> (s + dc4).conditions
+           0
+        0  6
+        1  7
+
+        Datatypes which are incompatible with a pd.DataFrame will throw an error:
+        >>> s + Delta(conditions="not compatible with pd.DataFrame") \
+# doctest: +NORMALIZE_WHITESPACE +ELLIPSIS
+        Traceback (most recent call last):
+        ...
+        ValueError: ...
+
+        Experiment data can be updated using a Delta:
+        >>> ded1 = Delta(experiment_data=pd.DataFrame({"x": [1,2,3], "y": ["a", "b", "c"]}))
+        >>> (s + ded1).experiment_data
+           x  y
+        0  1  a
+        1  2  b
+        2  3  c
+
+        ... and are extended with each Delta:
+        >>> ded2 = Delta(experiment_data=pd.DataFrame({"x": [4, 5, 6], "y": ["d", "e", "f"]}))
+        >>> (s + ded1 + ded2).experiment_data
+           x  y
+        0  1  a
+        1  2  b
+        2  3  c
+        3  4  d
+        4  5  e
+        5  6  f
+
+        If they are passed without column names, no column names are inferred.
+        This is to ensure that accidental mislabeling of columns cannot occur.
+        >>> ded3 = Delta(experiment_data=pd.DataFrame([(7, "g"), (8, "h")]))
+        >>> (s + ded3).experiment_data
+           0  1
+        0  7  g
+        1  8  h
+
+        If there are already data present, the column names must match.
+        >>> (s + ded2 + ded3).experiment_data
+             x    y    0    1
+        0  4.0    d  NaN  NaN
+        1  5.0    e  NaN  NaN
+        2  6.0    f  NaN  NaN
+        3  NaN  NaN  7.0    g
+        4  NaN  NaN  8.0    h
+
+        `experiment_data` other than `pd.DataFrame` will be coerced into a `DataFrame` if possible.
+        >>> import numpy as np
+        >>> ded4 = Delta(
+        ...     experiment_data=np.core.records.fromrecords([(1, "a"), (2, "b")], names=["x", "y"]))
+        >>> (s + ded4).experiment_data
+           x  y
+        0  1  a
+        1  2  b
+
+        `experiment_data` which are incompatible with a pd.DataFrame will throw an error:
+        >>> s + Delta(experiment_data="not compatible with pd.DataFrame") \
+# doctest: +NORMALIZE_WHITESPACE +ELLIPSIS
+        Traceback (most recent call last):
+        ...
+        ValueError: ...
+
+        `models` can be updated using a Delta:
+        >>> from sklearn.dummy import DummyClassifier
+        >>> dm1 = Delta(models=[DummyClassifier(constant=1)])
+        >>> dm2 = Delta(models=[DummyClassifier(constant=2), DummyClassifier(constant=3)])
+        >>> (s + dm1).models
+        [DummyClassifier(constant=1)]
+
+        >>> (s + dm1 + dm2).models
+        [DummyClassifier(constant=1), DummyClassifier(constant=2), DummyClassifier(constant=3)]
+
+    """

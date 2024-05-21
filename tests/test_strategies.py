@@ -11,7 +11,7 @@ from hypothesis.extra import numpy as st_np
 from hypothesis.extra import pandas as st_pd
 
 from autora.state import StandardState
-from autora.state_history_delta import StandardStateHistory
+from autora.state_history_delta_standard import StandardStateHistory
 from autora.variable import ValueType, Variable, VariableCollection
 
 VALUE_TYPE_DTYPE_MAPPING = {

@@ -184,10 +184,11 @@ class StandardStateHistory(StandardState, StateHistory):
         ... and are replaced by each `Delta`:
         >>> dv2 = Delta(variables=VariableCollection(independent_variables=[Variable("2")]))
         >>> s + dv1 + dv2 # doctest: +NORMALIZE_WHITESPACE +ELLIPSIS
-        StandardState(history=[..],
+        StandardStateHistory(history=[...],
             variables=VariableCollection(independent_variables=[Variable(name='2',...)
 
         The `conditions` can be updated using a `Delta`:
+        >>> import pandas as pd
         >>> dc1 = Delta(conditions=pd.DataFrame({"x": [1, 2, 3]}))
         >>> (s + dc1).conditions
            x

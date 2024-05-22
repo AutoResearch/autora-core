@@ -115,20 +115,11 @@ class DeltaHistory(State):
                               {'n': 1}])
 
 
-
-
-
-        >>> from dataclasses import dataclass, field
-        >>> from typing import List, Optional
-
-        If we instantiate the object with no data, the data fields will be initialized with
-        default values and the history will be initialized with a reference to the returned object
-        itself.
-        >>> ListState()
-        ListState(history=[...], l=[], m=[])
-
+        In real use, the DeltaHistory will be extended with additional fields.
         We define a dataclass where each field (which is going to be delta-ed) has additional
         metadata "delta" which describes its delta behaviour.
+        >>> from dataclasses import dataclass, field
+        >>> from typing import List, Optional
         >>> @dataclass(frozen=True)
         ... class ListState(DeltaHistory):
         ...    l: List = field(default_factory=list, metadata={"delta": "extend"})
@@ -140,24 +131,21 @@ class DeltaHistory(State):
         >>> ListState()
         ListState(history=[...], l=[], m=[])
 
-
-        >>>
-
-        >>> ListState() + Delta(n="cats") + Delta(n="dogs")
-
-        If the history is initialized as an empty list (the default), then the history is
-        initialized with the initial values of the other fields.
-        >>> ListState(history=[], l=[1], m=[2])
-        ListState(history=[...], l=[1], m=[2])
-
-        Now we instantiate the dataclass...
+        If we instantiate the dataclass with some data:
         >>> l = ListState(l=list("abc"), m=list("xyz"))
         >>> l  # doctest: +NORMALIZE_WHITESPACE
-        ListState(history=[{'l': ['a', 'b', 'c'], 'm': ['x', 'y', 'z']}],
-                  l=['a', 'b', 'c'],
-                  m=['x', 'y', 'z'])
+        ListState(history=[...], l=['a', 'b', 'c'], m=['x', 'y', 'z'])
 
-        ... and can add deltas to it. `l` will be extended:
+        ...the first reference in the history list is the object itself:
+        >>> l.history[0]
+        ListState(history=[...], l=['a', 'b', 'c'], m=['x', 'y', 'z'])
+
+        ... the two objects are identical.
+        >>> l is l.history[0]
+        True
+
+
+        We can add deltas to it. `l` will be extended:
         >>> l + Delta(l=list("def"))  # doctest: +NORMALIZE_WHITESPACE +ELLIPSIS
         ListState(history=[..., {'l': ['d', 'e', 'f']}],
                   l=['a', 'b', 'c', 'd', 'e', 'f'],
@@ -198,7 +186,7 @@ class DeltaHistory(State):
 
         >>> m = AppendState(n=list("ɑβɣ"))
         >>> m
-        AppendState(history=[{'n': ['ɑ', 'β', 'ɣ']}], n=['ɑ', 'β', 'ɣ'])
+        AppendState(history=[...], n=['ɑ', 'β', 'ɣ'])
 
         `n` will be appended:
         >>> m + Delta(n="∂")  # doctest: +ELLIPSIS
@@ -215,12 +203,13 @@ class DeltaHistory(State):
         >>> r = CoerceStateList()
 
         If there is no `metadata["converter"]` set for a field, no coercion occurs
-        >>> r + Delta(o="not a list")
-        CoerceStateList(history=[{'o': None, 'p': []}, {'o': 'not a list'}], o='not a list', p=[])
+        >>> r + Delta(o="not a list")  # doctest: +ELLIPSIS
+        CoerceStateList(history=[..., {'o': 'not a list'}], o='not a list', p=[])
 
-        If there is a `metadata["converter"]` set for a field, the data are coerced:
-        >>> r + Delta(p="not a list")  # doctest: +NORMALIZE_WHITESPACE
-        CoerceStateList(history=[{'o': None, 'p': []}, {'p': 'not a list'}],
+        If there is a `metadata["converter"]` set for a field, the data are coerced,
+        but the Delta object in the history remains the same as it was input:
+        >>> r + Delta(p="not a list")  # doctest: +NORMALIZE_WHITESPACE +ELLIPSIS
+        CoerceStateList(history=[..., {'p': 'not a list'}],
                         o=None, p=['n', 'o', 't', ' ', 'a', ' ', 'l', 'i', 's', 't'])
 
         If the input data are of the correct type, they are returned unaltered:

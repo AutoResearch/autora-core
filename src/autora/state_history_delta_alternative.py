@@ -17,10 +17,7 @@ class AlternateDeltaHistory(DeltaHistory):
         >>> from autora.state import Delta
         >>> s = AlternateDeltaHistory()
         >>> s  # doctest: +NORMALIZE_WHITESPACE
-        AlternateDeltaHistory(history=[{'variables': None,
-                                       'conditions': None,
-                                       'experiment_data': None,
-                                       'model': None}],
+        AlternateDeltaHistory(history=[...],
                             variables=None, conditions=None, experiment_data=None, model=None)
 
         The `variables` can be updated using a `Delta`:
@@ -131,8 +128,9 @@ class AlternateDeltaHistory(DeltaHistory):
 
 
         The history can be accessed to get older variants of any of the field versions:
+        >>> from autora.state_history_delta import history_of
         >>> sh = (s + dm1 + dm2 + dm3)
-        >>> sh.history_of("model") # doctest: +NORMALIZE_WHITESPACE +ELLIPSIS
+        >>> list(history_of(sh, "model")) # doctest: +NORMALIZE_WHITESPACE +ELLIPSIS
         [None,
          DummyClassifier(constant=1),
          DummyClassifier(constant=2),
@@ -146,7 +144,8 @@ class AlternateDeltaHistory(DeltaHistory):
         >>> shm = (s + dme1 + dme2 + dme3)
 
         Filter the history for deltas containing a field called "meta" with the value "flag"
-        >>> shm.history_filter(lambda s: s.get("meta") == "flag")
+        >>> from autora.state_history_delta import history_filter
+        >>> history_filter(shm, lambda s: s.get("meta") == "flag")
         [{'model': DummyClassifier(constant=2), 'meta': 'flag'}]
 
         You can do the same thing by filtering the history directly
@@ -154,15 +153,14 @@ class AlternateDeltaHistory(DeltaHistory):
         [{'model': DummyClassifier(constant=2), 'meta': 'flag'}]
 
         Filter the history for deltas containing both a model and conditions
-        >>> shm.history_filter(
-        ...     lambda s: ("model" in s and "conditions" in s)) # doctest: +NORMALIZE_WHITESPACE
+        >>> history_filter(shm, lambda s: ("model" in s and "conditions" in s))
+        ...     # doctest: +NORMALIZE_WHITESPACE
         [{'variables': None, 'conditions': None, 'experiment_data': None, 'model': None},
          {'model': DummyClassifier(constant=3), 'conditions': [1, 2, 3]}]
 
         ... or extract just the models from those entries:
-        >>> [m["model"]
-        ...     for m in filter(lambda s: ("model" in s and "conditions" in s), shm.history)
-        ... ] # doctest: +NORMALIZE_WHITESPACE
+        >>> [m["model"]for m in filter(lambda s: ("model" in s and "conditions" in s), shm.history)]
+        ...     # doctest: +NORMALIZE_WHITESPACE
         [None, DummyClassifier(constant=3)]
 
     """

@@ -13,10 +13,7 @@ class StandardDeltaHistory(StandardState, DeltaHistory):
         >>> from autora.state import Delta
         >>> s = StandardDeltaHistory()
         >>> s  # doctest: +NORMALIZE_WHITESPACE
-        StandardDeltaHistory(history=[{'variables': None,
-                                       'conditions': None,
-                                       'experiment_data': None,
-                                       'models': []}],
+        StandardDeltaHistory(history=[...],
                             variables=None, conditions=None, experiment_data=None, models=[])
 
         The `variables` can be updated using a `Delta`:

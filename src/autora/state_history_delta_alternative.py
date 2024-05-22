@@ -144,23 +144,22 @@ class AlternateDeltaHistory(DeltaHistory):
         >>> shm = (s + dme1 + dme2 + dme3)
 
         Filter the history for deltas containing a field called "meta" with the value "flag"
-        >>> from autora.state_history_delta import history_filter
-        >>> history_filter(shm, lambda s: s.get("meta") == "flag")
-        [{'model': DummyClassifier(constant=2), 'meta': 'flag'}]
-
-        You can do the same thing by filtering the history directly
-        >>> list(filter(lambda s: s.get("meta") == "flag", shm.history))
+        >>> from autora.state_history_delta import history_where, history_contains
+        >>> list(history_where(shm.history, meta="flag"))
         [{'model': DummyClassifier(constant=2), 'meta': 'flag'}]
 
         Filter the history for deltas containing both a model and conditions
-        >>> history_filter(shm, lambda s: ("model" in s and "conditions" in s))
+        >>> list(history_contains(shm.history, "model", "conditions"))
         ...     # doctest: +NORMALIZE_WHITESPACE
-        [{'variables': None, 'conditions': None, 'experiment_data': None, 'model': None},
+        [AlternateDeltaHistory(history=[...],
+                               variables=None,
+                               conditions=None,
+                               experiment_data=None,
+                               model=None),
          {'model': DummyClassifier(constant=3), 'conditions': [1, 2, 3]}]
 
         ... or extract just the models from those entries:
-        >>> [m["model"]for m in filter(lambda s: ("model" in s and "conditions" in s), shm.history)]
-        ...     # doctest: +NORMALIZE_WHITESPACE
+        >>> list(history_of(history_contains(shm.history, "model", "conditions"), "model"))
         [None, DummyClassifier(constant=3)]
 
     """

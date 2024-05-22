@@ -349,7 +349,46 @@ def as_of_last(state: "DeltaHistory", **kwargs):
     return new
 
 
-def history_of(state, key: str):
+def history_where(history, **kwargs):
+    def condition(entry):
+        if isinstance(entry, MutableMapping):
+            if kwargs.items() <= entry.items():
+                return True
+            else:
+                return False
+        elif isinstance(entry, State):
+            entry_items = {
+                k: hasattr(entry, k) and getattr(entry, k) for k in kwargs.keys()
+            }
+            if kwargs.items() <= entry_items.items():
+                return True
+            else:
+                return False
+
+    filtered_history = filter(condition, history)
+    return filtered_history
+
+
+def history_contains(history, *args):
+    keys = set(args)
+
+    def condition(entry):
+        if isinstance(entry, MutableMapping):
+            if keys <= set(entry.keys()):
+                return True
+            else:
+                return False
+        elif isinstance(entry, State):
+            if keys <= set(f.name for f in fields(entry)):
+                return True
+            else:
+                return False
+
+    filtered_history = filter(condition, history)
+    return filtered_history
+
+
+def history_of(state_or_history, key: str):
     """
     Examples:
         >>> from dataclasses import dataclass, field
@@ -371,13 +410,18 @@ def history_of(state, key: str):
         ['thud', 'nom']
 
     """
-    for entry in state.history:
-        if isinstance(entry, MutableMapping):
-            if key in entry.keys():
-                yield entry[key]
-        elif isinstance(entry, State):
-            if key in [f.name for f in fields(entry)]:
-                yield getattr(entry, key)
+    if isinstance(state_or_history, Iterable):
+        for entry in state_or_history:
+            if isinstance(entry, MutableMapping):
+                if key in entry.keys():
+                    yield entry[key]
+            elif isinstance(entry, State):
+                if key in [f.name for f in fields(entry)]:
+                    yield getattr(entry, key)
+
+    else:
+        for i in history_of(state_or_history.history, key):
+            yield i
 
 
 def history_filter(self, cond):

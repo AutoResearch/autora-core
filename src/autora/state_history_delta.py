@@ -7,6 +7,23 @@ from autora.state import Delta, State
 
 
 def reconstruct(history: Iterable[Union[State, Delta]]):
+    """
+    Examples:
+        >>> reconstruct([DeltaHistory()])
+        DeltaHistory(history=[...])
+
+        >>> reconstruct([DeltaHistory(), {"foo": "bar"}])
+        DeltaHistory(history=[DeltaHistory(history=[...]), {'foo': 'bar'}])
+
+        >>> reconstruct([DeltaHistory(), {"foo": "bar"}, {"baz": "bat"}])
+        DeltaHistory(history=[DeltaHistory(history=[...]), {'foo': 'bar'}, {'baz': 'bat'}])
+
+        >>> reconstruct([])
+        Traceback (most recent call last):
+        ...
+        TypeError: reduce() of empty iterable with no initial value
+
+    """
     new = reduce(operator.add, history)
     return new
 
@@ -49,34 +66,53 @@ class DeltaHistory(State):
         >>> b
         DeltaHistory(history=[DeltaHistory(history=[...]), {'n': 1}, {'n': 2}, {'n': 3}, {'n': 4}])
 
-        We can reconstruct the history up to any point
+        The history can be arbitrarily long:
+        >>> q = DeltaHistory()
+        >>> for i in range(10_000):
+        ...     q += Delta(n=i)
+        >>> q.history[-5:]
+        [{'n': 9995}, {'n': 9996}, {'n': 9997}, {'n': 9998}, {'n': 9999}]
+
+        Any fields which aren't present in the DeltaHistory object but which are provided in a
+        Delta will be stored in the history
+        >>> c: DeltaHistory = (a + Delta(n=1)
+        ...      + Delta(n=2, foo="bar", qux="thud")
+        ...      + Delta(n=3, foo="baz")
+        ...      + Delta(n=4, foo="bar"))
+        >>> c.history # doctest: +NORMALIZE_WHITESPACE +ELLIPSIS
+        [DeltaHistory(history=[...]),
+         {'n': 1},
+         {'n': 2, 'foo': 'bar', 'qux': 'thud'},
+         {'n': 3, 'foo': 'baz'},
+         {'n': 4, 'foo': 'bar'}]
+
+        We can reconstruct the history up to any point:
         >>> reconstruct(b.history[0:-1])
         DeltaHistory(history=[DeltaHistory(history=[...]), {'n': 1}, {'n': 2}, {'n': 3}])
 
-        We can also filter the deltas before reconstruction:
-        >>> from itertools import takewhile
-        >>> c: DeltaHistory = (a + Delta(n=1)
-        ...      + Delta(n=2, foo="bar")
-        ...      + Delta(n=3, foo="baz")
-        ...      + Delta(n=4, foo="bar"))
-        >>> reconstruct(filter_to_last(lambda e: e.get("foo", 0) == "baz", c.history))
+        We can reconstruct the object up until the last entry where `foo=baz` (Note that we use
+        the `e.get("foo", default)` method rather than the `e["foo"]` syntax
+        so that if the Delta has no "foo" key, no error is thrown.):
+        >>> reconstruct(filter_to_last(lambda e: e.get("foo", None) == "baz", c.history))
         ... # doctest: +NORMALIZE_WHITESPACE +ELLIPSIS
         DeltaHistory(history=[DeltaHistory(history=[...]),
                               {'n': 1},
-                              {'n': 2, 'foo': 'bar'},
+                              {'n': 2, 'foo': 'bar', 'qux': 'thud'},
                               {'n': 3, 'foo': 'baz'}])
+
+
+        ... or where `qux=thud`
+        >>> reconstruct(filter_to_last(lambda e: e.get("qux", None) == "thud", c.history))
+        ... # doctest: +NORMALIZE_WHITESPACE +ELLIPSIS
+        DeltaHistory(history=[DeltaHistory(history=[...]),
+                              {'n': 1},
+                              {'n': 2, 'foo': 'bar', 'qux': 'thud'}])
+
 
         >>> reconstruct(filter_to_last(lambda e: not "foo" in e, c.history))
         ... # doctest: +NORMALIZE_WHITESPACE +ELLIPSIS
         DeltaHistory(history=[DeltaHistory(history=[...]),
                               {'n': 1}])
-
-        >>> reconstruct(filter_to_last(lambda e: "foo" in e and e["foo"]=="baz", c.history))
-        ... # doctest: +NORMALIZE_WHITESPACE +ELLIPSIS
-        DeltaHistory(history=[DeltaHistory(history=[...]),
-                              {'n': 1},
-                              {'n': 2, 'foo': 'bar'},
-                              {'n': 3, 'foo': 'baz'}])
 
 
 

@@ -236,10 +236,10 @@ def reconstruct(history: Iterable[Union[State, Delta]]):
         >>> reconstruct([DeltaHistory(), {"foo": "bar"}, {"baz": "bat"}])
         DeltaHistory(history=[DeltaHistory(history=[...]), {'foo': 'bar'}, {'baz': 'bat'}])
 
-        >>> reconstruct([])
+        >>> reconstruct([])  # doctest: +ELLIPSIS
         Traceback (most recent call last):
         ...
-        TypeError: reduce() of empty iterable with no initial value
+        TypeError: reduce() of empty ... with no initial value
 
     """
     new = reduce(operator.add, history)

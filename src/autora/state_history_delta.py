@@ -5,7 +5,7 @@ from autora.state import Delta, State
 
 
 @dataclass(frozen=True)
-class StateHistory(State):
+class DeltaHistory(State):
     """
     Base object for dataclasses which use the Delta mechanism.
 
@@ -16,7 +16,7 @@ class StateHistory(State):
         We define a dataclass where each field (which is going to be delta-ed) has additional
         metadata "delta" which describes its delta behaviour.
         >>> @dataclass(frozen=True)
-        ... class ListState(StateHistory):
+        ... class ListState(DeltaHistory):
         ...    l: List = field(default_factory=list, metadata={"delta": "extend"})
         ...    m: List = field(default_factory=list, metadata={"delta": "replace"})
 
@@ -79,7 +79,7 @@ class StateHistory(State):
 
         We can also define fields which `append` the last result:
         >>> @dataclass(frozen=True)
-        ... class AppendState(StateHistory):
+        ... class AppendState(DeltaHistory):
         ...    n: List = field(default_factory=list, metadata={"delta": "append"})
 
         >>> m = AppendState(n=list("ɑβɣ"))
@@ -93,7 +93,7 @@ class StateHistory(State):
         The metadata key "converter" is used to coerce types (inspired by
         [PEP 712](https://peps.python.org/pep-0712/)):
         >>> @dataclass(frozen=True)
-        ... class CoerceStateList(StateHistory):
+        ... class CoerceStateList(DeltaHistory):
         ...    o: Optional[List] = field(default=None, metadata={"delta": "replace"})
         ...    p: List = field(default_factory=list, metadata={"delta": "replace",
         ...                                                    "converter": list})
@@ -116,7 +116,7 @@ class StateHistory(State):
         With a converter, inputs are converted to the type output by the converter:
         >>> import pandas as pd
         >>> @dataclass(frozen=True)
-        ... class CoerceStateDataFrame(StateHistory):
+        ... class CoerceStateDataFrame(DeltaHistory):
         ...    q: pd.DataFrame = field(default_factory=pd.DataFrame,
         ...                            metadata={"delta": "replace",
         ...                                      "converter": pd.DataFrame})

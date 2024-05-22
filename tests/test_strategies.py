@@ -11,7 +11,7 @@ from hypothesis.extra import numpy as st_np
 from hypothesis.extra import pandas as st_pd
 
 from autora.state import StandardState
-from autora.state_history_delta_standard import StandardStateHistory
+from autora.state_history_delta_standard import StandardDeltaHistory
 from autora.variable import ValueType, Variable, VariableCollection
 
 VALUE_TYPE_DTYPE_MAPPING = {
@@ -453,7 +453,7 @@ def standard_state_strategy(draw):
         )
     )
     models = draw(st.lists(model_strategy(), min_size=0, max_size=5))
-    state_class = draw(st.sampled_from([StandardState, StandardStateHistory]))
+    state_class = draw(st.sampled_from([StandardState, StandardDeltaHistory]))
     s = state_class(
         variables=variable_collection,
         conditions=conditions,

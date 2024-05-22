@@ -4,20 +4,20 @@ from typing import Optional
 import pandas as pd
 from sklearn.base import BaseEstimator
 
-from autora.state_history_delta import StateHistory
+from autora.state_history_delta import DeltaHistory
 from autora.variable import VariableCollection
 
 
 @dataclass(frozen=True)
-class AlternateStateHistory(StateHistory):
+class AlternateDeltaHistory(DeltaHistory):
     """
     Examples:
         The state can be initialized emtpy
         >>> from autora.variable import VariableCollection, Variable
         >>> from autora.state import Delta
-        >>> s = AlternateStateHistory()
+        >>> s = AlternateDeltaHistory()
         >>> s  # doctest: +NORMALIZE_WHITESPACE
-        AlternateStateHistory(history=[{'variables': None,
+        AlternateDeltaHistory(history=[{'variables': None,
                                        'conditions': None,
                                        'experiment_data': None,
                                        'model': None}],
@@ -26,14 +26,14 @@ class AlternateStateHistory(StateHistory):
         The `variables` can be updated using a `Delta`:
         >>> dv1 = Delta(variables=VariableCollection(independent_variables=[Variable("1")]))
         >>> s + dv1 # doctest: +NORMALIZE_WHITESPACE +ELLIPSIS
-        AlternateStateHistory(history=[...],
+        AlternateDeltaHistory(history=[...],
             variables=VariableCollection(independent_variables=[Variable(name='1', ...)], ...),
             ...)
 
         ... and are replaced by each `Delta`:
         >>> dv2 = Delta(variables=VariableCollection(independent_variables=[Variable("2")]))
         >>> s + dv1 + dv2 # doctest: +NORMALIZE_WHITESPACE +ELLIPSIS
-        AlternateStateHistory(history=[...],
+        AlternateDeltaHistory(history=[...],
             variables=VariableCollection(independent_variables=[Variable(name='2',...)
 
         The `conditions` can be updated using a `Delta`:

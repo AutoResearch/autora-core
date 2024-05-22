@@ -56,9 +56,13 @@ class DeltaHistory(State):
         >>> DeltaHistory()
         DeltaHistory(history=[...])
 
-        ... which is initialized with a reference to the object itself.
+        ... which is initialized with a reference to the object itself:
         >>> a = DeltaHistory()
         >>> a.history[0] is a
+        True
+
+        ... and the object in the history also has a full copy of the history at that point:
+        >>> a.history[0].history[0] is a
         True
 
         Each time a delta is added, the history is updated:

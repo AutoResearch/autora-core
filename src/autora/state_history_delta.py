@@ -1,17 +1,95 @@
-from dataclasses import dataclass, field, fields, replace
-from typing import List
+import operator
+from dataclasses import dataclass, field, replace
+from functools import reduce
+from typing import Iterable, List, Union
 
 from autora.state import Delta, State
+
+
+def reconstruct(history: Iterable[Union[State, Delta]]):
+    new = reduce(operator.add, history)
+    return new
+
+
+def filter_to_last(condition, history):
+    reversed_history = reversed(history)
+    reversed_index = None
+    for ri, e in enumerate(reversed_history):
+        if condition(e):
+            reversed_index = ri
+            break
+
+    if reversed_index is None:
+        raise IndexError("no matching entries found")
+
+    index = len(history) - reversed_index
+    for i, e in enumerate(history[:index]):
+        yield e
 
 
 @dataclass(frozen=True)
 class DeltaHistory(State):
     """
-    Base object for dataclasses which use the Delta mechanism.
+    Base object for dataclasses which use the Delta mechanism and store the history which led to
+    the creation of the current state.
 
     Examples:
+
+        This object stores the history in a list...
+        >>> DeltaHistory()
+        DeltaHistory(history=[...])
+
+        ... which is initialized with a reference to the object itself.
+        >>> a = DeltaHistory()
+        >>> a.history[0] is a
+        True
+
+        Each time a delta is added, the history is updated:
+        >>> b = a + Delta(n=1) + Delta(n=2) + Delta(n=3) + Delta(n=4)
+        >>> b
+        DeltaHistory(history=[DeltaHistory(history=[...]), {'n': 1}, {'n': 2}, {'n': 3}, {'n': 4}])
+
+        We can reconstruct the history up to any point
+        >>> reconstruct(b.history[0:-1])
+        DeltaHistory(history=[DeltaHistory(history=[...]), {'n': 1}, {'n': 2}, {'n': 3}])
+
+        We can also filter the deltas before reconstruction:
+        >>> from itertools import takewhile
+        >>> c: DeltaHistory = (a + Delta(n=1)
+        ...      + Delta(n=2, foo="bar")
+        ...      + Delta(n=3, foo="baz")
+        ...      + Delta(n=4, foo="bar"))
+        >>> reconstruct(filter_to_last(lambda e: e.get("foo", 0) == "baz", c.history))
+        ... # doctest: +NORMALIZE_WHITESPACE +ELLIPSIS
+        DeltaHistory(history=[DeltaHistory(history=[...]),
+                              {'n': 1},
+                              {'n': 2, 'foo': 'bar'},
+                              {'n': 3, 'foo': 'baz'}])
+
+        >>> reconstruct(filter_to_last(lambda e: not "foo" in e, c.history))
+        ... # doctest: +NORMALIZE_WHITESPACE +ELLIPSIS
+        DeltaHistory(history=[DeltaHistory(history=[...]),
+                              {'n': 1}])
+
+        >>> reconstruct(filter_to_last(lambda e: "foo" in e and e["foo"]=="baz", c.history))
+        ... # doctest: +NORMALIZE_WHITESPACE +ELLIPSIS
+        DeltaHistory(history=[DeltaHistory(history=[...]),
+                              {'n': 1},
+                              {'n': 2, 'foo': 'bar'},
+                              {'n': 3, 'foo': 'baz'}])
+
+
+
+
+
         >>> from dataclasses import dataclass, field
         >>> from typing import List, Optional
+
+        If we instantiate the object with no data, the data fields will be initialized with
+        default values and the history will be initialized with a reference to the returned object
+        itself.
+        >>> ListState()
+        ListState(history=[...], l=[], m=[])
 
         We define a dataclass where each field (which is going to be delta-ed) has additional
         metadata "delta" which describes its delta behaviour.
@@ -21,20 +99,20 @@ class DeltaHistory(State):
         ...    m: List = field(default_factory=list, metadata={"delta": "replace"})
 
         If we instantiate the object with no data, the data fields will be initialized with
-        default values and the history will be initialized with a dictionary of those default
-        values.
+        default values and the history will be initialized with a reference to the returned object
+        itself.
         >>> ListState()
-        ListState(history=[{'l': [], 'm': []}], l=[], m=[])
+        ListState(history=[...], l=[], m=[])
 
-        If instead we specify that the history be a list containing `None`, that value is used to
-        initialize the history.
-        >>> ListState(history=[None], l=[1], m=[2])
-        ListState(history=[None], l=[1], m=[2])
+
+        >>>
+
+        >>> ListState() + Delta(n="cats") + Delta(n="dogs")
 
         If the history is initialized as an empty list (the default), then the history is
         initialized with the initial values of the other fields.
         >>> ListState(history=[], l=[1], m=[2])
-        ListState(history=[{'l': [1], 'm': [2]}], l=[1], m=[2])
+        ListState(history=[...], l=[1], m=[2])
 
         Now we instantiate the dataclass...
         >>> l = ListState(l=list("abc"), m=list("xyz"))
@@ -152,12 +230,7 @@ class DeltaHistory(State):
 
     def __post_init__(self):
         if self.history == []:
-            initial_data_except_history = {
-                f.name: self.__getattribute__(f.name)
-                for f in fields(self)
-                if f.name != "history"
-            }
-            self.history.append(initial_data_except_history)
+            self.history.append(self)
 
     def history_of(self, key: str):
         relevant_history_entries = filter(

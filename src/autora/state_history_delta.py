@@ -1,47 +1,9 @@
 import operator
-from dataclasses import dataclass, field, replace
+from dataclasses import dataclass, field, fields, replace
 from functools import reduce
-from typing import Iterable, List, Union
+from typing import Iterable, List, MutableMapping, Union
 
 from autora.state import Delta, State
-
-
-def reconstruct(history: Iterable[Union[State, Delta]]):
-    """
-    Examples:
-        >>> reconstruct([DeltaHistory()])
-        DeltaHistory(history=[...])
-
-        >>> reconstruct([DeltaHistory(), {"foo": "bar"}])
-        DeltaHistory(history=[DeltaHistory(history=[...]), {'foo': 'bar'}])
-
-        >>> reconstruct([DeltaHistory(), {"foo": "bar"}, {"baz": "bat"}])
-        DeltaHistory(history=[DeltaHistory(history=[...]), {'foo': 'bar'}, {'baz': 'bat'}])
-
-        >>> reconstruct([])
-        Traceback (most recent call last):
-        ...
-        TypeError: reduce() of empty iterable with no initial value
-
-    """
-    new = reduce(operator.add, history)
-    return new
-
-
-def filter_to_last(condition, history):
-    reversed_history = reversed(history)
-    reversed_index = None
-    for ri, e in enumerate(reversed_history):
-        if condition(e):
-            reversed_index = ri
-            break
-
-    if reversed_index is None:
-        raise IndexError("no matching entries found")
-
-    index = len(history) - reversed_index
-    for i, e in enumerate(history[:index]):
-        yield e
 
 
 @dataclass(frozen=True)
@@ -261,100 +223,163 @@ class DeltaHistory(State):
         new = replace(new, history=self.history + [other])
         return new
 
-    def as_of_last(self, **kwargs):
-        """
-        Returns the State as it was the last time all the keyword-value pairs were found in the
-        Delta.
 
-        Examples:
+def reconstruct(history: Iterable[Union[State, Delta]]):
+    """
+    Examples:
+        >>> reconstruct([DeltaHistory()])
+        DeltaHistory(history=[...])
 
-            >>> from dataclasses import dataclass, field
-            >>> @dataclass(frozen=True)
-            ... class NState(DeltaHistory):
-            ...    n: int = field(default=0, metadata={"delta": "replace"})
-            >>> c = (NState()
-            ...      + Delta(n=1)
-            ...      + Delta(n=2, foo="bar", qux="thud")
-            ...      + Delta(n=3, foo="baz")
-            ...      + Delta(n=4, foo="baz", qux="nom")
-            ...      + Delta(n=5, foo="baz")
-            ...      + Delta(n=6, foo="bar"))
+        >>> reconstruct([DeltaHistory(), {"foo": "bar"}])
+        DeltaHistory(history=[DeltaHistory(history=[...]), {'foo': 'bar'}])
 
-            The last time `foo` was equal to `"bar"` in one of the Delta updates was the last step:
-            >>> c.as_of_last(foo="bar")  # doctest: +ELLIPSIS
-            NState(history=[...], n=6)
+        >>> reconstruct([DeltaHistory(), {"foo": "bar"}, {"baz": "bat"}])
+        DeltaHistory(history=[DeltaHistory(history=[...]), {'foo': 'bar'}, {'baz': 'bat'}])
 
-            >>> c.as_of_last(foo="baz")  # doctest: +ELLIPSIS
-            NState(history=[...], n=5)
+        >>> reconstruct([])
+        Traceback (most recent call last):
+        ...
+        TypeError: reduce() of empty iterable with no initial value
 
-            >>> c.as_of_last(qux="thud")  # doctest: +ELLIPSIS
-            NState(history=[...], n=2)
-
-            >>> c.as_of_last(foo="baz", qux="nom")  # doctest: +ELLIPSIS
-            NState(history=[...], n=4)
-
-            We can also look up values which might have been updated:
-            >>> c.as_of_last(n=2)  # doctest: +NORMALIZE_WHITESPACE +ELLIPSIS
-            NState(history=[NState(history=[...], n=0),
-                            {'n': 1},
-                            {'n': 2, 'foo': 'bar', 'qux': 'thud'}],
-                   n=2)
+    """
+    new = reduce(operator.add, history)
+    return new
 
 
-            This also works with extending and appending fields:
-            >>> @dataclass(frozen=True)
-            ... class EState(DeltaHistory):
-            ...    n: list[int] = field(default_factory=list, metadata={"delta": "append"})
-            >>> d = (EState()
-            ...      + Delta(n=1)
-            ...      + Delta(n=2, foo="bar", qux="thud")
-            ...      + Delta(n=3, foo="baz")
-            ...      + Delta(n=4, foo="baz", qux="nom")
-            ...      + Delta(n=5, foo="baz")
-            ...      + Delta(n=6, foo="bar"))
+def filter_to_last(condition, history):
+    reversed_history = reversed(history)
+    reversed_index = None
+    for ri, e in enumerate(reversed_history):
+        if condition(e):
+            reversed_index = ri
+            break
 
-            The last time `foo` was equal to `"bar"` in one of the Delta updates was the last step:
-            >>> d.as_of_last(foo="bar")  # doctest: +ELLIPSIS
-            EState(history=[...], n=[1, 2, 3, 4, 5, 6])
+    if reversed_index is None:
+        raise IndexError("no matching entries found")
 
-            >>> d.as_of_last(foo="baz")  # doctest: +ELLIPSIS
-            EState(history=[...], n=[1, 2, 3, 4, 5])
+    index = len(history) - reversed_index
+    for i, e in enumerate(history[:index]):
+        yield e
 
-            >>> d.as_of_last(qux="thud")  # doctest: +ELLIPSIS
-            EState(history=[...], n=[1, 2])
 
-            >>> d.as_of_last(foo="baz", qux="nom")  # doctest: +ELLIPSIS
-            EState(history=[...], n=[1, 2, 3, 4])
+def as_of_last(state: "DeltaHistory", **kwargs):
+    """
+    Returns the State as it was the last time all the keyword-value pairs were found in the
+    Delta.
 
-            We can also look up values which might have been updated:
-            >>> d.as_of_last(n=3)  # doctest: +NORMALIZE_WHITESPACE +ELLIPSIS
-            EState(history=[EState(history=[...], n=[]),
-                            {'n': 1},
-                            {'n': 2, 'foo': 'bar', 'qux': 'thud'},
-                            {'n': 3, 'foo': 'baz'}],
-                   n=[1, 2, 3])
+    Examples:
 
-        """
+        >>> from dataclasses import dataclass, field
+        >>> @dataclass(frozen=True)
+        ... class NState(DeltaHistory):
+        ...    n: int = field(default=0, metadata={"delta": "replace"})
+        >>> c = (NState()
+        ...      + Delta(n=1)
+        ...      + Delta(n=2, foo="bar", qux="thud")
+        ...      + Delta(n=3, foo="baz")
+        ...      + Delta(n=4, foo="baz", qux="nom")
+        ...      + Delta(n=5, foo="baz")
+        ...      + Delta(n=6, foo="bar"))
 
-        def condition(entry):
-            for key, value in kwargs.items():
-                if not entry.get(key, None) == value:
-                    return False
-            return True
+        The last time `foo` was equal to `"bar"` in one of the Delta updates was the last step:
+        >>> as_of_last(c, foo="bar")  # doctest: +ELLIPSIS
+        NState(history=[...], n=6)
 
-        history = filter_to_last(condition, self.history)
-        new = reconstruct(history)
+        >>> as_of_last(c, foo="baz")  # doctest: +ELLIPSIS
+        NState(history=[...], n=5)
 
-        return new
+        >>> as_of_last(c, qux="thud")  # doctest: +ELLIPSIS
+        NState(history=[...], n=2)
 
-    def history_of(self, key: str):
-        relevant_history_entries = filter(
-            lambda e: key in e.keys(),
-            self.history,
-        )
-        relevant_entries = [k.get(key) for k in relevant_history_entries]
-        return relevant_entries
+        >>> as_of_last(c, foo="baz", qux="nom")  # doctest: +ELLIPSIS
+        NState(history=[...], n=4)
 
-    def history_filter(self, cond):
-        relevant_history_entries = list(filter(cond, self.history))
-        return relevant_history_entries
+        We can also look up values which might have been updated:
+        >>> as_of_last(c, n=2)  # doctest: +NORMALIZE_WHITESPACE +ELLIPSIS
+        NState(history=[NState(history=[...], n=0),
+                        {'n': 1},
+                        {'n': 2, 'foo': 'bar', 'qux': 'thud'}],
+               n=2)
+
+
+        This also works with extending and appending fields:
+        >>> @dataclass(frozen=True)
+        ... class EState(DeltaHistory):
+        ...    n: list[int] = field(default_factory=list, metadata={"delta": "append"})
+        >>> d = (EState()
+        ...      + Delta(n=1)
+        ...      + Delta(n=2, foo="bar", qux="thud")
+        ...      + Delta(n=3, foo="baz")
+        ...      + Delta(n=4, foo="baz", qux="nom")
+        ...      + Delta(n=5, foo="baz")
+        ...      + Delta(n=6, foo="bar"))
+
+        The last time `foo` was equal to `"bar"` in one of the Delta updates was the last step:
+        >>> as_of_last(d, foo="bar")  # doctest: +ELLIPSIS
+        EState(history=[...], n=[1, 2, 3, 4, 5, 6])
+
+        >>> as_of_last(d, foo="baz")  # doctest: +ELLIPSIS
+        EState(history=[...], n=[1, 2, 3, 4, 5])
+
+        >>> as_of_last(d, qux="thud")  # doctest: +ELLIPSIS
+        EState(history=[...], n=[1, 2])
+
+        >>> as_of_last(d, foo="baz", qux="nom")  # doctest: +ELLIPSIS
+        EState(history=[...], n=[1, 2, 3, 4])
+
+        We can also look up values which might have been updated:
+        >>> as_of_last(d, n=3)  # doctest: +NORMALIZE_WHITESPACE +ELLIPSIS
+        EState(history=[EState(history=[...], n=[]),
+                        {'n': 1},
+                        {'n': 2, 'foo': 'bar', 'qux': 'thud'},
+                        {'n': 3, 'foo': 'baz'}],
+               n=[1, 2, 3])
+
+    """
+
+    def condition(entry):
+        for key, value in kwargs.items():
+            if not entry.get(key, None) == value:
+                return False
+        return True
+
+    history = filter_to_last(condition, state.history)
+    new = reconstruct(history)
+
+    return new
+
+
+def history_of(state, key: str):
+    """
+    Examples:
+        >>> from dataclasses import dataclass, field
+        >>> from typing import Optional
+        >>> @dataclass(frozen=True)
+        ... class NState(DeltaHistory):
+        ...    n: Optional[int] = field(default=None, metadata={"delta": "replace"})
+        >>> c = (NState()
+        ...      + Delta(n=1)
+        ...      + Delta(n=2, foo="bar", qux="thud")
+        ...      + Delta(n=3, foo="baz")
+        ...      + Delta(n=4, foo="baz", qux="nom")
+        ...      + Delta(n=5, foo="baz")
+        ...      + Delta(n=6, foo="bar"))
+        >>> list(history_of(c, "n"))
+        [None, 1, 2, 3, 4, 5, 6]
+
+        >>> list(history_of(c, "qux"))
+        ['thud', 'nom']
+
+    """
+    for entry in state.history:
+        if isinstance(entry, MutableMapping):
+            if key in entry.keys():
+                yield entry[key]
+        elif isinstance(entry, State):
+            if key in [f.name for f in fields(entry)]:
+                yield getattr(entry, key)
+
+
+def history_filter(self, cond):
+    relevant_history_entries = list(filter(cond, self.history))
+    return relevant_history_entries

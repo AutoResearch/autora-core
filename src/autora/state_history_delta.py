@@ -257,6 +257,92 @@ class DeltaHistory(State):
         if self.history == []:
             self.history.append(self)
 
+    def as_of_last(self, **kwargs):
+        """
+        Returns the State as it was the last time all the keyword-value pairs were found in the
+        Delta.
+
+        Examples:
+
+            >>> from dataclasses import dataclass, field
+            >>> @dataclass(frozen=True)
+            ... class NState(DeltaHistory):
+            ...    n: int = field(default=0, metadata={"delta": "replace"})
+            >>> c = (NState()
+            ...      + Delta(n=1)
+            ...      + Delta(n=2, foo="bar", qux="thud")
+            ...      + Delta(n=3, foo="baz")
+            ...      + Delta(n=4, foo="baz", qux="nom")
+            ...      + Delta(n=5, foo="baz")
+            ...      + Delta(n=6, foo="bar"))
+
+            The last time `foo` was equal to `"bar"` in one of the Delta updates was the last step:
+            >>> c.as_of_last(foo="bar")  # doctest: +ELLIPSIS
+            NState(history=[...], n=6)
+
+            >>> c.as_of_last(foo="baz")  # doctest: +ELLIPSIS
+            NState(history=[...], n=5)
+
+            >>> c.as_of_last(qux="thud")  # doctest: +ELLIPSIS
+            NState(history=[...], n=2)
+
+            >>> c.as_of_last(foo="baz", qux="nom")  # doctest: +ELLIPSIS
+            NState(history=[...], n=4)
+
+            We can also look up values which might have been updated:
+            >>> c.as_of_last(n=2)  # doctest: +NORMALIZE_WHITESPACE +ELLIPSIS
+            NState(history=[NState(history=[...], n=0),
+                            {'n': 1},
+                            {'n': 2, 'foo': 'bar', 'qux': 'thud'}],
+                   n=2)
+
+
+            This also works with extending and appending fields:
+            >>> @dataclass(frozen=True)
+            ... class EState(DeltaHistory):
+            ...    n: list[int] = field(default_factory=list, metadata={"delta": "append"})
+            >>> d = (EState()
+            ...      + Delta(n=1)
+            ...      + Delta(n=2, foo="bar", qux="thud")
+            ...      + Delta(n=3, foo="baz")
+            ...      + Delta(n=4, foo="baz", qux="nom")
+            ...      + Delta(n=5, foo="baz")
+            ...      + Delta(n=6, foo="bar"))
+
+            The last time `foo` was equal to `"bar"` in one of the Delta updates was the last step:
+            >>> d.as_of_last(foo="bar")  # doctest: +ELLIPSIS
+            EState(history=[...], n=[1, 2, 3, 4, 5, 6])
+
+            >>> d.as_of_last(foo="baz")  # doctest: +ELLIPSIS
+            EState(history=[...], n=[1, 2, 3, 4, 5])
+
+            >>> d.as_of_last(qux="thud")  # doctest: +ELLIPSIS
+            EState(history=[...], n=[1, 2])
+
+            >>> d.as_of_last(foo="baz", qux="nom")  # doctest: +ELLIPSIS
+            EState(history=[...], n=[1, 2, 3, 4])
+
+            We can also look up values which might have been updated:
+            >>> d.as_of_last(n=3)  # doctest: +NORMALIZE_WHITESPACE +ELLIPSIS
+            EState(history=[EState(history=[...], n=[]),
+                            {'n': 1},
+                            {'n': 2, 'foo': 'bar', 'qux': 'thud'},
+                            {'n': 3, 'foo': 'baz'}],
+                   n=[1, 2, 3])
+
+        """
+
+        def condition(entry):
+            for key, value in kwargs.items():
+                if not entry.get(key, None) == value:
+                    return False
+            return True
+
+        history = filter_to_last(condition, self.history)
+        new = reconstruct(history)
+
+        return new
+
     def history_of(self, key: str):
         relevant_history_entries = filter(
             lambda e: key in e.keys(),

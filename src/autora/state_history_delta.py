@@ -252,14 +252,14 @@ class DeltaHistory(State):
 
     history: List[Delta] = field(default_factory=list)
 
+    def __post_init__(self):
+        if self.history == []:
+            self.history.append(self)
+
     def __add__(self, other):
         new = super().__add__(other, warn_on_unused_fields=False)
         new = replace(new, history=self.history + [other])
         return new
-
-    def __post_init__(self):
-        if self.history == []:
-            self.history.append(self)
 
     def as_of_last(self, **kwargs):
         """

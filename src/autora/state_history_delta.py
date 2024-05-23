@@ -531,8 +531,3 @@ def history_of(history, key: str):
         elif isinstance(entry, State):
             if key in [f.name for f in fields(entry)]:
                 yield getattr(entry, key)
-
-
-def history_filter(self, cond):
-    relevant_history_entries = list(filter(cond, self.history))
-    return relevant_history_entries

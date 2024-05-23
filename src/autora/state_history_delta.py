@@ -262,7 +262,7 @@ def filter_to_last(condition, history):
         yield e
 
 
-def as_of_last(state: "DeltaHistory", **kwargs):
+def as_of_last(state: DeltaHistory, **kwargs):
     """
     Returns the State as it was the last time all the keyword-value pairs were found in the
     Delta.

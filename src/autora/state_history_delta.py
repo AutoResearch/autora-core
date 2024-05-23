@@ -353,7 +353,6 @@ def history_where(history: Iterable[Union[MutableMapping, State]], **kwargs):
     """
     Filter a history list for entries which match the given keyword arguments and their values
 
-
     Args:
         history: Iterable of MutableMappings (including Deltas) and States
         **kwargs: keys and their values to match
@@ -414,6 +413,46 @@ def history_where(history: Iterable[Union[MutableMapping, State]], **kwargs):
 
 
 def history_contains(history, *args):
+    """
+    Filter a history list for entries which have the given keyword
+
+    Args:
+        history: Iterable of MutableMappings (including Deltas) and States
+        *args: names of fields
+
+    Returns: filtered iterable of MutableMappings (including Deltas) and States
+
+    Examples:
+        >>> history = [
+        ...     dict(a=1, b=2),
+        ...     Delta(c=3, a=1),
+        ...     Delta(c=3, a=2, unique=True),
+        ...     DeltaHistory(),
+        ...     dict()
+        ... ]
+
+        >>> list(history_contains(history))  # doctest: +NORMALIZE_WHITESPACE
+        [{'a': 1, 'b': 2},
+         {'c': 3, 'a': 1},
+         {'c': 3, 'a': 2, 'unique': True},
+         DeltaHistory(history=[...]),
+         {}]
+
+        >>> list(history_contains(history, 'a'))
+        [{'a': 1, 'b': 2}, {'c': 3, 'a': 1}, {'c': 3, 'a': 2, 'unique': True}]
+
+        >>> list(history_contains(history, 'b'))
+        [{'a': 1, 'b': 2}]
+
+        >>> list(history_contains(history, 'c'))
+        [{'c': 3, 'a': 1}, {'c': 3, 'a': 2, 'unique': True}]
+
+        >>> list(history_contains(history, 'unique'))
+        [{'c': 3, 'a': 2, 'unique': True}]
+
+
+
+    """
     keys = set(args)
 
     def condition(entry):

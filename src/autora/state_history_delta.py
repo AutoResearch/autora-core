@@ -349,7 +349,49 @@ def as_of_last(state: "DeltaHistory", **kwargs):
     return new
 
 
-def history_where(history, **kwargs):
+def history_where(history: Iterable[Union[MutableMapping, State]], **kwargs):
+    """
+    Filter a history list for entries which match the given keyword arguments and their values
+
+
+    Args:
+        history: Iterable of MutableMappings (including Deltas) and States
+        **kwargs: keys and their values to match
+
+    Returns: filtered iterable of MutableMappings (including Deltas) and States
+
+    Examples:
+        >>> history = [
+        ...     dict(a=1, b=2),
+        ...     Delta(c=3, a=1),
+        ...     Delta(c=3, a=2, unique=True),
+        ...     DeltaHistory(),
+        ...     dict()
+        ... ]
+
+        >>> list(history_where(history))  # doctest: +NORMALIZE_WHITESPACE
+        [{'a': 1, 'b': 2},
+         {'c': 3, 'a': 1},
+         {'c': 3, 'a': 2, 'unique': True},
+         DeltaHistory(history=[...]),
+         {}]
+
+        >>> list(history_where(history, a=1))
+        [{'a': 1, 'b': 2}, {'c': 3, 'a': 1}]
+
+        >>> list(history_where(history, b=2))
+        [{'a': 1, 'b': 2}]
+
+        >>> list(history_where(history, unique=True))
+        [{'c': 3, 'a': 2, 'unique': True}]
+
+        >>> list(history_where(history, unique=1))
+        [{'c': 3, 'a': 2, 'unique': True}]
+
+
+
+    """
+
     def condition(entry):
         if isinstance(entry, MutableMapping):
             if kwargs.items() <= entry.items():
@@ -364,6 +406,8 @@ def history_where(history, **kwargs):
                 return True
             else:
                 return False
+        else:
+            raise NotImplementedError("type %s not supported", type(entry))
 
     filtered_history = filter(condition, history)
     return filtered_history

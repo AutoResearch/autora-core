@@ -398,17 +398,20 @@ def as_of_last(state: DeltaHistory, **kwargs):
                n=[1, 2, 3])
 
     """
+    history = history_up_to_last(state.history, **kwargs)
+    new = reconstruct(history)
+    return new
 
+
+def history_up_to_last(history, **kwargs):
     def condition(entry):
         for key, value in kwargs.items():
             if not entry.get(key, None) == value:
                 return False
         return True
 
-    history = filter_to_last(condition, state.history)
-    new = reconstruct(history)
-
-    return new
+    history = filter_to_last(condition, history)
+    return history
 
 
 def history_where(history: Iterable[Union[MutableMapping, State]], **kwargs):

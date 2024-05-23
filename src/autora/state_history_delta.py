@@ -471,40 +471,66 @@ def history_contains(history, *args):
     return filtered_history
 
 
-def history_of(state_or_history, key: str):
+def history_of(history, key: str):
     """
+    Get all the values of a given key out of a history.
+
     Examples:
+
+        >>> history = [
+        ...     {'n': None},
+        ...     {'n': 1},
+        ...     {'n': 2, 'foo': 'bar', 'qux': 'thud'},
+        ...     {'foo': 'bat'},
+        ...     {'n': 3, 'foo': 'baz'},
+        ...     {'n': 4, 'foo': 'baz', 'qux': 'nom'},
+        ...     {'n': 5, 'foo': 'baz'},
+        ...     {'qux': 'moo'},
+        ...     {'n': 6, 'foo': 'bar'}]
+        >>> list(history_of(history, 'n'))
+        [None, 1, 2, 3, 4, 5, 6]
+
+        >>> list(history_of(history, 'foo'))
+        ['bar', 'bat', 'baz', 'baz', 'baz', 'bar']
+
+        >>> list(history_of(history, 'qux'))
+        ['thud', 'nom', 'moo']
+
         >>> from dataclasses import dataclass, field
         >>> from typing import Optional
         >>> @dataclass(frozen=True)
         ... class NState(DeltaHistory):
         ...    n: Optional[int] = field(default=None, metadata={"delta": "replace"})
-        >>> c = (NState()
-        ...      + Delta(n=1)
-        ...      + Delta(n=2, foo="bar", qux="thud")
-        ...      + Delta(n=3, foo="baz")
-        ...      + Delta(n=4, foo="baz", qux="nom")
-        ...      + Delta(n=5, foo="baz")
-        ...      + Delta(n=6, foo="bar"))
-        >>> list(history_of(c, "n"))
+        >>> c: NState = (
+        ...     NState()
+        ...     + Delta(n=1)
+        ...     + Delta(n=2, foo="bar", qux="thud")
+        ...     + {'foo': 'bat'}
+        ...     + Delta(n=3, foo="baz")
+        ...     + Delta(n=4, foo="baz", qux="nom")
+        ...     + {'qux': 'moo'}
+        ...     + Delta(n=5, foo="baz")
+        ...     + Delta(n=6, foo="bar")
+        ... )
+
+        >>> list(history_of(c.history, "n"))
         [None, 1, 2, 3, 4, 5, 6]
 
-        >>> list(history_of(c, "qux"))
-        ['thud', 'nom']
+        >>> list(history_of(c.history, "qux"))
+        ['thud', 'nom', 'moo']
+
+        >>> list(history_of(c.history, "foo"))
+        ['bar', 'bat', 'baz', 'baz', 'baz', 'bar']
 
     """
-    if isinstance(state_or_history, Iterable):
-        for entry in state_or_history:
-            if isinstance(entry, MutableMapping):
-                if key in entry.keys():
-                    yield entry[key]
-            elif isinstance(entry, State):
-                if key in [f.name for f in fields(entry)]:
-                    yield getattr(entry, key)
 
-    else:
-        for i in history_of(state_or_history.history, key):
-            yield i
+    for entry in history:
+        if isinstance(entry, MutableMapping):
+            if key in entry.keys():
+                yield entry[key]
+        elif isinstance(entry, State):
+            if key in [f.name for f in fields(entry)]:
+                yield getattr(entry, key)
 
 
 def history_filter(self, cond):

@@ -130,7 +130,7 @@ class AlternateDeltaHistory(DeltaHistory):
         The history can be accessed to get older variants of any of the field versions:
         >>> from autora.state_history_delta import history_of
         >>> sh = (s + dm1 + dm2 + dm3)
-        >>> list(history_of(sh, "model")) # doctest: +NORMALIZE_WHITESPACE +ELLIPSIS
+        >>> list(history_of(sh.history, "model")) # doctest: +NORMALIZE_WHITESPACE +ELLIPSIS
         [None,
          DummyClassifier(constant=1),
          DummyClassifier(constant=2),

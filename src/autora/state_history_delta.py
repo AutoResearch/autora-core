@@ -1,7 +1,7 @@
 import operator
 from dataclasses import dataclass, field, fields, replace
 from functools import reduce
-from typing import Iterable, List, MutableMapping, Union
+from typing import Iterable, List, Mapping, MutableMapping, Union
 
 from autora.state import Delta, State
 
@@ -418,15 +418,15 @@ def history_up_to_last(history, **kwargs):
     return history
 
 
-def history_where(history: Iterable[Union[MutableMapping, State]], **kwargs):
+def history_where(history: Iterable[Union[Mapping, State]], **kwargs):
     """
     Filter a history list for entries which match the given keyword arguments and their values
 
     Args:
-        history: Iterable of MutableMappings (including Deltas) and States
+        history: Iterable of Mappings (including Deltas) and States
         **kwargs: keys and their values to match
 
-    Returns: filtered iterable of MutableMappings (including Deltas) and States
+    Returns: filtered iterable of Mappings (including Deltas) and States
 
     Examples:
         >>> history = [
@@ -461,7 +461,7 @@ def history_where(history: Iterable[Union[MutableMapping, State]], **kwargs):
     """
 
     def condition(entry):
-        if isinstance(entry, MutableMapping):
+        if isinstance(entry, Mapping):
             if kwargs.items() <= entry.items():
                 return True
             else:
@@ -486,10 +486,10 @@ def history_contains(history, *args):
     Filter a history list for entries which have the given keyword
 
     Args:
-        history: Iterable of MutableMappings (including Deltas) and States
+        history: Iterable of Mappings (including Deltas) and States
         *args: names of fields
 
-    Returns: filtered iterable of MutableMappings (including Deltas) and States
+    Returns: filtered iterable of Mappings (including Deltas) and States
 
     Examples:
         >>> history = [
@@ -525,7 +525,7 @@ def history_contains(history, *args):
     keys = set(args)
 
     def condition(entry):
-        if isinstance(entry, MutableMapping):
+        if isinstance(entry, Mapping):
             if keys <= set(entry.keys()):
                 return True
             else:
@@ -594,7 +594,7 @@ def history_of(history, key: str):
     """
 
     for entry in history:
-        if isinstance(entry, MutableMapping):
+        if isinstance(entry, Mapping):
             if key in entry.keys():
                 yield entry[key]
         elif isinstance(entry, State):

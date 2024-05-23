@@ -246,10 +246,72 @@ def reconstruct(history: Iterable[Union[State, Delta]]):
     return new
 
 
-def filter_to_last(condition, history):
-    reversed_history = reversed(history)
+def filter_to_last(condition, iterable):
+    """
+    Filter an iterable and return all entries until the last where a condition is True.
+
+    Examples:
+        >>> list(filter_to_last(lambda x: x == 4, range(8)))
+        [0, 1, 2, 3, 4]
+
+        >>> i = [dict(n=1), dict(n=2), dict(n=3), dict(q="this"), dict(n=4)]
+        >>> list(filter_to_last(lambda x: x.get("q", None) == "this", i))
+        [{'n': 1}, {'n': 2}, {'n': 3}, {'q': 'this'}]
+
+
+        We consider a more realistic case with heterogenous types in the list.
+        >>> from dataclasses import dataclass, field
+        >>> from typing import Optional
+        >>> @dataclass(frozen=True)
+        ... class NState(DeltaHistory):
+        ...    n: Optional[int] = None
+        >>> from autora.state import Delta
+        >>> j = [dict(n=1), dict(n=2), Delta(n=3), dict(q="this"), NState(n=4), dict(n=5)]
+
+        If we have a real state object in the list, there might be problems with a simple condition:
+        >>> list(filter_to_last(lambda x: x.get("q", None) == "this", j))
+        Traceback (most recent call last):
+        ...
+        AttributeError: 'NState' object has no attribute 'get'
+
+        In this case, a more complex condition is needed, for instance using exception handling:
+        >>> def condition_with_exception_handling(entry):
+        ...     try:
+        ...         result = entry.get("q", None) == "this"
+        ...         return result
+        ...     except AttributeError:
+        ...         return False
+        >>> list(filter_to_last(condition_with_exception_handling, j))
+        [{'n': 1}, {'n': 2}, {'n': 3}, {'q': 'this'}]
+
+        ... or with explicit support for each type:
+        >>> from typing import Union
+        >>> def condition_with_type_support_factory(key, value):
+        ...     def condition(entry):
+        ...         if isinstance(entry, Union[dict, Delta]):
+        ...             result = entry.get(key, None) == value
+        ...         elif isinstance(entry, State):
+        ...             if hasattr(entry, key):
+        ...                 result = getattr(entry, key) == value
+        ...             else:
+        ...                 result = False
+        ...         else:
+        ...             raise TypeError
+        ...         return result
+        ...     return condition
+        >>> condition_with_type_support = condition_with_type_support_factory("q", "this")
+        >>> list(filter_to_last(condition_with_type_support, j))
+        [{'n': 1}, {'n': 2}, {'n': 3}, {'q': 'this'}]
+
+        >>> condition_with_type_support_n = condition_with_type_support_factory("n", 4)
+        >>> list(filter_to_last(condition_with_type_support_n, j))
+        [{'n': 1}, {'n': 2}, {'n': 3}, {'q': 'this'}, NState(history=[...], n=4)]
+
+
+    """
+    reversed_iterable = reversed(iterable)
     reversed_index = None
-    for ri, e in enumerate(reversed_history):
+    for ri, e in enumerate(reversed_iterable):
         if condition(e):
             reversed_index = ri
             break
@@ -257,8 +319,8 @@ def filter_to_last(condition, history):
     if reversed_index is None:
         raise IndexError("no matching entries found")
 
-    index = len(history) - reversed_index
-    for i, e in enumerate(history[:index]):
+    index = len(iterable) - reversed_index
+    for i, e in enumerate(iterable[:index]):
         yield e
 
 

@@ -1,7 +1,7 @@
 import operator
 from dataclasses import dataclass, field, fields, replace
 from functools import reduce
-from typing import Iterable, List, Mapping, MutableMapping, Union
+from typing import Iterable, List, Mapping, Union
 
 from autora.state import Delta, State
 
@@ -408,11 +408,48 @@ def as_of_last(state: DeltaHistory, **kwargs):
 
 
 def history_up_to_last(history, **kwargs):
+    """
+
+    Args:
+        history:
+        **kwargs:
+
+    Returns:
+
+    Examples:
+        We consider a realistic case with heterogenous types in the list.
+        >>> from dataclasses import dataclass, field
+        >>> from typing import Optional
+        >>> @dataclass(frozen=True)
+        ... class NState(DeltaHistory):
+        ...    n: Optional[int] = None
+        >>> from autora.state import Delta
+        >>> j = [dict(n=1), dict(n=2), Delta(n=3), dict(q="this"), NState(n=4), dict(n=5)]
+
+        >>> list(history_up_to_last(j, q="this"))
+        [{'n': 1}, {'n': 2}, {'n': 3}, {'q': 'this'}]
+
+        >>> list(history_up_to_last(j, n=4))
+        [{'n': 1}, {'n': 2}, {'n': 3}, {'q': 'this'}, NState(history=[...], n=4)]
+
+        >>> list(history_up_to_last([], n=4))
+        []
+
+    """
+
     def condition(entry):
-        for key, value in kwargs.items():
-            if not entry.get(key, None) == value:
-                return False
-        return True
+        if isinstance(entry, Mapping):
+            for key, value in kwargs.items():
+                if not entry.get(key, None) == value:
+                    return False
+            return True
+        elif isinstance(entry, State):
+            for key, value in kwargs.items():
+                if not (hasattr(entry, key) and getattr(entry, key) == value):
+                    return False
+            return True
+        else:
+            raise NotImplementedError("type %s not supported", type(entry))
 
     history = filter_to_last(condition, history)
     return history

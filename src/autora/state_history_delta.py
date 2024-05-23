@@ -637,3 +637,59 @@ def history_of(history, key: str):
         elif isinstance(entry, State):
             if key in [f.name for f in fields(entry)]:
                 yield getattr(entry, key)
+
+
+def history_of_key_where(history, key, **kwargs):
+    """
+    Get all the values of a given key given matching other values.
+
+    Examples:
+
+        >>> history = [
+        ...     {'n': None},
+        ...     {'n': 1},
+        ...     {'n': 2, 'foo': 'bar', 'qux': 'thud'},
+        ...     {'foo': 'bat'},
+        ...     {'n': 3, 'foo': 'baz'},
+        ...     {'n': 4, 'foo': 'baz', 'qux': 'nom'},
+        ...     {'n': 5, 'foo': 'baz', 'qux': 'thud'},
+        ...     {'qux': 'moo'},
+        ...     {'n': 6, 'foo': 'bar'}]
+        >>> list(history_of_key_where(history, "n", foo="bar"))
+        [2, 6]
+
+        >>> list(history_of_key_where(history, "foo", qux="thud"))
+        ['bar', 'baz']
+
+        >>> from dataclasses import dataclass, field
+        >>> from typing import Optional
+        >>> @dataclass(frozen=True)
+        ... class NState(DeltaHistory):
+        ...    n: Optional[int] = field(default=None, metadata={"delta": "replace"})
+        >>> c: NState = (
+        ...     NState()
+        ...     + Delta(n=1)
+        ...     + Delta(n=2, foo="bar", qux="thud")
+        ...     + {'foo': 'bat'}
+        ...     + Delta(n=3, foo="baz")
+        ...     + Delta(n=4, foo="baz", qux="nom")
+        ...     + {'qux': 'moo'}
+        ...     + Delta(n=5, foo="baz")
+        ...     + Delta(n=6, foo="bar")
+        ... )
+
+        >>> list(history_of_key_where(c.history, "n"))
+        [None, 1, 2, 3, 4, 5, 6]
+
+        >>> list(history_of_key_where(c.history, "n", foo="bar"))
+        [2, 6]
+
+        >>> list(history_of_key_where(c.history, "qux", n=2))
+        ['thud']
+
+        >>> list(history_of_key_where(c.history, "foo"))
+        ['bar', 'bat', 'baz', 'baz', 'baz', 'bar']
+
+    """
+    new = history_of(history_where(history, **kwargs), key)
+    return new

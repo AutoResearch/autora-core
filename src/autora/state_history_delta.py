@@ -258,6 +258,10 @@ def filter_to_last(condition, iterable):
         >>> list(filter_to_last(lambda x: x.get("q", None) == "this", i))
         [{'n': 1}, {'n': 2}, {'n': 3}, {'q': 'this'}]
 
+        If none of the conditions match, the generator is emtpy:
+        >>> list(filter_to_last(lambda x: x == 9, range(8)))
+        []
+
 
         We consider a more realistic case with heterogenous types in the list.
         >>> from dataclasses import dataclass, field
@@ -310,7 +314,7 @@ def filter_to_last(condition, iterable):
 
     """
     reversed_iterable = reversed(iterable)
-    reversed_index = None
+    reversed_index = len(iterable)
     for ri, e in enumerate(reversed_iterable):
         if condition(e):
             reversed_index = ri

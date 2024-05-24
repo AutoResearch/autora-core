@@ -355,6 +355,14 @@ Result = Delta
 """`Result` is an alias for `Delta`."""
 
 
+def _replace(_, b):
+    """
+    Function to replace one value with another.
+    This is included for completeness.
+    """
+    return b
+
+
 @singledispatch
 def _extend(a, b):
     """

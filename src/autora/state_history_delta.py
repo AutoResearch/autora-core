@@ -1,7 +1,7 @@
 import operator
 from dataclasses import dataclass, field, fields, replace
 from functools import reduce
-from typing import Iterable, List, Mapping, Union
+from typing import List, Mapping, Sequence, Union
 
 from autora.state import Delta, State
 
@@ -224,7 +224,7 @@ class DeltaHistory(State):
         return new
 
 
-def reconstruct(history: Iterable[Union[State, Delta]]):
+def reconstruct(history: Sequence[Union[State, Delta]]):
     """
     Examples:
         >>> reconstruct([DeltaHistory()])
@@ -246,9 +246,9 @@ def reconstruct(history: Iterable[Union[State, Delta]]):
     return new
 
 
-def filter_to_last(condition, iterable):
+def filter_to_last(condition, sequence):
     """
-    Filter an iterable and return all entries until the last where a condition is True.
+    Filter a sequence and return all entries until the last where a condition is True.
 
     Examples:
         >>> list(filter_to_last(lambda x: x == 4, range(8)))
@@ -313,9 +313,9 @@ def filter_to_last(condition, iterable):
 
 
     """
-    reversed_iterable = reversed(iterable)
-    reversed_index = len(iterable)
-    for ri, e in enumerate(reversed_iterable):
+    reversed_sequence = reversed(sequence)
+    reversed_index = len(sequence)
+    for ri, e in enumerate(reversed_sequence):
         if condition(e):
             reversed_index = ri
             break
@@ -323,8 +323,8 @@ def filter_to_last(condition, iterable):
     if reversed_index is None:
         raise IndexError("no matching entries found")
 
-    index = len(iterable) - reversed_index
-    for i, e in enumerate(iterable[:index]):
+    index = len(sequence) - reversed_index
+    for i, e in enumerate(sequence[:index]):
         yield e
 
 
@@ -455,15 +455,15 @@ def history_up_to_last(history, **kwargs):
     return history
 
 
-def history_where(history: Iterable[Union[Mapping, State]], **kwargs):
+def history_where(history: Sequence[Union[Mapping, State]], **kwargs):
     """
     Filter a history list for entries which match the given keyword arguments and their values
 
     Args:
-        history: Iterable of Mappings (including Deltas) and States
+        history: Sequence of Mappings (including Deltas) and States
         **kwargs: keys and their values to match
 
-    Returns: filtered iterable of Mappings (including Deltas) and States
+    Returns: filtered sequence of Mappings (including Deltas) and States
 
     Examples:
         >>> history = [
@@ -523,10 +523,10 @@ def history_contains(history, *args):
     Filter a history list for entries which have the given keyword
 
     Args:
-        history: Iterable of Mappings (including Deltas) and States
+        history: Sequence of Mappings (including Deltas) and States
         *args: names of fields
 
-    Returns: filtered iterable of Mappings (including Deltas) and States
+    Returns: filtered sequence of Mappings (including Deltas) and States
 
     Examples:
         >>> history = [
@@ -693,3 +693,72 @@ def history_of_key_where(history, key, **kwargs):
     """
     new = history_of(history_where(history, **kwargs), key)
     return new
+
+
+def aggregate_history_of_key_where(history, key, function, **kwargs):
+    """
+    Filter a history and then combine the values of a given key using a function.
+
+    Examples:
+
+        >>> history = [
+        ...     {'n': None},
+        ...     {'n': 1},
+        ...     {'n': 2, 'foo': 'bar', 'qux': 'thud'},
+        ...     {'foo': 'bat'},
+        ...     {'n': 3, 'foo': 'baz'},
+        ...     {'n': 4, 'foo': 'baz', 'qux': 'nom'},
+        ...     {'n': 5, 'foo': 'baz', 'qux': 'thud'},
+        ...     {'qux': 'moo'},
+        ...     {'n': 6, 'foo': 'bar'}]
+
+        >>> import operator
+        >>> aggregate_history_of_key_where(history, "n", operator.add, foo="bar")
+        8
+
+        >>> aggregate_history_of_key_where(history, "n", operator.add, foo="baz")
+        12
+
+        >>> aggregate_history_of_key_where(history, "foo", operator.add, qux="thud")
+        'barbaz'
+
+        >>> aggregate_history_of_key_where(history, "qux", operator.add)
+        'thudnomthudmoo'
+
+        >>> import pandas as pd
+        >>> from autora.state import _extend_pd_dataframe
+        >>> df_history = [
+        ...     {"df": pd.DataFrame(), "meta": "raw"},
+        ...     {"df": {"a": [1, 2, 3], "b": ["a", "b", "c"]}, "meta": "raw"},
+        ...     {"df": {"a": [1, 2, 3], "b": ["a", pd.NA, "c"]}, "meta": "filtered"},
+        ...     {"df": {"a": [4, 5, 6], "b": ["d", "e", "f"]}, "meta": "raw"},
+        ...     {"df": {"x": ["⍺", "β", "ɣ"]}, "meta": "qc"},
+        ...     {"df": {"a": [1, 3, 4, 5, 6], "b": ["a", "c", pd.NA, "e", pd.NA]},
+        ...      "meta": "filtered"}]
+
+        >>> import pandas as pd
+        >>> def append_dfs(a, b):
+        ...     return pd.concat((pd.DataFrame(a), pd.DataFrame(b)), ignore_index=True)
+        >>> aggregate_history_of_key_where(df_history, "df", append_dfs, meta="raw")
+           a  b
+        0  1  a
+        1  2  b
+        2  3  c
+        3  4  d
+        4  5  e
+        5  6  f
+
+        >>> aggregate_history_of_key_where(df_history, "df", _replace, meta="filtered")
+        {'a': [1, 3, 4, 5, 6], 'b': ['a', 'c', <NA>, 'e', <NA>]}
+
+        >>> aggregate_history_of_key_where(
+        ...     history_up_to_last(df_history, meta="qc"), "df", _replace, meta="filtered")
+        {'a': [1, 2, 3], 'b': ['a', <NA>, 'c']}
+
+
+
+
+    """
+    history_ = history_of(history_where(history, **kwargs), key)
+    value = reduce(function, history_)
+    return value

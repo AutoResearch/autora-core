@@ -708,27 +708,26 @@ def _history_of(history: Iterable[Union[Mapping, State]], key: str):
         >>> from dataclasses import dataclass, field
         >>> from typing import Optional
         >>> @dataclass(frozen=True)
-        ... class NState(DeltaHistory):
+        ... class NState(State):
         ...    n: Optional[int] = field(default=None, metadata={"delta": "replace"})
-        >>> c: NState = (
-        ...     NState()
-        ...     + Delta(n=1)
-        ...     + Delta(n=2, foo="bar", qux="thud")
-        ...     + {'foo': 'bat'}
-        ...     + Delta(n=3, foo="baz")
-        ...     + Delta(n=4, foo="baz", qux="nom")
-        ...     + {'qux': 'moo'}
-        ...     + Delta(n=5, foo="baz")
-        ...     + Delta(n=6, foo="bar")
-        ... )
+        >>> c = [NState(),
+        ...      Delta(n=1),
+        ...      Delta(n=2, foo="bar", qux="thud"),
+        ...      {'foo': 'bat'},
+        ...      Delta(n=3, foo="baz"),
+        ...      Delta(n=4, foo="baz", qux="nom"),
+        ...      {'qux': 'moo'},
+        ...      Delta(n=5, foo="baz"),
+        ...      Delta(n=6, foo="bar"),
+        ... ]
 
-        >>> list(_history_of(c.history, "n"))
+        >>> list(_history_of(c, "n"))
         [None, 1, 2, 3, 4, 5, 6]
 
-        >>> list(_history_of(c.history, "qux"))
+        >>> list(_history_of(c, "qux"))
         ['thud', 'nom', 'moo']
 
-        >>> list(_history_of(c.history, "foo"))
+        >>> list(_history_of(c, "foo"))
         ['bar', 'bat', 'baz', 'baz', 'baz', 'bar']
 
     """

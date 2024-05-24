@@ -459,7 +459,7 @@ def _filter_to_last(condition, iterable):
         >>> from typing import Union
         >>> def condition_with_type_support_factory(key, value):
         ...     def condition(entry):
-        ...         if isinstance(entry, Union[dict, Delta]):
+        ...         if isinstance(entry, dict) or isinstance(entry, Delta):
         ...             result = entry.get(key, None) == value
         ...         elif isinstance(entry, State):
         ...             if hasattr(entry, key):

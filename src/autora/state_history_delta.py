@@ -473,8 +473,8 @@ def _history_up_to_last(history: Sequence[Union[Mapping, State]], **kwargs):
         else:
             raise NotImplementedError("type %s not supported", type(entry))
 
-    history = _filter_to_last(condition, history)
-    return history
+    filtered_history = _filter_to_last(condition, history)
+    return filtered_history
 
 
 def _history_where(history: Sequence[Union[Mapping, State]], **kwargs):

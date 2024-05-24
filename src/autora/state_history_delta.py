@@ -429,6 +429,40 @@ def _filter_to_last(condition, iterable):
         yield e
 
 
+def _history_filter_to_last(history: Sequence[Union[Mapping, State]], condition):
+    """Filter a history up to the last entry where an arbitrary condition is true.
+
+    Examples:
+        >>> from dataclasses import dataclass
+        >>> @dataclass(frozen=True)
+        ... class NState(State):
+        ...    n: int = 0
+        >>> h = [NState(n=-1),
+        ...      {'n': 1},
+        ...      {'n': 2, 'foo': 'bar', 'qux': 'thud'},
+        ...      {'n': 3, 'foo': 'baz'},
+        ...      {'n': 4, 'foo': 'bar'}]
+        >>> list(_history_filter_to_last(h, lambda e: not "foo" in e))
+        [NState(n=-1), {'n': 1}]
+
+        >>> list(_history_filter_to_last(h, lambda e: "qux" in e))
+        [NState(n=-1), {'n': 1}, {'n': 2, 'foo': 'bar', 'qux': 'thud'}]
+
+        The filter must be compatible with all the objects in the history. For instance,
+        this fails because the State object does not support `in` for checking whether a key exists:
+        >>> list(_history_filter_to_last(h, lambda e: "nowhere" in e))
+        Traceback (most recent call last):
+        ...
+        TypeError: argument of type 'State' is not iterable
+
+        >>> list(_history_filter_to_last(h, lambda e: e.get("nowhere", None)))
+        []
+
+    """
+    filtered_history = _filter_to_last(condition, history)
+    return filtered_history
+
+
 def _history_up_to_last(history: Sequence[Union[Mapping, State]], **kwargs):
     """
 

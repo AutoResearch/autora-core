@@ -4,13 +4,13 @@ import operator
 from collections import UserList
 from dataclasses import dataclass, field, fields, replace
 from functools import reduce
-from typing import Iterable, Mapping, Union
+from typing import Iterable, List, Mapping, Sequence, Union
 
 from autora.state import Delta, State
 
 
 class History(UserList):
-    """
+    """Stores a sequence of Mappings and States which can be
     Examples:
         >>> History()
         []
@@ -85,6 +85,8 @@ class History(UserList):
         {'a': [1, 2, 3], 'b': ['a', <NA>, 'c']}
 
     """
+
+    data: List[Union[Mapping, State]]
 
     def where(self, **kwargs):
         new = self.__class__(_history_where(self.data, **kwargs))
@@ -508,7 +510,7 @@ def _as_of_last(state: DeltaHistory, **kwargs):
     return new
 
 
-def _history_up_to_last(history, **kwargs):
+def _history_up_to_last(history: Sequence[Union[Mapping, State]], **kwargs):
     """
 
     Args:
@@ -556,7 +558,7 @@ def _history_up_to_last(history, **kwargs):
     return history
 
 
-def _history_where(history: Iterable[Union[Mapping, State]], **kwargs):
+def _history_where(history: Sequence[Union[Mapping, State]], **kwargs):
     """
     Filter a history list for entries which match the given keyword arguments and their values
 
@@ -619,7 +621,7 @@ def _history_where(history: Iterable[Union[Mapping, State]], **kwargs):
     return filtered_history
 
 
-def _history_contains(history, *args):
+def _history_contains(history: Sequence[Union[Mapping, State]], *args):
     """
     Filter a history list for entries which have the given keyword
 
@@ -678,7 +680,7 @@ def _history_contains(history, *args):
     return filtered_history
 
 
-def _history_of(history, key: str):
+def _history_of(history: Iterable[Union[Mapping, State]], key: str):
     """
     Get all the values of a given key out of a history.
 
@@ -738,59 +740,3 @@ def _history_of(history, key: str):
         elif isinstance(entry, State):
             if key in [f.name for f in fields(entry)]:
                 yield getattr(entry, key)
-
-
-def _history_of_key_where(history, key, **kwargs):
-    """
-    Get all the values of a given key given matching other values.
-
-    Examples:
-
-        >>> history = [
-        ...     {'n': None},
-        ...     {'n': 1},
-        ...     {'n': 2, 'foo': 'bar', 'qux': 'thud'},
-        ...     {'foo': 'bat'},
-        ...     {'n': 3, 'foo': 'baz'},
-        ...     {'n': 4, 'foo': 'baz', 'qux': 'nom'},
-        ...     {'n': 5, 'foo': 'baz', 'qux': 'thud'},
-        ...     {'qux': 'moo'},
-        ...     {'n': 6, 'foo': 'bar'}]
-        >>> list(_history_of_key_where(history, "n", foo="bar"))
-        [2, 6]
-
-        >>> list(_history_of_key_where(history, "foo", qux="thud"))
-        ['bar', 'baz']
-
-        >>> from dataclasses import dataclass, field
-        >>> from typing import Optional
-        >>> @dataclass(frozen=True)
-        ... class NState(DeltaHistory):
-        ...    n: Optional[int] = field(default=None, metadata={"delta": "replace"})
-        >>> c: NState = (
-        ...     NState()
-        ...     + Delta(n=1)
-        ...     + Delta(n=2, foo="bar", qux="thud")
-        ...     + {'foo': 'bat'}
-        ...     + Delta(n=3, foo="baz")
-        ...     + Delta(n=4, foo="baz", qux="nom")
-        ...     + {'qux': 'moo'}
-        ...     + Delta(n=5, foo="baz")
-        ...     + Delta(n=6, foo="bar")
-        ... )
-
-        >>> list(_history_of_key_where(c.history, "n"))
-        [None, 1, 2, 3, 4, 5, 6]
-
-        >>> list(_history_of_key_where(c.history, "n", foo="bar"))
-        [2, 6]
-
-        >>> list(_history_of_key_where(c.history, "qux", n=2))
-        ['thud']
-
-        >>> list(_history_of_key_where(c.history, "foo"))
-        ['bar', 'bat', 'baz', 'baz', 'baz', 'bar']
-
-    """
-    new = _history_of(_history_where(history, **kwargs), key)
-    return new

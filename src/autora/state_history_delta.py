@@ -162,8 +162,7 @@ class DeltaHistory(State):
         We can reconstruct the object up until the last entry where `foo=baz` (Note that we use
         the `e.get("foo", default)` method rather than the `e["foo"]` syntax
         so that if the Delta has no "foo" key, no error is thrown.):
-        >>> reconstruct(_filter_to_last(lambda e: e.get("foo", None) == "baz", c.history))
-        ... # doctest: +NORMALIZE_WHITESPACE +ELLIPSIS
+        >>> reconstruct(c.history.up_to_last(foo="baz"))  # doctest: +NORMALIZE_WHITESPACE +ELLIPSIS
         DeltaHistory(history=[DeltaHistory(history=[...]),
                               {'n': 1},
                               {'n': 2, 'foo': 'bar', 'qux': 'thud'},
@@ -171,8 +170,7 @@ class DeltaHistory(State):
 
 
         ... or where `qux=thud`
-        >>> reconstruct(_filter_to_last(lambda e: e.get("qux", None) == "thud", c.history))
-        ... # doctest: +NORMALIZE_WHITESPACE +ELLIPSIS
+        >>> reconstruct(c.history.up_to_last(qux="thud")) # doctest: +NORMALIZE_WHITESPACE +ELLIPSIS
         DeltaHistory(history=[DeltaHistory(history=[...]),
                               {'n': 1},
                               {'n': 2, 'foo': 'bar', 'qux': 'thud'}])
@@ -227,7 +225,7 @@ class DeltaHistory(State):
                   m=['u', 'v', 'w'])
 
         ... they can be chained:
-        >>> l +Delta(l=list("d")) + Delta(m=list("u"))  # doctest: +NORMALIZE_WHITESPACE +ELLIPSIS
+        >>> l + Delta(l=list("d")) + Delta(m=list("u"))  # doctest: +NORMALIZE_WHITESPACE +ELLIPSIS
         ListState(history=[..., {'l': ['d']}, {'m': ['u']}],
                   l=['a', 'b', 'c', 'd'],
                   m=['u'])

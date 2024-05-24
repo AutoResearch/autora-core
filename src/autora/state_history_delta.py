@@ -659,8 +659,6 @@ def _history_contains(history: Sequence[Union[Mapping, State]], *args):
         >>> list(_history_contains(history, 'unique'))
         [{'c': 3, 'a': 2, 'unique': True}]
 
-
-
     """
     keys = set(args)
 

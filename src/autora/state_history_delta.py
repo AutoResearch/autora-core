@@ -55,14 +55,84 @@ Examples:
     ...      "df"))[-1]
     {'a': [1, 2, 3], 'b': ['a', <NA>, 'c']}
 """
-
-
 import operator
+from collections import UserList
 from dataclasses import dataclass, field, fields, replace
 from functools import reduce
 from typing import Iterable, List, Mapping, Union
 
 from autora.state import Delta, State
+
+
+class History(UserList):
+    """
+    Examples:
+        >>> History()
+        []
+
+        >>> History("abcde")
+        ['a', 'b', 'c', 'd', 'e']
+
+        >>> history = History([
+        ...     {'n': None},
+        ...     {'n': 1},
+        ...     {'n': 2, 'foo': 'bar', 'qux': 'thud'},
+        ...     {'foo': 'bat'},
+        ...     {'n': 3, 'foo': 'baz'},
+        ...     {'n': 4, 'foo': 'baz', 'qux': 'nom'},
+        ...     {'n': 5, 'foo': 'baz', 'qux': 'thud'},
+        ...     {'qux': 'moo'},
+        ...     {'n': 6, 'foo': 'bar'}])
+
+
+        The individual operations can be applied alone:
+        >>> history.of("n")
+        [None, 1, 2, 3, 4, 5, 6]
+
+        >>> history.where(foo="bar")
+        [{'n': 2, 'foo': 'bar', 'qux': 'thud'}, {'n': 6, 'foo': 'bar'}]
+
+        >>> history.contains("qux")  # doctest: +NORMALIZE_WHITESPACE
+        [{'n': 2, 'foo': 'bar', 'qux': 'thud'},
+         {'n': 4, 'foo': 'baz', 'qux': 'nom'},
+         {'n': 5, 'foo': 'baz', 'qux': 'thud'},
+         {'qux': 'moo'}]
+
+         >>> history.up_to_last(foo="bat")
+         [{'n': None}, {'n': 1}, {'n': 2, 'foo': 'bar', 'qux': 'thud'}, {'foo': 'bat'}]
+
+        They can also be chained:
+        >>> history.contains("qux").of("n")
+        [2, 4, 5]
+
+        >>> history.where(foo="bar").of("n")
+        [2, 6]
+
+        >>> import operator
+        >>> history.where(foo="bar").of("n").reduce(operator.add)
+        8
+
+    """
+
+    def where(self, **kwargs):
+        new = self.__class__(history_where(self.data, **kwargs))
+        return new
+
+    def up_to_last(self, **kwargs):
+        new = self.__class__(history_up_to_last(self.data, **kwargs))
+        return new
+
+    def contains(self, *args):
+        new = self.__class__(history_contains(self.data, *args))
+        return new
+
+    def of(self, key):
+        new = self.__class__(history_of(self.data, key))
+        return new
+
+    def reduce(self, function):
+        new = reduce(function, self)
+        return new
 
 
 @dataclass(frozen=True)

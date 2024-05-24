@@ -3,10 +3,10 @@
 import operator
 from collections import UserList
 from dataclasses import dataclass, field, fields, replace
-from functools import reduce
+from functools import reduce, wraps
 from typing import Iterable, List, Mapping, Sequence, Union
 
-from autora.state import Delta, State
+from autora.state import Delta, S, State
 
 
 class History(UserList):
@@ -786,3 +786,34 @@ def _history_of(history: Iterable[Union[Mapping, State]], key: str):
         elif isinstance(entry, State):
             if key in [f.name for f in fields(entry)]:
                 yield getattr(entry, key)
+
+
+def delta_to_state_transformed(transformation=None):
+    """Decorator factory to turn a function which returns a Delta use a transformed State for its
+    input.
+
+    Args:
+        transformation: the function to apply to the input state.
+
+    Returns: a decorator for a State function
+
+    Examples:
+        TODO
+
+    """
+
+    def decorator(f):
+        @wraps(f)
+        def _f(state_: S, **kwargs) -> S:
+            if transformation is not None:
+                input_state_ = transformation(state_)
+            else:
+                input_state_ = state_
+            delta = f(input_state_, **kwargs)
+            assert isinstance(delta, Mapping), (
+                "Output of %s must be a `Delta`, `UserDict`, " "or `dict`." % f
+            )
+            new_state = state_ + delta
+            return new_state
+
+    return decorator

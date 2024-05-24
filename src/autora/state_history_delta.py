@@ -596,8 +596,6 @@ def _history_where(history: Sequence[Union[Mapping, State]], **kwargs):
         >>> list(_history_where(history, unique=1))
         [{'c': 3, 'a': 2, 'unique': True}]
 
-
-
     """
 
     def condition(entry):

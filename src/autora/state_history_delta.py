@@ -500,8 +500,9 @@ def _history_up_to_last(history: Sequence[Union[Mapping, State]], **kwargs):
                     return False
             return True
         elif isinstance(entry, State):
+            value_dict = vars(entry)
             for key, value in kwargs.items():
-                if not (hasattr(entry, key) and getattr(entry, key) == value):
+                if not value_dict.get(key, None) == value:
                     return False
             return True
         else:

@@ -1,3 +1,62 @@
+"""State objects with a history.
+
+Examples:
+    >>> history = [
+    ...     {'n': None},
+    ...     {'n': 1},
+    ...     {'n': 2, 'foo': 'bar', 'qux': 'thud'},
+    ...     {'foo': 'bat'},
+    ...     {'n': 3, 'foo': 'baz'},
+    ...     {'n': 4, 'foo': 'baz', 'qux': 'nom'},
+    ...     {'n': 5, 'foo': 'baz', 'qux': 'thud'},
+    ...     {'qux': 'moo'},
+    ...     {'n': 6, 'foo': 'bar'}]
+
+    >>> import operator
+    >>> reduce(operator.add, history_of(history_where(history, foo="bar"), "n"))
+    8
+
+    >>> reduce(operator.add, history_of(history_where(history, foo="baz"), "n"))
+    12
+
+    >>> reduce(operator.add, history_of(history_where(history, qux="thud"), "foo"))
+    'barbaz'
+
+    >>> reduce(operator.add, history_of(history, "qux"))
+    'thudnomthudmoo'
+
+    >>> import pandas as pd
+    >>> from autora.state import _extend_pd_dataframe
+    >>> df_history = [
+    ...     {"df": pd.DataFrame(), "meta": "raw"},
+    ...     {"df": {"a": [1, 2, 3], "b": ["a", "b", "c"]}, "meta": "raw"},
+    ...     {"df": {"a": [1, 2, 3], "b": ["a", pd.NA, "c"]}, "meta": "filtered"},
+    ...     {"df": {"a": [4, 5, 6], "b": ["d", "e", "f"]}, "meta": "raw"},
+    ...     {"qdf": {"x": ["⍺", "β", "ɣ"]}, "meta": "qc"},
+    ...     {"df": {"a": [1, 3, 4, 5, 6], "b": ["a", "c", pd.NA, "e", pd.NA]},
+    ...      "meta": "filtered"}]
+
+    >>> import pandas as pd
+    >>> def append_dfs(a, b):
+    ...     return pd.concat((pd.DataFrame(a), pd.DataFrame(b)), ignore_index=True)
+    >>> reduce(append_dfs, history_of(history_where(df_history, meta="raw"), "df"))
+       a  b
+    0  1  a
+    1  2  b
+    2  3  c
+    3  4  d
+    4  5  e
+    5  6  f
+
+    >>> list(history_of(history_where(df_history, meta="filtered"), "df"))[-1]
+    {'a': [1, 3, 4, 5, 6], 'b': ['a', 'c', <NA>, 'e', <NA>]}
+
+    >>> list(history_of(history_where(history_up_to_last(df_history, meta="qc"), meta="filtered"),
+    ...      "df"))[-1]
+    {'a': [1, 2, 3], 'b': ['a', <NA>, 'c']}
+"""
+
+
 import operator
 from dataclasses import dataclass, field, fields, replace
 from functools import reduce

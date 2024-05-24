@@ -1,60 +1,5 @@
-"""State objects with a history.
+"""State objects with a history."""
 
-Examples:
-    >>> history = [
-    ...     {'n': None},
-    ...     {'n': 1},
-    ...     {'n': 2, 'foo': 'bar', 'qux': 'thud'},
-    ...     {'foo': 'bat'},
-    ...     {'n': 3, 'foo': 'baz'},
-    ...     {'n': 4, 'foo': 'baz', 'qux': 'nom'},
-    ...     {'n': 5, 'foo': 'baz', 'qux': 'thud'},
-    ...     {'qux': 'moo'},
-    ...     {'n': 6, 'foo': 'bar'}]
-
-    >>> import operator
-    >>> reduce(operator.add, history_of(history_where(history, foo="bar"), "n"))
-    8
-
-    >>> reduce(operator.add, history_of(history_where(history, foo="baz"), "n"))
-    12
-
-    >>> reduce(operator.add, history_of(history_where(history, qux="thud"), "foo"))
-    'barbaz'
-
-    >>> reduce(operator.add, history_of(history, "qux"))
-    'thudnomthudmoo'
-
-    >>> import pandas as pd
-    >>> from autora.state import _extend_pd_dataframe
-    >>> df_history = [
-    ...     {"df": pd.DataFrame(), "meta": "raw"},
-    ...     {"df": {"a": [1, 2, 3], "b": ["a", "b", "c"]}, "meta": "raw"},
-    ...     {"df": {"a": [1, 2, 3], "b": ["a", pd.NA, "c"]}, "meta": "filtered"},
-    ...     {"df": {"a": [4, 5, 6], "b": ["d", "e", "f"]}, "meta": "raw"},
-    ...     {"qdf": {"x": ["⍺", "β", "ɣ"]}, "meta": "qc"},
-    ...     {"df": {"a": [1, 3, 4, 5, 6], "b": ["a", "c", pd.NA, "e", pd.NA]},
-    ...      "meta": "filtered"}]
-
-    >>> import pandas as pd
-    >>> def append_dfs(a, b):
-    ...     return pd.concat((pd.DataFrame(a), pd.DataFrame(b)), ignore_index=True)
-    >>> reduce(append_dfs, history_of(history_where(df_history, meta="raw"), "df"))
-       a  b
-    0  1  a
-    1  2  b
-    2  3  c
-    3  4  d
-    4  5  e
-    5  6  f
-
-    >>> list(history_of(history_where(df_history, meta="filtered"), "df"))[-1]
-    {'a': [1, 3, 4, 5, 6], 'b': ['a', 'c', <NA>, 'e', <NA>]}
-
-    >>> list(history_of(history_where(history_up_to_last(df_history, meta="qc"), meta="filtered"),
-    ...      "df"))[-1]
-    {'a': [1, 2, 3], 'b': ['a', <NA>, 'c']}
-"""
 import operator
 from collections import UserList
 from dataclasses import dataclass, field, fields, replace
@@ -73,7 +18,7 @@ class History(UserList):
         >>> History("abcde")
         ['a', 'b', 'c', 'd', 'e']
 
-        >>> history = History([
+        >>> h1 = History([
         ...     {'n': None},
         ...     {'n': 1},
         ...     {'n': 2, 'foo': 'bar', 'qux': 'thud'},
@@ -86,48 +31,75 @@ class History(UserList):
 
 
         The individual operations can be applied alone:
-        >>> history.of("n")
+        >>> h1.of("n")
         [None, 1, 2, 3, 4, 5, 6]
 
-        >>> history.where(foo="bar")
+        >>> h1.where(foo="bar")
         [{'n': 2, 'foo': 'bar', 'qux': 'thud'}, {'n': 6, 'foo': 'bar'}]
 
-        >>> history.contains("qux")  # doctest: +NORMALIZE_WHITESPACE
+        >>> h1.contains("qux")  # doctest: +NORMALIZE_WHITESPACE
         [{'n': 2, 'foo': 'bar', 'qux': 'thud'},
          {'n': 4, 'foo': 'baz', 'qux': 'nom'},
          {'n': 5, 'foo': 'baz', 'qux': 'thud'},
          {'qux': 'moo'}]
 
-         >>> history.up_to_last(foo="bat")
+         >>> h1.up_to_last(foo="bat")
          [{'n': None}, {'n': 1}, {'n': 2, 'foo': 'bar', 'qux': 'thud'}, {'foo': 'bat'}]
 
         They can also be chained:
-        >>> history.contains("qux").of("n")
+        >>> h1.contains("qux").of("n")
         [2, 4, 5]
 
-        >>> history.where(foo="bar").of("n")
+        >>> h1.where(foo="bar").of("n")
         [2, 6]
 
         >>> import operator
-        >>> history.where(foo="bar").of("n").reduce(operator.add)
+        >>> h1.where(foo="bar").of("n").reduce(operator.add)
         8
+
+        >>> import pandas as pd
+        >>> h2 = History([
+        ...     {"df": pd.DataFrame(), "meta": "raw"},
+        ...     {"df": {"a": [1, 2, 3], "b": ["a", "b", "c"]}, "meta": "raw"},
+        ...     {"df": {"a": [1, 2, 3], "b": ["a", pd.NA, "c"]}, "meta": "filtered"},
+        ...     {"df": {"a": [4, 5, 6], "b": ["d", "e", "f"]}, "meta": "raw"},
+        ...     {"qdf": {"x": ["⍺", "β", "ɣ"]}, "meta": "qc"},
+        ...     {"df": {"a": [1, 3, 4, 5, 6], "b": ["a", "c", pd.NA, "e", pd.NA]},
+        ...      "meta": "filtered"}])
+
+        >>> def append_dfs(a, b):
+        ...     return pd.concat((pd.DataFrame(a), pd.DataFrame(b)), ignore_index=True)
+        >>> h2.where(meta="raw").of("df").reduce(append_dfs)
+           a  b
+        0  1  a
+        1  2  b
+        2  3  c
+        3  4  d
+        4  5  e
+        5  6  f
+
+        >>> h2.where(meta="filtered").of("df")[-1]
+        {'a': [1, 3, 4, 5, 6], 'b': ['a', 'c', <NA>, 'e', <NA>]}
+
+        >>> h2.up_to_last(meta="qc").where(meta="filtered").of("df")[-1]
+        {'a': [1, 2, 3], 'b': ['a', <NA>, 'c']}
 
     """
 
     def where(self, **kwargs):
-        new = self.__class__(history_where(self.data, **kwargs))
+        new = self.__class__(_history_where(self.data, **kwargs))
         return new
 
     def up_to_last(self, **kwargs):
-        new = self.__class__(history_up_to_last(self.data, **kwargs))
+        new = self.__class__(_history_up_to_last(self.data, **kwargs))
         return new
 
     def contains(self, *args):
-        new = self.__class__(history_contains(self.data, *args))
+        new = self.__class__(_history_contains(self.data, *args))
         return new
 
     def of(self, key):
-        new = self.__class__(history_of(self.data, key))
+        new = self.__class__(_history_of(self.data, key))
         return new
 
     def reduce(self, function):
@@ -188,7 +160,7 @@ class DeltaHistory(State):
         We can reconstruct the object up until the last entry where `foo=baz` (Note that we use
         the `e.get("foo", default)` method rather than the `e["foo"]` syntax
         so that if the Delta has no "foo" key, no error is thrown.):
-        >>> reconstruct(filter_to_last(lambda e: e.get("foo", None) == "baz", c.history))
+        >>> reconstruct(_filter_to_last(lambda e: e.get("foo", None) == "baz", c.history))
         ... # doctest: +NORMALIZE_WHITESPACE +ELLIPSIS
         DeltaHistory(history=[DeltaHistory(history=[...]),
                               {'n': 1},
@@ -197,14 +169,14 @@ class DeltaHistory(State):
 
 
         ... or where `qux=thud`
-        >>> reconstruct(filter_to_last(lambda e: e.get("qux", None) == "thud", c.history))
+        >>> reconstruct(_filter_to_last(lambda e: e.get("qux", None) == "thud", c.history))
         ... # doctest: +NORMALIZE_WHITESPACE +ELLIPSIS
         DeltaHistory(history=[DeltaHistory(history=[...]),
                               {'n': 1},
                               {'n': 2, 'foo': 'bar', 'qux': 'thud'}])
 
 
-        >>> reconstruct(filter_to_last(lambda e: not "foo" in e, c.history))
+        >>> reconstruct(_filter_to_last(lambda e: not "foo" in e, c.history))
         ... # doctest: +NORMALIZE_WHITESPACE +ELLIPSIS
         DeltaHistory(history=[DeltaHistory(history=[...]),
                               {'n': 1}])
@@ -375,20 +347,20 @@ def reconstruct(history: Iterable[Union[State, Delta]]):
     return new
 
 
-def filter_to_last(condition, iterable):
+def _filter_to_last(condition, iterable):
     """
     Filter an iterable and return all entries until the last where a condition is True.
 
     Examples:
-        >>> list(filter_to_last(lambda x: x == 4, range(8)))
+        >>> list(_filter_to_last(lambda x: x == 4, range(8)))
         [0, 1, 2, 3, 4]
 
         >>> i = [dict(n=1), dict(n=2), dict(n=3), dict(q="this"), dict(n=4)]
-        >>> list(filter_to_last(lambda x: x.get("q", None) == "this", i))
+        >>> list(_filter_to_last(lambda x: x.get("q", None) == "this", i))
         [{'n': 1}, {'n': 2}, {'n': 3}, {'q': 'this'}]
 
         If none of the conditions match, the generator is emtpy:
-        >>> list(filter_to_last(lambda x: x == 9, range(8)))
+        >>> list(_filter_to_last(lambda x: x == 9, range(8)))
         []
 
 
@@ -402,7 +374,7 @@ def filter_to_last(condition, iterable):
         >>> j = [dict(n=1), dict(n=2), Delta(n=3), dict(q="this"), NState(n=4), dict(n=5)]
 
         If we have a real state object in the list, there might be problems with a simple condition:
-        >>> list(filter_to_last(lambda x: x.get("q", None) == "this", j))
+        >>> list(_filter_to_last(lambda x: x.get("q", None) == "this", j))
         Traceback (most recent call last):
         ...
         AttributeError: 'NState' object has no attribute 'get'
@@ -414,7 +386,7 @@ def filter_to_last(condition, iterable):
         ...         return result
         ...     except AttributeError:
         ...         return False
-        >>> list(filter_to_last(condition_with_exception_handling, j))
+        >>> list(_filter_to_last(condition_with_exception_handling, j))
         [{'n': 1}, {'n': 2}, {'n': 3}, {'q': 'this'}]
 
         ... or with explicit support for each type:
@@ -433,11 +405,11 @@ def filter_to_last(condition, iterable):
         ...         return result
         ...     return condition
         >>> condition_with_type_support = condition_with_type_support_factory("q", "this")
-        >>> list(filter_to_last(condition_with_type_support, j))
+        >>> list(_filter_to_last(condition_with_type_support, j))
         [{'n': 1}, {'n': 2}, {'n': 3}, {'q': 'this'}]
 
         >>> condition_with_type_support_n = condition_with_type_support_factory("n", 4)
-        >>> list(filter_to_last(condition_with_type_support_n, j))
+        >>> list(_filter_to_last(condition_with_type_support_n, j))
         [{'n': 1}, {'n': 2}, {'n': 3}, {'q': 'this'}, NState(history=[...], n=4)]
 
 
@@ -457,7 +429,7 @@ def filter_to_last(condition, iterable):
         yield e
 
 
-def as_of_last(state: DeltaHistory, **kwargs):
+def _as_of_last(state: DeltaHistory, **kwargs):
     """
     Returns the State as it was the last time all the keyword-value pairs were found in the
     Delta.
@@ -477,20 +449,20 @@ def as_of_last(state: DeltaHistory, **kwargs):
         ...      + Delta(n=6, foo="bar"))
 
         The last time `foo` was equal to `"bar"` in one of the Delta updates was the last step:
-        >>> as_of_last(c, foo="bar")  # doctest: +ELLIPSIS
+        >>> _as_of_last(c, foo="bar")  # doctest: +ELLIPSIS
         NState(history=[...], n=6)
 
-        >>> as_of_last(c, foo="baz")  # doctest: +ELLIPSIS
+        >>> _as_of_last(c, foo="baz")  # doctest: +ELLIPSIS
         NState(history=[...], n=5)
 
-        >>> as_of_last(c, qux="thud")  # doctest: +ELLIPSIS
+        >>> _as_of_last(c, qux="thud")  # doctest: +ELLIPSIS
         NState(history=[...], n=2)
 
-        >>> as_of_last(c, foo="baz", qux="nom")  # doctest: +ELLIPSIS
+        >>> _as_of_last(c, foo="baz", qux="nom")  # doctest: +ELLIPSIS
         NState(history=[...], n=4)
 
         We can also look up values which might have been updated:
-        >>> as_of_last(c, n=2)  # doctest: +NORMALIZE_WHITESPACE +ELLIPSIS
+        >>> _as_of_last(c, n=2)  # doctest: +NORMALIZE_WHITESPACE +ELLIPSIS
         NState(history=[NState(history=[...], n=0),
                         {'n': 1},
                         {'n': 2, 'foo': 'bar', 'qux': 'thud'}],
@@ -510,20 +482,20 @@ def as_of_last(state: DeltaHistory, **kwargs):
         ...      + Delta(n=6, foo="bar"))
 
         The last time `foo` was equal to `"bar"` in one of the Delta updates was the last step:
-        >>> as_of_last(d, foo="bar")  # doctest: +ELLIPSIS
+        >>> _as_of_last(d, foo="bar")  # doctest: +ELLIPSIS
         EState(history=[...], n=[1, 2, 3, 4, 5, 6])
 
-        >>> as_of_last(d, foo="baz")  # doctest: +ELLIPSIS
+        >>> _as_of_last(d, foo="baz")  # doctest: +ELLIPSIS
         EState(history=[...], n=[1, 2, 3, 4, 5])
 
-        >>> as_of_last(d, qux="thud")  # doctest: +ELLIPSIS
+        >>> _as_of_last(d, qux="thud")  # doctest: +ELLIPSIS
         EState(history=[...], n=[1, 2])
 
-        >>> as_of_last(d, foo="baz", qux="nom")  # doctest: +ELLIPSIS
+        >>> _as_of_last(d, foo="baz", qux="nom")  # doctest: +ELLIPSIS
         EState(history=[...], n=[1, 2, 3, 4])
 
         We can also look up values which might have been updated:
-        >>> as_of_last(d, n=3)  # doctest: +NORMALIZE_WHITESPACE +ELLIPSIS
+        >>> _as_of_last(d, n=3)  # doctest: +NORMALIZE_WHITESPACE +ELLIPSIS
         EState(history=[EState(history=[...], n=[]),
                         {'n': 1},
                         {'n': 2, 'foo': 'bar', 'qux': 'thud'},
@@ -531,12 +503,12 @@ def as_of_last(state: DeltaHistory, **kwargs):
                n=[1, 2, 3])
 
     """
-    history = history_up_to_last(state.history, **kwargs)
+    history = _history_up_to_last(state.history, **kwargs)
     new = reconstruct(history)
     return new
 
 
-def history_up_to_last(history, **kwargs):
+def _history_up_to_last(history, **kwargs):
     """
 
     Args:
@@ -555,13 +527,13 @@ def history_up_to_last(history, **kwargs):
         >>> from autora.state import Delta
         >>> j = [dict(n=1), dict(n=2), Delta(n=3), dict(q="this"), NState(n=4), dict(n=5)]
 
-        >>> list(history_up_to_last(j, q="this"))
+        >>> list(_history_up_to_last(j, q="this"))
         [{'n': 1}, {'n': 2}, {'n': 3}, {'q': 'this'}]
 
-        >>> list(history_up_to_last(j, n=4))
+        >>> list(_history_up_to_last(j, n=4))
         [{'n': 1}, {'n': 2}, {'n': 3}, {'q': 'this'}, NState(history=[...], n=4)]
 
-        >>> list(history_up_to_last([], n=4))
+        >>> list(_history_up_to_last([], n=4))
         []
 
     """
@@ -580,11 +552,11 @@ def history_up_to_last(history, **kwargs):
         else:
             raise NotImplementedError("type %s not supported", type(entry))
 
-    history = filter_to_last(condition, history)
+    history = _filter_to_last(condition, history)
     return history
 
 
-def history_where(history: Iterable[Union[Mapping, State]], **kwargs):
+def _history_where(history: Iterable[Union[Mapping, State]], **kwargs):
     """
     Filter a history list for entries which match the given keyword arguments and their values
 
@@ -603,23 +575,23 @@ def history_where(history: Iterable[Union[Mapping, State]], **kwargs):
         ...     dict()
         ... ]
 
-        >>> list(history_where(history))  # doctest: +NORMALIZE_WHITESPACE
+        >>> list(_history_where(history))  # doctest: +NORMALIZE_WHITESPACE
         [{'a': 1, 'b': 2},
          {'c': 3, 'a': 1},
          {'c': 3, 'a': 2, 'unique': True},
          DeltaHistory(history=[...]),
          {}]
 
-        >>> list(history_where(history, a=1))
+        >>> list(_history_where(history, a=1))
         [{'a': 1, 'b': 2}, {'c': 3, 'a': 1}]
 
-        >>> list(history_where(history, b=2))
+        >>> list(_history_where(history, b=2))
         [{'a': 1, 'b': 2}]
 
-        >>> list(history_where(history, unique=True))
+        >>> list(_history_where(history, unique=True))
         [{'c': 3, 'a': 2, 'unique': True}]
 
-        >>> list(history_where(history, unique=1))
+        >>> list(_history_where(history, unique=1))
         [{'c': 3, 'a': 2, 'unique': True}]
 
 
@@ -647,7 +619,7 @@ def history_where(history: Iterable[Union[Mapping, State]], **kwargs):
     return filtered_history
 
 
-def history_contains(history, *args):
+def _history_contains(history, *args):
     """
     Filter a history list for entries which have the given keyword
 
@@ -666,23 +638,23 @@ def history_contains(history, *args):
         ...     dict()
         ... ]
 
-        >>> list(history_contains(history))  # doctest: +NORMALIZE_WHITESPACE
+        >>> list(_history_contains(history))  # doctest: +NORMALIZE_WHITESPACE
         [{'a': 1, 'b': 2},
          {'c': 3, 'a': 1},
          {'c': 3, 'a': 2, 'unique': True},
          DeltaHistory(history=[...]),
          {}]
 
-        >>> list(history_contains(history, 'a'))
+        >>> list(_history_contains(history, 'a'))
         [{'a': 1, 'b': 2}, {'c': 3, 'a': 1}, {'c': 3, 'a': 2, 'unique': True}]
 
-        >>> list(history_contains(history, 'b'))
+        >>> list(_history_contains(history, 'b'))
         [{'a': 1, 'b': 2}]
 
-        >>> list(history_contains(history, 'c'))
+        >>> list(_history_contains(history, 'c'))
         [{'c': 3, 'a': 1}, {'c': 3, 'a': 2, 'unique': True}]
 
-        >>> list(history_contains(history, 'unique'))
+        >>> list(_history_contains(history, 'unique'))
         [{'c': 3, 'a': 2, 'unique': True}]
 
 
@@ -706,7 +678,7 @@ def history_contains(history, *args):
     return filtered_history
 
 
-def history_of(history, key: str):
+def _history_of(history, key: str):
     """
     Get all the values of a given key out of a history.
 
@@ -722,13 +694,13 @@ def history_of(history, key: str):
         ...     {'n': 5, 'foo': 'baz'},
         ...     {'qux': 'moo'},
         ...     {'n': 6, 'foo': 'bar'}]
-        >>> list(history_of(history, 'n'))
+        >>> list(_history_of(history, 'n'))
         [None, 1, 2, 3, 4, 5, 6]
 
-        >>> list(history_of(history, 'foo'))
+        >>> list(_history_of(history, 'foo'))
         ['bar', 'bat', 'baz', 'baz', 'baz', 'bar']
 
-        >>> list(history_of(history, 'qux'))
+        >>> list(_history_of(history, 'qux'))
         ['thud', 'nom', 'moo']
 
         >>> from dataclasses import dataclass, field
@@ -748,13 +720,13 @@ def history_of(history, key: str):
         ...     + Delta(n=6, foo="bar")
         ... )
 
-        >>> list(history_of(c.history, "n"))
+        >>> list(_history_of(c.history, "n"))
         [None, 1, 2, 3, 4, 5, 6]
 
-        >>> list(history_of(c.history, "qux"))
+        >>> list(_history_of(c.history, "qux"))
         ['thud', 'nom', 'moo']
 
-        >>> list(history_of(c.history, "foo"))
+        >>> list(_history_of(c.history, "foo"))
         ['bar', 'bat', 'baz', 'baz', 'baz', 'bar']
 
     """
@@ -768,7 +740,7 @@ def history_of(history, key: str):
                 yield getattr(entry, key)
 
 
-def history_of_key_where(history, key, **kwargs):
+def _history_of_key_where(history, key, **kwargs):
     """
     Get all the values of a given key given matching other values.
 
@@ -784,10 +756,10 @@ def history_of_key_where(history, key, **kwargs):
         ...     {'n': 5, 'foo': 'baz', 'qux': 'thud'},
         ...     {'qux': 'moo'},
         ...     {'n': 6, 'foo': 'bar'}]
-        >>> list(history_of_key_where(history, "n", foo="bar"))
+        >>> list(_history_of_key_where(history, "n", foo="bar"))
         [2, 6]
 
-        >>> list(history_of_key_where(history, "foo", qux="thud"))
+        >>> list(_history_of_key_where(history, "foo", qux="thud"))
         ['bar', 'baz']
 
         >>> from dataclasses import dataclass, field
@@ -807,18 +779,18 @@ def history_of_key_where(history, key, **kwargs):
         ...     + Delta(n=6, foo="bar")
         ... )
 
-        >>> list(history_of_key_where(c.history, "n"))
+        >>> list(_history_of_key_where(c.history, "n"))
         [None, 1, 2, 3, 4, 5, 6]
 
-        >>> list(history_of_key_where(c.history, "n", foo="bar"))
+        >>> list(_history_of_key_where(c.history, "n", foo="bar"))
         [2, 6]
 
-        >>> list(history_of_key_where(c.history, "qux", n=2))
+        >>> list(_history_of_key_where(c.history, "qux", n=2))
         ['thud']
 
-        >>> list(history_of_key_where(c.history, "foo"))
+        >>> list(_history_of_key_where(c.history, "foo"))
         ['bar', 'bat', 'baz', 'baz', 'baz', 'bar']
 
     """
-    new = history_of(history_where(history, **kwargs), key)
+    new = _history_of(_history_where(history, **kwargs), key)
     return new

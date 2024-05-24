@@ -128,9 +128,9 @@ class AlternateDeltaHistory(DeltaHistory):
 
 
         The history can be accessed to get older variants of any of the field versions:
-        >>> from autora.state_history_delta import history_of
+        >>> from autora.state_history_delta import _history_of
         >>> sh = (s + dm1 + dm2 + dm3)
-        >>> list(history_of(sh.history, "model")) # doctest: +NORMALIZE_WHITESPACE +ELLIPSIS
+        >>> list(_history_of(sh.history, "model")) # doctest: +NORMALIZE_WHITESPACE +ELLIPSIS
         [None,
          DummyClassifier(constant=1),
          DummyClassifier(constant=2),
@@ -144,12 +144,12 @@ class AlternateDeltaHistory(DeltaHistory):
         >>> shm = (s + dme1 + dme2 + dme3)
 
         Filter the history for deltas containing a field called "meta" with the value "flag"
-        >>> from autora.state_history_delta import history_where, history_contains
-        >>> list(history_where(shm.history, meta="flag"))
+        >>> from autora.state_history_delta import _history_where, _history_contains
+        >>> list(_history_where(shm.history, meta="flag"))
         [{'model': DummyClassifier(constant=2), 'meta': 'flag'}]
 
         Filter the history for deltas containing both a model and conditions
-        >>> list(history_contains(shm.history, "model", "conditions"))
+        >>> list(_history_contains(shm.history, "model", "conditions"))
         ...     # doctest: +NORMALIZE_WHITESPACE
         [AlternateDeltaHistory(history=[...],
                                variables=None,
@@ -159,7 +159,7 @@ class AlternateDeltaHistory(DeltaHistory):
          {'model': DummyClassifier(constant=3), 'conditions': [1, 2, 3]}]
 
         ... or extract just the models from those entries:
-        >>> list(history_of(history_contains(shm.history, "model", "conditions"), "model"))
+        >>> list(_history_of(_history_contains(shm.history, "model", "conditions"), "model"))
         [None, DummyClassifier(constant=3)]
 
     """

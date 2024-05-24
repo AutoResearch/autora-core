@@ -1104,8 +1104,8 @@ class StandardState(State):
         1  7
 
         Datatypes which are incompatible with a pd.DataFrame will throw an error:
-        >>> s + Delta(conditions="not compatible with pd.DataFrame") \
-# doctest: +NORMALIZE_WHITESPACE +ELLIPSIS
+        >>> s + Delta(conditions="not compatible with pd.DataFrame")
+        ... # doctest: +NORMALIZE_WHITESPACE +ELLIPSIS
         Traceback (most recent call last):
         ...
         ValueError: ...

@@ -21,6 +21,7 @@ class History(UserList):
         >>> h1 = History([
         ...     {'n': None},
         ...     {'n': 1},
+        ...     {'m': 11},
         ...     {'n': 2, 'foo': 'bar', 'qux': 'thud'},
         ...     {'foo': 'bat'},
         ...     {'n': 3, 'foo': 'baz'},
@@ -44,7 +45,13 @@ class History(UserList):
          {'qux': 'moo'}]
 
          >>> h1.up_to_last(foo="bat")
-         [{'n': None}, {'n': 1}, {'n': 2, 'foo': 'bar', 'qux': 'thud'}, {'foo': 'bat'}]
+         [{'n': None}, {'n': 1}, {'m': 11}, {'n': 2, 'foo': 'bar', 'qux': 'thud'}, {'foo': 'bat'}]
+
+         >>> h1.up_to_last("m")
+         [{'n': None}, {'n': 1}, {'m': 11}]
+
+         >>> h1.up_to_last(foo="bar", qux="thud")
+         [{'n': None}, {'n': 1}, {'m': 11}, {'n': 2, 'foo': 'bar', 'qux': 'thud'}]
 
         They can also be chained:
         >>> h1.contains("qux").of("n")
@@ -53,22 +60,36 @@ class History(UserList):
         >>> h1.where(foo="bar").of("n")
         [2, 6]
 
+        The `reduce` method applies `reduce` to aggregate the returned values:
         >>> import operator
         >>> h1.where(foo="bar").of("n").reduce(operator.add)
         8
 
+        A concrete use case is applying metadata fields to elements of a history and using the
+        methods to filter particular versions of some data.
         >>> import pandas as pd
         >>> h2 = History([
-        ...     {"df": pd.DataFrame(), "meta": "raw"},
+        ...     {"df": pd.DataFrame(), "meta": "raw"},  # empty dataframe
+        ...     # First raw data:
         ...     {"df": {"a": [1, 2, 3], "b": ["a", "b", "c"]}, "meta": "raw"},
+        ...     # Filtered version of data:
         ...     {"df": {"a": [1, 2, 3], "b": ["a", pd.NA, "c"]}, "meta": "filtered"},
+        ...     # New raw data:
         ...     {"df": {"a": [4, 5, 6], "b": ["d", "e", "f"]}, "meta": "raw"},
+        ...     # Other data:
         ...     {"qdf": {"x": ["⍺", "β", "ɣ"]}, "meta": "qc"},
+        ...     # Filtered version of all the previous raw data
         ...     {"df": {"a": [1, 3, 4, 5, 6], "b": ["a", "c", pd.NA, "e", pd.NA]},
         ...      "meta": "filtered"}])
 
+        This kind of history allows us to store both raw and processed data in the same history,
+        and allows us to filter the history by the type of data we care about.
+
+        Assume we want to be able to join the data together and treat them as dataframes:
         >>> def append_dfs(a, b):
         ...     return pd.concat((pd.DataFrame(a), pd.DataFrame(b)), ignore_index=True)
+
+        We might want to collate all of the raw data.
         >>> h2.where(meta="raw").of("df").reduce(append_dfs)
            a  b
         0  1  a
@@ -78,12 +99,51 @@ class History(UserList):
         4  5  e
         5  6  f
 
+        Or we might want to look at the last `[-1]` version of the "df" fields where the key
+        "meta" has the value "filtered":
         >>> h2.where(meta="filtered").of("df")[-1]
         {'a': [1, 3, 4, 5, 6], 'b': ['a', 'c', <NA>, 'e', <NA>]}
 
+        Or we might want to look at the last version of the filtered data which were available
+        before the last isntance where the key "meta" has the value "qc":
         >>> h2.up_to_last(meta="qc").where(meta="filtered").of("df")[-1]
         {'a': [1, 2, 3], 'b': ['a', <NA>, 'c']}
 
+        The `reconstruct` method is a shorthand for `.reduce(operator.add)`, and is particularly
+        useful for Histories of State and Delta objects:
+        >>> from typing import Optional
+        >>> @dataclass(frozen=True)
+        ... class DfState(State):
+        ...     df: pd.DataFrame = field(
+        ...         default_factory=pd.DataFrame, metadata={"delta": "replace"})
+        ...     p: int = field(default=0, metadata={"delta": "replace"})
+        >>> h3 = History([
+        ...         DfState(),
+        ...         Delta(df=dict(a=list("abc"), n=[1, 2, 3]), meta="raw"),
+        ...         Delta(df=dict(a=list("abc"), n=[1, pd.NA, 3]), p=17, meta="filtered"),
+        ...         Delta(qc=True),
+        ...         Delta(df=dict(a=list("def"), n=[4, 5, 6]), meta="raw"),
+        ...         Delta(df=dict(a=list("abcdef"), n=[1, 2, 3, 4, pd.NA, 6]), p=5, meta="filtered")
+        ... ])
+        >>> h3.reconstruct()
+        DfState(df={'a': ['a', 'b', 'c', 'd', 'e', 'f'], 'n': [1, 2, 3, 4, <NA>, 6]}, p=5)
+
+        >>> h3.up_to_last("qc").reconstruct()
+        DfState(df={'a': ['a', 'b', 'c'], 'n': [1, <NA>, 3]}, p=17)
+
+        >>> h3.up_to_last(meta="raw").reconstruct()
+        DfState(df={'a': ['d', 'e', 'f'], 'n': [4, 5, 6]}, p=17)
+
+        In this case, if we need to access the combined "raw" data, we can use the pd.concat
+        function as before:
+        >>> h3.where(meta="raw").of("df").reduce(append_dfs)
+           a  n
+        0  a  1
+        1  b  2
+        2  c  3
+        3  d  4
+        4  e  5
+        5  f  6
     """
 
     data: List[Union[Mapping, State]]
@@ -92,8 +152,8 @@ class History(UserList):
         new = self.__class__(_history_where(self.data, **kwargs))
         return new
 
-    def up_to_last(self, **kwargs):
-        new = self.__class__(_history_up_to_last(self.data, **kwargs))
+    def up_to_last(self, *args, **kwargs):
+        new = self.__class__(_history_up_to_last(self.data, *args, **kwargs))
         return new
 
     def contains(self, *args):
@@ -466,7 +526,7 @@ def _history_filter_to_last(history: Sequence[Union[Mapping, State]], condition)
     return filtered_history
 
 
-def _history_up_to_last(history: Sequence[Union[Mapping, State]], **kwargs):
+def _history_up_to_last(history: Sequence[Union[Mapping, State]], *args, **kwargs):
     """
 
     Args:
@@ -483,27 +543,61 @@ def _history_up_to_last(history: Sequence[Union[Mapping, State]], **kwargs):
         ... class NState(DeltaHistory):
         ...    n: Optional[int] = None
         >>> from autora.state import Delta
-        >>> j = [dict(n=1), dict(n=2), Delta(n=3), dict(q="this"), NState(n=4), dict(n=5)]
+        >>> j = [dict(n=1), dict(n=2), Delta(n=3, p=1), dict(q="this"),
+        ...      NState(n=4), dict(n=5), dict(p="foo", r="bar")]
 
+        We can filter up to the last entry containing a specific key name:
+        >>> list(_history_up_to_last(j, "q"))
+        [{'n': 1}, {'n': 2}, {'n': 3, 'p': 1}, {'q': 'this'}]
+
+        ...
+        >>> list(_history_up_to_last(j, "n"))
+        [{'n': 1}, {'n': 2}, {'n': 3, 'p': 1}, {'q': 'this'}, NState(history=[...], n=4), {'n': 5}]
+
+        ... or to the last entry with a particular key-value-pair:
         >>> list(_history_up_to_last(j, q="this"))
-        [{'n': 1}, {'n': 2}, {'n': 3}, {'q': 'this'}]
+        [{'n': 1}, {'n': 2}, {'n': 3, 'p': 1}, {'q': 'this'}]
 
         >>> list(_history_up_to_last(j, n=4))
-        [{'n': 1}, {'n': 2}, {'n': 3}, {'q': 'this'}, NState(history=[...], n=4)]
+        [{'n': 1}, {'n': 2}, {'n': 3, 'p': 1}, {'q': 'this'}, NState(history=[...], n=4)]
 
         >>> list(_history_up_to_last([], n=4))
         []
+
+        We can filter up to the last entry containing multiple keys:
+        >>> list(_history_up_to_last(j, "n", "p"))
+        [{'n': 1}, {'n': 2}, {'n': 3, 'p': 1}]
+
+        Or for multiple key-value-pairs:
+        >>> k = [dict(n=1), dict(n=2), Delta(n=3, p=1),
+        ...      Delta(n=-1, p=1, q='this'), dict(n=5), Delta(n=3, p=1, q='that')]
+        >>> list(_history_up_to_last(k, n=-1, p=1))
+        [{'n': 1}, {'n': 2}, {'n': 3, 'p': 1}, {'n': -1, 'p': 1, 'q': 'this'}]
+
+        Or for a combination of keys and key-value-pairs:
+        >>> list(_history_up_to_last(k, "n", "p", q="this"))
+        [{'n': 1}, {'n': 2}, {'n': 3, 'p': 1}, {'n': -1, 'p': 1, 'q': 'this'}]
+
+        >>> list(_history_up_to_last(k, "n", "p", q="that"))  # doctest: +NORMALIZE_WHITESPACE
+        [{'n': 1}, {'n': 2}, {'n': 3, 'p': 1}, {'n': -1, 'p': 1, 'q': 'this'},
+         {'n': 5}, {'n': 3, 'p': 1, 'q': 'that'}]
 
     """
 
     def condition(entry):
         if isinstance(entry, Mapping):
+            for key in args:
+                if key not in entry:
+                    return False
             for key, value in kwargs.items():
                 if not entry.get(key, None) == value:
                     return False
             return True
         elif isinstance(entry, State):
             value_dict = vars(entry)
+            for key in args:
+                if key not in value_dict:
+                    return False
             for key, value in kwargs.items():
                 if not value_dict.get(key, None) == value:
                     return False

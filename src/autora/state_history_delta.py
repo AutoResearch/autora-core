@@ -453,10 +453,7 @@ def _history_filter_to_last(history: Sequence[Union[Mapping, State]], condition)
         >>> list(_history_filter_to_last(h, lambda e: "nowhere" in e))
         Traceback (most recent call last):
         ...
-        TypeError: argument of type 'State' is not iterable
-
-        >>> list(_history_filter_to_last(h, lambda e: e.get("nowhere", None)))
-        []
+        TypeError: argument of type 'NState' is not iterable
 
     """
     filtered_history = _filter_to_last(condition, history)

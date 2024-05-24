@@ -4,7 +4,7 @@ import operator
 from collections import UserList
 from dataclasses import dataclass, field, fields, replace
 from functools import reduce
-from typing import Iterable, List, Mapping, Union
+from typing import Iterable, Mapping, Union
 
 from autora.state import Delta, State
 
@@ -313,7 +313,7 @@ class DeltaHistory(State):
 
     """
 
-    history: List[Delta] = field(default_factory=list)
+    history: History = field(default_factory=History)
 
     def __post_init__(self):
         if self.history == []:

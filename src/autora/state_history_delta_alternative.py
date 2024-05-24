@@ -128,28 +128,52 @@ class AlternateDeltaHistory(DeltaHistory):
 
 
         The history can be accessed to get older variants of any of the field versions:
-        >>> from autora.state_history_delta import _history_of
         >>> sh = (s + dm1 + dm2 + dm3)
-        >>> list(_history_of(sh.history, "model")) # doctest: +NORMALIZE_WHITESPACE +ELLIPSIS
+        >>> sh.history.of("model") # doctest: +NORMALIZE_WHITESPACE +ELLIPSIS
         [None,
          DummyClassifier(constant=1),
          DummyClassifier(constant=2),
          DummyClassifier(constant=3)]
 
-        For more involved filtering, potentially involving other metadata, the .history_filter
-        method can be used:
+         We can also reconstruct the State as it was at any point in the history:
+         >>> sh.history[:2].reconstruct()  # doctest: +ELLIPSIS +NORMALIZE_WHITESPACE
+         AlternateDeltaHistory(..., model=DummyClassifier(constant=1))
+
+         >>> sh.history[:3].reconstruct()  # doctest: +ELLIPSIS +NORMALIZE_WHITESPACE
+         AlternateDeltaHistory(..., model=DummyClassifier(constant=2))
+
+         >>> sh.history[:4].reconstruct()  # doctest: +ELLIPSIS +NORMALIZE_WHITESPACE
+         AlternateDeltaHistory(..., model=DummyClassifier(constant=3))
+
+        For more involved filtering, potentially involving other metadata, the filtering methods
+        on the history can be used:
         >>> dme1 = Delta(model=DummyClassifier(constant=1))
         >>> dme2 = Delta(model=DummyClassifier(constant=2), meta="flag")
         >>> dme3 = Delta(model=DummyClassifier(constant=3), conditions=[1,2,3]) # multi-update
-        >>> shm = (s + dme1 + dme2 + dme3)
+        >>> shm: AlternateDeltaHistory = (s + dme1 + dme2 + dme3)
 
         Filter the history for deltas containing a field called "meta" with the value "flag"
-        >>> from autora.state_history_delta import _history_where, _history_contains
-        >>> list(_history_where(shm.history, meta="flag"))
+        >>> shm.history.where(meta="flag")
         [{'model': DummyClassifier(constant=2), 'meta': 'flag'}]
 
+        ... and reconstruct the state as it was at that time:
+        >>> shm.history.up_to_last(meta="flag").reconstruct()  # doctest: +ELLIPSIS
+        AlternateDeltaHistory(..., model=DummyClassifier(constant=2))
+
+        ... and reconstruct the state as it was at that time:
+        >>> shm.history.up_to_last("conditions").reconstruct()
+        ... # doctest: +ELLIPSIS +NORMALIZE_WHITESPACE
+        AlternateDeltaHistory(...,
+            conditions=   0
+                       0  1
+                       1  2
+                       2  3,
+            ...,
+            model=DummyClassifier(constant=3))
+
+
         Filter the history for deltas containing both a model and conditions
-        >>> list(_history_contains(shm.history, "model", "conditions"))
+        >>> shm.history.contains("model", "conditions")
         ...     # doctest: +NORMALIZE_WHITESPACE
         [AlternateDeltaHistory(history=[...],
                                variables=None,
@@ -159,7 +183,7 @@ class AlternateDeltaHistory(DeltaHistory):
          {'model': DummyClassifier(constant=3), 'conditions': [1, 2, 3]}]
 
         ... or extract just the models from those entries:
-        >>> list(_history_of(_history_contains(shm.history, "model", "conditions"), "model"))
+        >>> shm.history.contains("model", "conditions").of("model")
         [None, DummyClassifier(constant=3)]
 
     """

@@ -108,6 +108,10 @@ class History(UserList):
         new = reduce(function, self)
         return new
 
+    def reconstruct(self):
+        new = self.reduce(operator.add)
+        return new
+
 
 @dataclass(frozen=True)
 class DeltaHistory(State):
@@ -156,13 +160,14 @@ class DeltaHistory(State):
          {'n': 4, 'foo': 'bar'}]
 
         We can reconstruct the history up to any point:
-        >>> reconstruct(b.history[0:-1])
+        >>> b.history[0:-1].reconstruct()
         DeltaHistory(history=[DeltaHistory(history=[...]), {'n': 1}, {'n': 2}, {'n': 3}])
 
         We can reconstruct the object up until the last entry where `foo=baz` (Note that we use
         the `e.get("foo", default)` method rather than the `e["foo"]` syntax
         so that if the Delta has no "foo" key, no error is thrown.):
-        >>> reconstruct(c.history.up_to_last(foo="baz"))  # doctest: +NORMALIZE_WHITESPACE +ELLIPSIS
+        >>> c.history.up_to_last(foo="baz").reconstruct()
+        ...     # doctest: +NORMALIZE_WHITESPACE +ELLIPSIS
         DeltaHistory(history=[DeltaHistory(history=[...]),
                               {'n': 1},
                               {'n': 2, 'foo': 'bar', 'qux': 'thud'},
@@ -170,7 +175,8 @@ class DeltaHistory(State):
 
 
         ... or where `qux=thud`
-        >>> reconstruct(c.history.up_to_last(qux="thud")) # doctest: +NORMALIZE_WHITESPACE +ELLIPSIS
+        >>> c.history.up_to_last(qux="thud").reconstruct()
+        ...     # doctest: +NORMALIZE_WHITESPACE +ELLIPSIS
         DeltaHistory(history=[DeltaHistory(history=[...]),
                               {'n': 1},
                               {'n': 2, 'foo': 'bar', 'qux': 'thud'}])

@@ -1,8 +1,7 @@
 from collections import UserList
 from functools import singledispatchmethod
-from typing import List, Union
+from typing import List
 
-from autora.state import Delta
 from autora.state_history_dataclass import Entry
 
 
@@ -17,6 +16,7 @@ class HistoryStateList(UserList):
         >>> a + {"conditions": [1, 2, 3]}
         [Entry(kind='conditions', data=[1, 2, 3])]
 
+        >>> from autora.state import Delta
         >>> a + Delta(conditions=[1, 2, 3])
         [Entry(kind='conditions', data=[1, 2, 3])]
 
@@ -60,7 +60,7 @@ class HistoryStateList(UserList):
         return new
 
     @__add__.register
-    def _(self, other: Union[Delta, dict]):
+    def _(self, other: dict):
         new_data = [Entry(kind, data) for kind, data in other.items()]
         new = self + new_data
         return new

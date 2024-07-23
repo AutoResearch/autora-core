@@ -118,8 +118,12 @@ def array_to_sequence(input: numpy.typing.ArrayLike):
 
         This is converted into records:
         >>> l1 = list(array_to_sequence(a1))
-        >>> l1
-        [(0, 'a'), (1, 'b'), (2, 'c'), (3, 'd'), (4, 'e')]
+        >>> l1 # doctest: +NORMALIZE_WHITESPACE
+        [np.record((0, 'a'), dtype=[('f0', '<i8'), ('f1', '<U1')]),
+        np.record((1, 'b'), dtype=[('f0', '<i8'), ('f1', '<U1')]),
+        np.record((2, 'c'), dtype=[('f0', '<i8'), ('f1', '<U1')]),
+        np.record((3, 'd'), dtype=[('f0', '<i8'), ('f1', '<U1')]),
+        np.record((4, 'e'), dtype=[('f0', '<i8'), ('f1', '<U1')])]
 
         The elements of the list are numpy.records
         >>> type(l1[0])

@@ -157,25 +157,29 @@ def sample(
         >>> import pandas as pd
         >>> sample(
         ...     pd.DataFrame({"x": range(100, 200)}), num_samples=5, random_state=180)
-              x
-        67  167
-        71  171
-        64  164
-        63  163
-        96  196
+             x
+        0  167
+        1  171
+        2  164
+        3  163
+        4  196
 
         From a list (returns a DataFrame):
         >>> sample(range(1000), num_samples=5, random_state=180)
-               0
-        270  270
-        908  908
-        109  109
-        331  331
-        978  978
+             0
+        0  270
+        1  908
+        2  109
+        3  331
+        4  978
     """
     conditions_ = pd.DataFrame(conditions)
     return pd.DataFrame.sample(
-        conditions_, random_state=random_state, n=num_samples, replace=replace
+        conditions_,
+        random_state=random_state,
+        n=num_samples,
+        replace=replace,
+        ignore_index=True,
     )
 
 

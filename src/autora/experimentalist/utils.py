@@ -107,7 +107,7 @@ def array_to_sequence(input: numpy.typing.ArrayLike):
         array([0, 1])
 
         The rows can be subscripted as usual:
-        >>> l0[2][1]
+        >>> int(l0[2][1])
         5
 
         We can also use a record array:

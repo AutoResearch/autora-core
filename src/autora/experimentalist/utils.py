@@ -47,11 +47,11 @@ def sequence_to_recarray(iterable):
     Examples:
 
         A simple range object is converted into a recarray of dimension 2:
-        >>> sequence_to_recarray(range(5)) # doctest: +NORMALIZE_WHITESPACE
+        >>> sequence_to_recarray(range(5)) # doctest: +NORMALIZE_WHITESPACE +ELLIPSIS
         rec.array([(0,), (1,), (2,), (3,), (4,)], dtype=[('f0', '<i...')])
 
         Mixed datatypes lead to multiple output types:
-        >>> sequence_to_recarray(zip(range(5), "abcde"))  # doctest: +NORMALIZE_WHITESPACE
+        >>> sequence_to_recarray(zip(range(5), "abcde"))  # doctest: +NORMALIZE_WHITESPACE +ELLIPSIS
         rec.array([(0, 'a'), (1, 'b'), (2, 'c'), (3, 'd'), (4, 'e')],
             dtype=[('f0', '<i...'), ('f1', '<U1')])
 
@@ -112,18 +112,14 @@ def array_to_sequence(input: numpy.typing.ArrayLike):
 
         We can also use a record array:
         >>> a1 = np.rec.fromarrays([range(5), list("abcde")])
-        >>> a1
+        >>> a1 # doctest: +ELLIPSIS
         rec.array([(0, 'a'), (1, 'b'), (2, 'c'), (3, 'd'), (4, 'e')],
                   dtype=[('f0', '<i...'), ('f1', '<U1')])
 
         This is converted into records:
         >>> l1 = list(array_to_sequence(a1))
         >>> l1 # doctest: +NORMALIZE_WHITESPACE
-        [np.record((0, 'a'), dtype=[('f0', '<i8'), ('f1', '<U1')]),
-        np.record((1, 'b'), dtype=[('f0', '<i8'), ('f1', '<U1')]),
-        np.record((2, 'c'), dtype=[('f0', '<i8'), ('f1', '<U1')]),
-        np.record((3, 'd'), dtype=[('f0', '<i8'), ('f1', '<U1')]),
-        np.record((4, 'e'), dtype=[('f0', '<i8'), ('f1', '<U1')])]
+        [(0, 'a'), (1, 'b'), (2, 'c'), (3, 'd'), (4, 'e')]
 
         The elements of the list are numpy.records
         >>> type(l1[0])

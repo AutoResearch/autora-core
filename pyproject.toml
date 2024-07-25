@@ -30,7 +30,7 @@ classifiers = [  # Optional
 ]
 
 dependencies = [
-    "numpy",
+    "numpy>=1,<2",
     "matplotlib",
     "pandas",
     "scikit-learn",

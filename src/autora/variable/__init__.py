@@ -16,6 +16,7 @@ class ValueType(str, Enum):
         "probability_distribution"  # probability distribution over classes
     )
     CLASS = "class"  # sample from probability distribution over classes
+    MATRIX = "matrix"  # matrix of probabilities
 
 
 @dataclass

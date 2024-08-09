@@ -1205,15 +1205,29 @@ class StandardState(State):
         >>> (s + dm1 + dm2).models
         [DummyClassifier(constant=1), DummyClassifier(constant=2), DummyClassifier(constant=3)]
 
+        We can use properties X, y, iv_names and dv_names as 'getters' ...
         >>> x_v = Variable('x')
         >>> y_v = Variable('y')
         >>> variables = VariableCollection(independent_variables=[x_v], dependent_variables=[y_v])
         >>> e_data = pd.DataFrame({'x': [1, 2, 3], 'y': [2, 4, 6]})
         >>> s = StandardState(variables=variables, experiment_data=e_data)
         >>> @inputs_from_state
-        ... def add_six(X):
+        ... def show_X(X):
         ...     return X
-        >>> add_six(s)
+        >>> show_X(s)
+           x
+        0  1
+        1  2
+        2  3
+
+        ... but nothing happens if we use them as `setters`:
+        >>> @on_state
+        ... def add_to_X(X):
+        ...     res = X.copy()
+        ...     res['x'] += 1
+        ...     return Delta(X=res)
+        >>> s = add_to_X(s)
+        >>> s.X
            x
         0  1
         1  2

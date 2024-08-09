@@ -1188,6 +1188,100 @@ class StandardState(State):
         metadata={"delta": "extend"},
     )
 
+    @property
+    def iv_names(self) -> List[str]:
+        """
+        Returns the names of the independent variables
+        Examples:
+            >>> s_empty = StandardState()
+            >>> s_empty.iv_names
+            []
+            >>> from autora.variable import VariableCollection, Variable
+            >>> iv_1 = Variable('variable_1')
+            >>> iv_2 = Variable('variable_2')
+            >>> variables = VariableCollection(independent_variables=[iv_1, iv_2])
+            >>> s_variables = StandardState(variables=variables)
+            >>> s_variables.iv_names
+            ['variable_1', 'variable_2']
+        """
+        if not self.variables or not self.variables.independent_variables:
+            return []
+        return [iv.name for iv in self.variables.independent_variables]
+
+    @property
+    def dv_names(self) -> List[str]:
+        """
+        Returns the names of the independent variables
+        Examples:
+            >>> s_empty = StandardState()
+            >>> s_empty.dv_names
+            []
+            >>> from autora.variable import VariableCollection, Variable
+            >>> x = Variable('x')
+            >>> y = Variable('y')
+            >>> variables = VariableCollection(independent_variables=[x], dependent_variables=[y])
+            >>> s_variables = StandardState(variables=variables)
+            >>> s_variables.dv_names
+            ['y']
+        """
+        if not self.variables or not self.variables.dependent_variables:
+            return []
+        return [dv.name for dv in self.variables.dependent_variables]
+
+    @property
+    def X(self) -> pd.DataFrame:
+        """
+        Returns the already observed conditions as a pd.DataFrame
+        Examples:
+            >>> s_empty = StandardState()
+            >>> s_empty.X
+            Empty DataFrame
+            Columns: []
+            Index: []
+            >>> from autora.variable import VariableCollection, Variable
+            >>> x = Variable('x')
+            >>> y = Variable('y')
+            >>> variables = VariableCollection(independent_variables=[x], dependent_variables=[y])
+            >>> experiment_data = pd.DataFrame({'x': [0, 1, 2, 3], 'y': [0, 2, 4, 6]})
+            >>> s = StandardState(variables=variables, experiment_data=experiment_data)
+            >>> s.X
+               x
+            0  0
+            1  1
+            2  2
+            3  3
+        """
+        if self.experiment_data is None:
+            return pd.DataFrame()
+        return self.experiment_data[self.iv_names]
+
+    @property
+    def y(self) -> pd.DataFrame:
+        """
+        Returns the observations as a pd.DataFrame
+        Examples:
+            >>> s_empty = StandardState()
+            >>> s_empty.y
+            Empty DataFrame
+            Columns: []
+            Index: []
+            >>> from autora.variable import VariableCollection, Variable
+            >>> x = Variable('x')
+            >>> y = Variable('y')
+            >>> variables = VariableCollection(independent_variables=[x], dependent_variables=[y])
+            >>> experiment_data = pd.DataFrame({'x': [0, 1, 2, 3], 'y': [0, 2, 4, 6]})
+            >>> s = StandardState(variables=variables, experiment_data=experiment_data)
+            >>> s.y
+               y
+            0  0
+            1  2
+            2  4
+            3  6
+        """
+        if self.experiment_data is None:
+            return pd.DataFrame()
+        return self.experiment_data[self.dv_names]
+
 
 X = TypeVar("X")
 Y = TypeVar("Y")

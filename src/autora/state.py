@@ -1507,6 +1507,13 @@ class StandardState(State):
         return self.experiment_data[self.iv_names]
 
     @property
+    def reference_conditions(self) -> pd.DataFrame:
+        """
+        Returns the already observed conditions as a pd.DataFrame.
+        """
+        return self.X
+
+    @property
     def y(self) -> pd.DataFrame:
         """
         Returns the observations as a pd.DataFrame
@@ -1532,6 +1539,13 @@ class StandardState(State):
         if self.experiment_data is None:
             return pd.DataFrame()
         return self.experiment_data[self.dv_names]
+
+    @property
+    def reference_observations(self) -> pd.DataFrame:
+        """
+        Returns the observations as a pd.DataFrame
+        """
+        return self.y
 
     @property
     def model(self):

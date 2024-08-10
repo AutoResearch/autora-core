@@ -1534,7 +1534,6 @@ class StandardState(State):
         return self.experiment_data[self.dv_names]
 
 
-
 X = TypeVar("X")
 Y = TypeVar("Y")
 XY = TypeVar("XY")

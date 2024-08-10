@@ -1535,15 +1535,11 @@ class StandardState(State):
 
     @property
     def model(self):
-        if len(self.models) == 0:
+        """Alias for the last model in the `models`."""
+        try:
+            return self.models[-1]
+        except IndexError:
             return None
-        # The property to access the backing field
-        return self.models[-1]
-
-    @model.setter
-    def model(self, value):
-        # Control the setting behavior
-        self.models.append(value)
 
 
 X = TypeVar("X")

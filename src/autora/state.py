@@ -1533,17 +1533,6 @@ class StandardState(State):
             return pd.DataFrame()
         return self.experiment_data[self.dv_names]
 
-    @property
-    def model(self):
-        if len(self.models) == 0:
-            return None
-        # The property to access the backing field
-        return self.models[-1]
-
-    @model.setter
-    def model(self, value):
-        # Control the setting behavior
-        self.models.append(value)
 
 
 X = TypeVar("X")

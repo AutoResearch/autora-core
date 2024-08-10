@@ -1533,6 +1533,14 @@ class StandardState(State):
             return pd.DataFrame()
         return self.experiment_data[self.dv_names]
 
+    @property
+    def model(self):
+        """Alias for the last model in the `models`."""
+        try:
+            return self.models[-1]
+        except IndexError:
+            return None
+
 
 X = TypeVar("X")
 Y = TypeVar("Y")

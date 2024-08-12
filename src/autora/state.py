@@ -818,6 +818,27 @@ def inputs_from_state(f, input_mapping: Dict = {}):
         Doing something on:  U(conditions=[1, 2, 3, 4])
         [3, 4, 5, 6]
 
+
+        If the state has a @property alias, this is respected:
+        >>> @inputs_from_state
+        ... def function_which_needs_alias(alias):
+        ...     print("Doing something with: ", alias)
+        ...     new_conditions = [x + 2 for x in alias]
+        ...     return new_conditions
+
+        >>> @dataclass(frozen=True)
+        ... class V(State):
+        ...     conditions: List = field(default_factory=list, metadata={"delta": "extend"})
+        ...
+        ...     @property
+        ...     def alias(self):
+        ...         return self.conditions
+
+        >>> function_which_needs_alias(V(conditions=[1,2,3,4]))
+        Doing something with:  [1, 2, 3, 4]
+        [3, 4, 5, 6]
+
+
     """
     # Get the set of parameter names from function f's signature
 

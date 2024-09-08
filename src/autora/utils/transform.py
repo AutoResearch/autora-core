@@ -4,11 +4,11 @@ import numpy as np
 import pandas as pd
 
 
-def df_to_array(df: Union[pd.DataFrame, pd.Series]) -> np.array:
+def to_array(arr: Union[pd.DataFrame, pd.Series, np.ndarray]) -> np.ndarray:
     """
     Transforms a pandas data frame to a numpy array
     Args:
-        df: the pandas data frame
+        arr: the pandas data frame
 
     Returns:
         a numpy array
@@ -19,7 +19,7 @@ def df_to_array(df: Union[pd.DataFrame, pd.Series]) -> np.array:
         ...     'x_0': [1, 2, 3],
         ...     'x_1': [4, 5, 6],
         ...     'x_2': [7, 8, 9]})
-        >>> np.array_equal(np.array(df_one), df_to_array(df_one))
+        >>> np.array_equal(np.array(df_one), to_array(df_one))
         True
 
         If the rows contain lists ...
@@ -28,7 +28,7 @@ def df_to_array(df: Union[pd.DataFrame, pd.Series]) -> np.array:
         ...     'x_1': [[0, 1], [1, 1], [2, 1]],
         ...     'x_2': [[0, 2], [1, 2], [2, 2]]
         ... })
-        >>> array_transformed = df_to_array(df_list)
+        >>> array_transformed = to_array(df_list)
         >>> array_cast = np.array(df_list)
 
         the results are not equal:
@@ -61,7 +61,7 @@ def df_to_array(df: Union[pd.DataFrame, pd.Series]) -> np.array:
         ...     'x_1': [np.array([0, 1]), np.array([1, 1]), np.array([2, 1])],
         ...     'x_2': [np.array([0, 2]), np.array([1, 2]), np.array([2, 2])]
         ... })
-        >>> array_transformed = df_to_array(df_array)
+        >>> array_transformed = to_array(df_array)
         >>> array_cast = np.array(df_list)
 
         the results are not equal:
@@ -93,7 +93,7 @@ def df_to_array(df: Union[pd.DataFrame, pd.Series]) -> np.array:
         ...     'x_0': [[[0,0],[1,1]], [[0,0],[2,2]]],
         ...     'x_1': [[[1,1],[1,1]], [[1,1],[2,2]]]
         ... })
-        >>> df_to_array(df_nested)
+        >>> to_array(df_nested)
         array([[[[0, 0],
                  [1, 1]],
         <BLANKLINE>
@@ -111,12 +111,14 @@ def df_to_array(df: Union[pd.DataFrame, pd.Series]) -> np.array:
         a flattening version of this (ATTENTION: when using the flattening version,
         information about which entry belongs to which condition is lost):
     """
+    if isinstance(arr, np.ndarray):
+        return arr
 
-    _lst = [list(row) for _, row in df.iterrows()]
+    _lst = [list(row) for _, row in arr.iterrows()]
     return np.array(_lst)
 
 
-def df_to_array_flatten(df: Union[pd.DataFrame, pd.Series]) -> np.array:
+def to_array_flatten(arr: Union[pd.DataFrame, pd.Series, np.ndarray]) -> np.ndarray:
     """
     Flattens elements in a pandas DataFrame to resolve shape inconsistencies.
 
@@ -131,11 +133,18 @@ def df_to_array_flatten(df: Union[pd.DataFrame, pd.Series]) -> np.array:
         ...     'x_0': [0, 2, 4],
         ...     'x_1': [[1, 1], [3, 3], [5, 5]]
         ... })
-        >>> df_to_array_flatten(df_inconsistent)
+        >>> to_array_flatten(df_inconsistent)
         array([[0, 1, 1],
                [2, 3, 3],
                [4, 5, 5]])
     """
+    if isinstance(arr, np.ndarray):
+        return arr
     return np.array(
-        [np.concatenate([np.ravel(x) if isinstance(x, (list, np.ndarray)) else [x] for x in row])
-         for _, row in df.iterrows()])
+        [
+            np.concatenate(
+                [np.ravel(x) if isinstance(x, (list, np.ndarray)) else [x] for x in row]
+            )
+            for _, row in arr.iterrows()
+        ]
+    )

@@ -1,4 +1,4 @@
-# Workflow & State Mechanics
+# States & Workflow Mechanics
 
 AutoRA includes core functionality for defining empirical research workflows. This core functionality is organized into these submodules:
 

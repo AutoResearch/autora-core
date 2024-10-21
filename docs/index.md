@@ -1,12 +1,12 @@
-# Core Functionality
+# Workflow & State Mechanics
 
-AutoRA includes core functionality for running AutoRA experiments organized into these submodules:
+AutoRA includes core functionality for defining empirical research workflows. This core functionality is organized into these submodules:
 
-- `autora.state`, which underpins the unified `State` interface for writing experimentalists, experiment runners and 
+- `autora.variable`, for representing experimental metadata describing the type and domain of variables
+- `autora.state`, which underpins the unified `State` interface for interacting with experimentalists, experiment runners and 
   theorists
 - `autora.serializer`, utilities for saving and loading `States`
 - `autora.workflow`, command line tools for running experimentalists, experiment runners and theorists
-- `autora.variable`, for representing experimental metadata describing the type and domain of variables
 - `autora.utils`, utilities and helper functions not linked to any specific core functionality  
 
 It also provides some basic experimentalists in the `autora.experimentalist` submodule. However, most 

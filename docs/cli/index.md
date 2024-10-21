@@ -1,4 +1,4 @@
-# Command Line Interface
+# Workflows for HPCs via the Command Line Interface
 
 Different parts of AutoRA experiments can require very different computational resources. For instance:
 
